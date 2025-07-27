@@ -527,6 +527,7 @@ def get_alert_widget(
             const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const wsHost = window.location.host;
             const wsUrl = `${{wsProtocol}}//${{wsHost}}/api/v1/ws/{streamer.id}`;
+            console.log('WebSocket URL:', wsUrl);
             
             let socket;
             let currentTimeout;
@@ -535,7 +536,7 @@ def get_alert_widget(
             // Настройки алертов из бэкенда
             const alertSettings = {{
                 enabled: {str(settings.alerts_enabled).lower()},
-                tiers: {settings.tiers or []}
+                tiers: {json.dumps(settings.tiers or []).replace('None', 'null').replace('True', 'true').replace('False', 'false')}
             }};
             
             // Инициализация аудио контекста
