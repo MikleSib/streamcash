@@ -88,9 +88,15 @@ export default function DashboardPage() {
     }
   };
 
+  const getDonationUrl = () => {
+    const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+    const baseUrl = hostname === 'xn--h1aefoeg0czb.xn--p1ai' ? 'https://стримкэш.рф' : window.location.origin;
+    return `${baseUrl}/donate/${streamerProfile?.donation_url}`;
+  };
+
   const copyDonationLink = () => {
     if (streamerProfile?.donation_url) {
-      const link = `${window.location.origin}/donate/${streamerProfile.donation_url}`;
+      const link = getDonationUrl();
       copyToClipboard(link, 'donation');
     }
   };
@@ -314,6 +320,37 @@ export default function DashboardPage() {
               />
             </div>
 
+            {/* Quick Actions */}
+            <div className="mb-12">
+              <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
+                <Zap className="w-6 h-6 mr-3 text-purple-400" />
+                Быстрые действия
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <QuickActionCard
+                  title="Настройки алертов"
+                  description="Настройте звуки, анимации и внешний вид уведомлений"
+                  icon={Settings}
+                  onClick={() => router.push('/dashboard/settings')}
+                />
+                
+                <QuickActionCard
+                  title="История донатов"
+                  description="Просмотрите все полученные донаты и статистику"
+                  icon={BarChart3}
+                  onClick={() => router.push('/dashboard/donations')}
+                />
+                
+                <QuickActionCard
+                  title="Страница донатов"
+                  description="Посмотрите, как выглядит ваша страница для зрителей"
+                  icon={Eye}
+                  onClick={() => window.open(getDonationUrl(), '_blank')}
+                />
+              </div>
+            </div>
+
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
               {/* Donation Link */}
@@ -332,7 +369,7 @@ export default function DashboardPage() {
                   <input
                     type="text"
                     readOnly
-                    value={`${typeof window !== 'undefined' ? window.location.origin : ''}/donate/${streamerProfile.donation_url}`}
+                    value={getDonationUrl()}
                     className="flex-1 px-4 py-3 bg-gray-700/70 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                   <Button 
@@ -472,36 +509,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Quick Actions */}
-            <div>
-              <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-                <Zap className="w-6 h-6 mr-3 text-purple-400" />
-                Быстрые действия
-              </h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <QuickActionCard
-                  title="Настройки алертов"
-                  description="Настройте звуки, анимации и внешний вид уведомлений"
-                  icon={Settings}
-                  onClick={() => router.push('/dashboard/settings')}
-                />
-                
-                <QuickActionCard
-                  title="История донатов"
-                  description="Просмотрите все полученные донаты и статистику"
-                  icon={BarChart3}
-                  onClick={() => router.push('/dashboard/donations')}
-                />
-                
-                <QuickActionCard
-                  title="Страница донатов"
-                  description="Посмотрите, как выглядит ваша страница для зрителей"
-                  icon={Eye}
-                  onClick={() => window.open(`/donate/${streamerProfile.donation_url}`, '_blank')}
-                />
-              </div>
-            </div>
+
           </>
         )}
       </div>

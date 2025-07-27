@@ -6,7 +6,7 @@ import { Providers } from './providers';
 const inter = Inter({ subsets: ['latin', 'cyrillic'] });
 
 export const metadata: Metadata = {
-  title: 'DonationAlerts РФ',
+  title: 'СтримКэш',
   description: 'Российская платформа для приёма донатов стримерами',
 };
 

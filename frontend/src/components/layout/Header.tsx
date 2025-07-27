@@ -49,7 +49,7 @@ export function Header() {
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-bold text-white group-hover:text-purple-300 transition-colors">
-                DonationAlerts
+                СтримКэш
               </span>
               <span className="text-xs text-purple-400 font-medium -mt-1">РФ</span>
             </div>

@@ -355,7 +355,7 @@ export default function HomePage() {
             <div>
               <div className="flex items-center mb-4">
                 <DollarSign className="w-8 h-8 text-purple-400 mr-2" />
-                <span className="text-xl font-bold text-white">DonationAlerts РФ</span>
+                <span className="text-xl font-bold text-white">СтримКэш</span>
               </div>
               <p className="text-gray-400">
                 Лучшая платформа для донатов в России
@@ -391,7 +391,7 @@ export default function HomePage() {
           </div>
           
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 DonationAlerts РФ. Все права защищены.</p>
+            <p>&copy; 2025 СтримКэш. Все права защищены.</p>
           </div>
         </div>
       </footer>

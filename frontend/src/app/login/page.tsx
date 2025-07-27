@@ -122,7 +122,7 @@ export default function LoginPage() {
           <div className="relative z-10 flex flex-col justify-center px-12 py-12">
             <div className="mb-12">
               <h1 className="text-4xl font-bold text-white mb-4">
-                С возвращением в <span className="text-purple-400">DonationAlerts РФ</span>
+                С возвращением в <span className="text-purple-400">СтримКэш</span>
               </h1>
               <p className="text-xl text-gray-300 mb-8">
                 Продолжайте зарабатывать на своих стримах

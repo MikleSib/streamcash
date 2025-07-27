@@ -125,7 +125,7 @@ export default function RegisterPage() {
           <div className="relative z-10 flex flex-col justify-center px-12 py-12">
             <div className="mb-12">
               <h1 className="text-4xl font-bold text-white mb-4">
-                Присоединяйтесь к <span className="text-purple-400">DonationAlerts РФ</span>
+                Присоединяйтесь к <span className="text-purple-400">СтримКэш</span>
               </h1>
               <p className="text-xl text-gray-300">
                 Начните зарабатывать на стримах уже сегодня
@@ -152,7 +152,7 @@ export default function RegisterPage() {
 
             <div className="mt-12 p-6 bg-gradient-to-r from-purple-600/10 to-pink-600/10 rounded-xl border border-purple-500/20">
               <p className="text-purple-200 text-sm">
-                "DonationAlerts РФ помог мне увеличить доходы от стримов в 3 раза!"
+                "СтримКэш помог мне увеличить доходы от стримов в 3 раза!"
               </p>
               <p className="text-purple-400 text-sm mt-2 font-medium">
                 — Андрей, стример

@@ -404,7 +404,7 @@ def get_alert_widget(
     <html>
     <head>
         <meta charset="utf-8">
-        <title>Виджет алертов DonationAlerts РФ</title>
+        <title>Виджет алертов СтримКэш</title>
         <style>
             body {{
                 margin: 0;
