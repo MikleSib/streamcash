@@ -18,11 +18,16 @@ class ConnectionManager:
         print(f"WebSocket connected for streamer {streamer_id}. Total connections: {len(self.active_connections[streamer_id])}")
 
     def disconnect(self, websocket: WebSocket, streamer_id: int):
+        print(f"Disconnecting WebSocket for streamer_id: {streamer_id}")
         if streamer_id in self.active_connections:
             if websocket in self.active_connections[streamer_id]:
                 self.active_connections[streamer_id].remove(websocket)
+                print(f"WebSocket removed from streamer {streamer_id}")
             if not self.active_connections[streamer_id]:
                 del self.active_connections[streamer_id]
+                print(f"All connections removed for streamer {streamer_id}")
+        else:
+            print(f"No active connections found for streamer {streamer_id}")
 
     async def send_personal_message(self, message: str, websocket: WebSocket):
         await websocket.send_text(message)

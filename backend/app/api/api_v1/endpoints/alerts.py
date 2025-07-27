@@ -523,7 +523,7 @@ def get_alert_widget(
             const animationContainer = document.getElementById('animationContainer');
             const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const wsHost = window.location.host;
-            const wsUrl = `${{wsProtocol}}//${{wsHost}}/api/v1/ws/ws/{streamer.id}`;
+            const wsUrl = `${{wsProtocol}}//${{wsHost}}/api/v1/ws/{streamer.id}`;
             
             let socket;
             let currentTimeout;
