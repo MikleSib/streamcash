@@ -389,9 +389,12 @@ def get_alert_widget(
     """
     Получить HTML виджет алертов для OBS по URL стримера
     """
+    print(f"Widget request for donation_url: {donation_url}")
     streamer = crud.streamer.get_by_donation_url(db, donation_url=donation_url)
     if not streamer:
+        print(f"Streamer not found for donation_url: {donation_url}")
         raise HTTPException(status_code=404, detail="Streamer not found")
+    print(f"Found streamer: {streamer.id} for user: {streamer.user_id}")
     
     settings = crud.alert_settings.get_or_create_for_user(db, user_id=streamer.user_id)
     
