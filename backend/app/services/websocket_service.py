@@ -15,6 +15,7 @@ class ConnectionManager:
         if streamer_id not in self.active_connections:
             self.active_connections[streamer_id] = []
         self.active_connections[streamer_id].append(websocket)
+        print(f"WebSocket connected for streamer {streamer_id}. Total connections: {len(self.active_connections[streamer_id])}")
 
     def disconnect(self, websocket: WebSocket, streamer_id: int):
         if streamer_id in self.active_connections:
@@ -27,25 +28,35 @@ class ConnectionManager:
         await websocket.send_text(message)
 
     async def broadcast_to_streamer(self, message: str, streamer_id: int):
+        print(f"Broadcasting to streamer {streamer_id}: {message}")
+        print(f"Active connections for streamer {streamer_id}: {len(self.active_connections.get(streamer_id, []))}")
+        
         if streamer_id in self.active_connections:
             disconnected = []
             for connection in self.active_connections[streamer_id]:
                 try:
                     await connection.send_text(message)
-                except:
+                    print(f"Message sent successfully to connection")
+                except Exception as e:
+                    print(f"Failed to send message: {e}")
                     disconnected.append(connection)
             
             for connection in disconnected:
                 self.disconnect(connection, streamer_id)
+        else:
+            print(f"No active connections for streamer {streamer_id}")
 
 manager = ConnectionManager()
 
 async def notify_new_donation(donation_data: dict, streamer_id: int, db: Session):
     """Отправить уведомление о новом донате с подходящим тиром алерта"""
     
+    print(f"WebSocket notification: streamer_id={streamer_id}, donation_data={donation_data}")
+    
     # Получаем стримера
     streamer = crud.streamer.get(db, id=streamer_id)
     if not streamer:
+        print(f"Streamer not found: streamer_id={streamer_id}")
         return
     
     # Получаем подходящий тир для суммы доната

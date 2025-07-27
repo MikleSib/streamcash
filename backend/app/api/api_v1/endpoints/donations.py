@@ -41,6 +41,18 @@ async def create_donation(
         crud.donation.remove(db=db, id=donation.id)
         raise HTTPException(status_code=400, detail=f"Payment creation failed: {str(e)}")
     
+    # Отправляем уведомление через WebSocket
+    try:
+        donation_data = {
+            "donor_name": donation.donor_name,
+            "amount": donation.amount,
+            "message": donation.message,
+            "is_anonymous": donation.is_anonymous
+        }
+        await notify_new_donation(donation_data, donation.streamer_id, db)
+    except Exception as e:
+        print(f"Failed to send WebSocket notification: {e}")
+    
     return donation
 
 @router.get("/", response_model=List[schemas.DonationWithDetails])
