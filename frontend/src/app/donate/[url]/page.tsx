@@ -33,7 +33,7 @@ export default function DonatePage() {
     donor_name: '',
     donor_email: '',
     is_anonymous: false,
-    payment_method: 'yookassa',
+    payment_method: 'test',
   });
   const [donatingLoading, setDonatingLoading] = useState(false);
 
@@ -219,7 +219,11 @@ export default function DonatePage() {
                     <button
                       key={amount}
                       type="button"
-                      className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                      className={`px-3 py-1 text-sm rounded-md transition-colors font-medium ${
+                        donationData.amount === amount
+                          ? 'bg-blue-600 text-white hover:bg-blue-700'
+                          : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                      }`}
                       onClick={() => setDonationData({ ...donationData, amount })}
                     >
                       {amount} ₽
@@ -274,16 +278,9 @@ export default function DonatePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Способ оплаты
                 </label>
-                <select
-                  name="payment_method"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  value={donationData.payment_method}
-                  onChange={handleDonationChange}
-                >
-                  <option value="yookassa">YooKassa (карты, кошельки)</option>
-                  <option value="tinkoff">Тинькофф</option>
-                  <option value="sberbank">Сбербанк</option>
-                </select>
+                <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-600">
+                  Тестовая оплата (для разработки)
+                </div>
               </div>
 
               <div className="flex items-center">

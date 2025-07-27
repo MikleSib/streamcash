@@ -12,6 +12,7 @@ class DonationStatus(enum.Enum):
     REFUNDED = "refunded"
 
 class PaymentMethod(enum.Enum):
+    TEST = "test"
     YOOKASSA = "yookassa"
     SBERBANK = "sberbank"
     TINKOFF = "tinkoff"

@@ -17,7 +17,9 @@ class PaymentService:
         description: str, 
         payment_method: PaymentMethod
     ) -> Dict[str, Any]:
-        if payment_method == PaymentMethod.YOOKASSA:
+        if payment_method == PaymentMethod.TEST:
+            return await self._create_test_payment(amount, description)
+        elif payment_method == PaymentMethod.YOOKASSA:
             return await self._create_yookassa_payment(amount, description)
         elif payment_method == PaymentMethod.TINKOFF:
             return await self._create_tinkoff_payment(amount, description)
@@ -25,6 +27,17 @@ class PaymentService:
             return await self._create_sberbank_payment(amount, description)
         else:
             raise ValueError(f"Unsupported payment method: {payment_method}")
+
+    async def _create_test_payment(self, amount: float, description: str) -> Dict[str, Any]:
+        import uuid
+        fake_payment_id = str(uuid.uuid4())
+        return {
+            "id": fake_payment_id,
+            "status": "pending",
+            "confirmation_url": f"{settings.FRONTEND_URL}/donate/test-payment?payment_id={fake_payment_id}&amount={amount}",
+            "amount": amount,
+            "currency": "RUB"
+        }
 
     async def _create_yookassa_payment(self, amount: float, description: str) -> Dict[str, Any]:
         if not settings.YOOKASSA_SHOP_ID or not settings.YOOKASSA_SECRET_KEY:
