@@ -97,7 +97,8 @@ export default function DashboardPage() {
 
   const copyWidgetLink = () => {
     if (streamerProfile?.donation_url) {
-      const widgetUrl = `http://localhost:8000/api/v1/alerts/widget/${streamerProfile.donation_url}`;
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const widgetUrl = `${apiUrl}/api/v1/alerts/widget/${streamerProfile.donation_url}`;
       copyToClipboard(widgetUrl, 'widget');
     }
   };
@@ -417,7 +418,7 @@ export default function DashboardPage() {
                     <input
                       type="text"
                       readOnly
-                      value={`http://localhost:8000/api/v1/alerts/widget/${streamerProfile.donation_url}`}
+                      value={`https://стримкэш.рф/api/v1/alerts/widget/${streamerProfile.donation_url}`}
                       className="flex-1 px-4 py-3 bg-gray-700/70 border border-gray-600 rounded-lg text-white text-sm focus:outline-none"
                     />
                     <Button 

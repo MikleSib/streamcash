@@ -1,6 +1,7 @@
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from app import crud
@@ -10,6 +11,10 @@ from app.services.payment_service import PaymentService
 from app.services.websocket_service import notify_new_donation
 
 router = APIRouter()
+
+@router.options("/webhook/test")
+async def test_webhook_options():
+    return {"status": "ok"}
 
 @router.post("/webhook/yookassa")
 async def yookassa_webhook(
@@ -89,7 +94,9 @@ async def test_webhook(
     request: Request,
     db: Session = Depends(deps.get_db),
 ) -> Any:
+    print(f"Test webhook called with request: {request}")
     payload = await request.json()
+    print(f"Test webhook payload: {payload}")
     
     if payload.get("status") == "succeeded":
         payment_id = payload["payment_id"]
