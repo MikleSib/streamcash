@@ -98,7 +98,7 @@ export default function DashboardPage() {
   const copyWidgetLink = () => {
     if (streamerProfile?.donation_url) {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      const widgetUrl = `${apiUrl}/api/v1/alerts/widget/${streamerProfile.donation_url}`;
+      const widgetUrl = `${apiUrl}/v1/alerts/widget/${streamerProfile.donation_url}`;
       copyToClipboard(widgetUrl, 'widget');
     }
   };

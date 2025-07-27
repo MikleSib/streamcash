@@ -17,7 +17,7 @@ export default function TestPaymentPage() {
     
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      const response = await fetch(`${apiUrl}/api/v1/payments/webhook/test`, {
+      const response = await fetch(`${apiUrl}/v1/payments/webhook/test`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
