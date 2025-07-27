@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  # База данных PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: donationalerts_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: donation_alerts_ru
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - donationalerts_network
+
+  # Redis для кэширования и очередей
+  redis:
+    image: redis:7-alpine
+    container_name: donationalerts_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - donationalerts_network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: donationalerts_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/donation_alerts_ru
+      - REDIS_URL=redis://redis:6379
+      - SECRET_KEY=your-super-secret-key-change-in-production
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=10080
+      - FRONTEND_URL=http://localhost:3000
+      - API_URL=http://localhost:8000
+      # Добавьте сюда ваши ключи платёжных систем
+      - YOOKASSA_SHOP_ID=${YOOKASSA_SHOP_ID:-}
+      - YOOKASSA_SECRET_KEY=${YOOKASSA_SECRET_KEY:-}
+      - SBERBANK_USERNAME=${SBERBANK_USERNAME:-}
+      - SBERBANK_PASSWORD=${SBERBANK_PASSWORD:-}
+      - TINKOFF_TERMINAL_KEY=${TINKOFF_TERMINAL_KEY:-}
+      - TINKOFF_SECRET_KEY=${TINKOFF_SECRET_KEY:-}
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./backend/static:/app/static
+    networks:
+      - donationalerts_network
+    command: >
+      sh -c "
+        echo 'Waiting for database to be ready...' &&
+        while ! nc -z db 5432; do sleep 1; done &&
+        echo 'Database is ready!' &&
+        alembic upgrade head &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      "
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: donationalerts_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    networks:
+      - donationalerts_network
+
+  # Nginx reverse proxy (опционально)
+  nginx:
+    image: nginx:alpine
+    container_name: donationalerts_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - donationalerts_network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  donationalerts_network:
+    driver: bridge 

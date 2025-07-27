@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  # База данных PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: donationalerts_prod_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: donation_alerts_ru
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    networks:
+      - donationalerts_prod_network
+
+  # Redis для кэширования и очередей
+  redis:
+    image: redis:7-alpine
+    container_name: donationalerts_prod_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_prod_data:/data
+    networks:
+      - donationalerts_prod_network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: donationalerts_prod_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/donation_alerts_ru
+      - REDIS_URL=redis://redis:6379
+      - SECRET_KEY=${SECRET_KEY}
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=10080
+      - FRONTEND_URL=${FRONTEND_URL:-https://your-domain.com}
+      - API_URL=${API_URL:-https://api.your-domain.com}
+      # Платёжные системы
+      - YOOKASSA_SHOP_ID=${YOOKASSA_SHOP_ID}
+      - YOOKASSA_SECRET_KEY=${YOOKASSA_SECRET_KEY}
+      - SBERBANK_USERNAME=${SBERBANK_USERNAME}
+      - SBERBANK_PASSWORD=${SBERBANK_PASSWORD}
+      - TINKOFF_TERMINAL_KEY=${TINKOFF_TERMINAL_KEY}
+      - TINKOFF_SECRET_KEY=${TINKOFF_SECRET_KEY}
+      # Email
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - EMAIL_USE_TLS=${EMAIL_USE_TLS}
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./backend/static:/app/static
+    networks:
+      - donationalerts_prod_network
+    command: >
+      sh -c "
+        echo 'Waiting for database to be ready...' &&
+        while ! nc -z db 5432; do sleep 1; done &&
+        echo 'Database is ready!' &&
+        alembic upgrade head &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8000
+      "
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: donationalerts_prod_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-https://api.your-domain.com}
+    depends_on:
+      - backend
+    networks:
+      - donationalerts_prod_network
+
+volumes:
+  postgres_prod_data:
+  redis_prod_data:
+
+networks:
+  donationalerts_prod_network:
+    driver: bridge 
