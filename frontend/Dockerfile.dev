@@ -1,0 +1,13 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Установка зависимостей
+COPY package.json package-lock.json* ./
+RUN npm ci
+
+# Открытие порта
+EXPOSE 3000
+
+# Команда по умолчанию
+CMD ["npm", "run", "dev"] 
