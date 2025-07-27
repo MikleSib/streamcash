@@ -9,4 +9,4 @@ api_router.include_router(streamers.router, prefix="/streamers", tags=["streamer
 api_router.include_router(donations.router, prefix="/donations", tags=["donations"])
 api_router.include_router(payments.router, prefix="/payments", tags=["payments"])
 api_router.include_router(alerts.router, prefix="/alerts", tags=["alerts"])
-api_router.include_router(websocket.router, prefix="/ws", tags=["websocket"]) 
+api_router.include_router(websocket.router, tags=["websocket"]) 
