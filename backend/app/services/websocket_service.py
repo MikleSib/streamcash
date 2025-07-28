@@ -87,6 +87,7 @@ async def notify_new_donation(donation_data: dict, streamer_id: int, db: Session
     # Добавляем информацию о тире, если он найден
     if tier:
         message_data["tier"] = tier
+        print(f"Sending tier with elements: {tier.get('id')} - elements: {bool(tier.get('elements'))}")
         
         # Форматируем текст сообщения согласно шаблону тира
         if tier.get("text_template"):
@@ -96,6 +97,23 @@ async def notify_new_donation(donation_data: dict, streamer_id: int, db: Session
                 message=donation_data.get("message", "")
             )
             message_data["donation"]["formatted_text"] = formatted_text
+    
+    message = json.dumps(message_data)
+    await manager.broadcast_to_streamer(message, streamer_id)
+
+async def notify_settings_update(settings, streamer_id: int):
+    """Отправить обновленные настройки алертов в виджет"""
+    
+    print(f"Sending settings update to streamer {streamer_id}")
+    
+    # Формируем сообщение с обновленными настройками
+    message_data = {
+        "type": "settings_update",
+        "settings": {
+            "enabled": settings.alerts_enabled,
+            "tiers": settings.tiers or []
+        }
+    }
     
     message = json.dumps(message_data)
     await manager.broadcast_to_streamer(message, streamer_id) 

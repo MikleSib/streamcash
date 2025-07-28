@@ -120,6 +120,16 @@ export default function AlertPreviewPage() {
     }
   };
 
+  const handleRefreshWidget = async () => {
+    try {
+      await alertAPI.refreshWidget();
+      toast.success('Виджет обновлен!');
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.detail || 'Ошибка обновления виджета';
+      toast.error(errorMessage);
+    }
+  };
+
   const handleBackToSettings = () => {
     if (tier) {
       const tierParam = encodeURIComponent(JSON.stringify(tier));
@@ -182,6 +192,14 @@ export default function AlertPreviewPage() {
           </div>
           
           <div className="flex items-center space-x-3">
+            <button
+              onClick={handleRefreshWidget}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium flex items-center"
+            >
+              <Monitor className="w-4 h-4 mr-2" />
+              Обновить виджет
+            </button>
+
             <button
               onClick={handleTest}
               className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium flex items-center"
