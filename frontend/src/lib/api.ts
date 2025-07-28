@@ -93,7 +93,19 @@ export const alertAPI = {
     });
   },
   deleteFile: (fileUrl: string) => api.delete(`/alerts/upload/file?file_url=${encodeURIComponent(fileUrl)}`),
-  getUserFiles: () => api.get('/alerts/upload/files')
+  getUserFiles: () => api.get('/alerts/upload/files'),
+  previewAudio: (fileUrl: string, startTime: number, endTime?: number) => {
+    const params = new URLSearchParams({
+      file_url: fileUrl,
+      start_time: startTime.toString(),
+    });
+    if (endTime !== undefined) {
+      params.append('end_time', endTime.toString());
+    }
+    return api.post(`/alerts/preview-audio?${params}`, {}, {
+      responseType: 'blob'
+    });
+  }
 };
 
 export const paymentAPI = {

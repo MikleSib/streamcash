@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/Button';
-import { alertAPI } from '@/lib/api';
+import { alertAPI, streamerAPI } from '@/lib/api';
 import { 
   Play,
   ArrowLeft,
@@ -14,7 +14,9 @@ import {
   RotateCcw,
   Settings,
   TestTube,
-  Sparkles
+  Sparkles,
+  ExternalLink,
+  Monitor
 } from 'lucide-react';
 
 interface AlertTier {
@@ -47,6 +49,7 @@ export default function AlertTestPage() {
   const [tiers, setTiers] = useState<AlertTier[]>([]);
   const [loading, setLoading] = useState(true);
   const [testingTier, setTestingTier] = useState<string | null>(null);
+  const [streamerProfile, setStreamerProfile] = useState<any>(null);
   const [testData, setTestData] = useState({
     donor_name: 'TestUser',
     amount: '100',
@@ -63,6 +66,7 @@ export default function AlertTestPage() {
 
     if (user) {
       loadSettings();
+      loadStreamerProfile();
     }
   }, [user, authLoading]);
 
@@ -84,6 +88,15 @@ export default function AlertTestPage() {
       console.error('Failed to load alert settings:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadStreamerProfile = async () => {
+    try {
+      const response = await streamerAPI.getProfile();
+      setStreamerProfile(response.data);
+    } catch (error) {
+      console.error('Failed to load streamer profile:', error);
     }
   };
 
@@ -227,6 +240,17 @@ export default function AlertTestPage() {
     element.appendChild(animationContainer);
   };
 
+  const openWidgetTest = () => {
+    if (!streamerProfile?.donation_url) return;
+    
+    const widgetUrl = `https://стримкэш.рф/api/v1/alerts/widget/${streamerProfile.donation_url}`;
+    window.open(
+      widgetUrl, 
+      'widget-test',
+      'width=800,height=600,resizable=yes,scrollbars=no,menubar=no,toolbar=no,location=no,status=no'
+    );
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
@@ -267,6 +291,18 @@ export default function AlertTestPage() {
             <div>
               <h1 className="text-3xl font-bold text-white">Тест алертов</h1>
               <p className="text-gray-200">Проверьте как выглядят ваши алерты в действии</p>
+            </div>
+            
+            {/* Кнопка открытия виджета */}
+            <div className="ml-auto">
+              <Button
+                onClick={openWidgetTest}
+                disabled={!streamerProfile?.donation_url}
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
+              >
+                <Monitor className="w-4 h-4 mr-2" />
+                Виджет 800x600
+              </Button>
             </div>
           </div>
         </div>

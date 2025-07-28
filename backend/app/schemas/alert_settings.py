@@ -12,6 +12,8 @@ class AlertTier(BaseModel):
     sound_enabled: bool = True
     sound_file_url: Optional[str] = None
     sound_volume: float = 0.5
+    sound_start_time: float = 0.0  # Время начала в секундах
+    sound_end_time: Optional[float] = None  # Время окончания в секундах (None = до конца файла)
     
     # Визуальное оформление
     visual_enabled: bool = True

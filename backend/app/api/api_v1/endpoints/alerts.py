@@ -6,8 +6,10 @@ import json
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 from sqlalchemy.orm import Session
+import subprocess
+import tempfile
 
 from app import crud, models, schemas
 from app.core import deps
@@ -190,6 +192,84 @@ async def get_user_files(
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка при получении списка файлов: {str(e)}")
+
+@router.post("/preview-audio")
+async def preview_trimmed_audio(
+    *,
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_active_user),
+    file_url: str = Query(..., description="URL аудио файла"),
+    start_time: float = Query(0.0, description="Время начала в секундах"),
+    end_time: float = Query(None, description="Время окончания в секундах"),
+) -> StreamingResponse:
+    """
+    Создать предварительное прослушивание обрезанного аудио
+    """
+    try:
+        # Проверяем, что файл принадлежит пользователю
+        if not file_url.startswith("/static/uploads/"):
+            raise HTTPException(status_code=400, detail="Недопустимый путь к файлу")
+        
+        # Получаем путь к исходному файлу
+        source_file_path = Path(settings.UPLOAD_DIR) / file_url.replace("/static/uploads/", "")
+        
+        if not source_file_path.exists():
+            raise HTTPException(status_code=404, detail="Файл не найден")
+        
+        # Создаем временный файл для обрезанного аудио
+        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as temp_file:
+            temp_file_path = temp_file.name
+        
+        # Команда FFmpeg для обрезки аудио
+        cmd = ["ffmpeg", "-y", "-i", str(source_file_path)]
+        
+        if start_time > 0:
+            cmd.extend(["-ss", str(start_time)])
+            
+        if end_time is not None:
+            duration = end_time - start_time
+            cmd.extend(["-t", str(duration)])
+        
+        cmd.extend(["-acodec", "mp3", temp_file_path])
+        
+        # Выполняем команду
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        if result.returncode != 0:
+            # Удаляем временный файл при ошибке
+            try:
+                os.unlink(temp_file_path)
+            except:
+                pass
+            raise HTTPException(status_code=500, detail=f"Ошибка обрезки аудио: {result.stderr}")
+        
+        # Возвращаем обрезанный файл как поток
+        def file_generator():
+            try:
+                with open(temp_file_path, "rb") as f:
+                    while True:
+                        chunk = f.read(8192)
+                        if not chunk:
+                            break
+                        yield chunk
+            finally:
+                # Удаляем временный файл после отправки
+                try:
+                    os.unlink(temp_file_path)
+                except:
+                    pass
+        
+        return StreamingResponse(
+            file_generator(),
+            media_type="audio/mpeg",
+            headers={
+                "Content-Disposition": "inline; filename=preview.mp3",
+                "Cache-Control": "no-cache"
+            }
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка создания превью: {str(e)}")
 
 @router.get("/", response_model=schemas.AlertSettings)
 def get_alert_settings(

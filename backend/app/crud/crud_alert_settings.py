@@ -15,6 +15,8 @@ def create_default_tier() -> Dict[str, Any]:
         "max_amount": None,
         "sound_enabled": True,
         "sound_volume": 0.5,
+        "sound_start_time": 0.0,
+        "sound_end_time": None,
         "visual_enabled": True,
         "alert_duration": 5,
         "text_color": "#FFFFFF",
