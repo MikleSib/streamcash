@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
-import { Header } from '@/components/layout/Header';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/Button';
 import { donationAPI } from '@/lib/api';
 import { formatMoney } from '@/lib/utils';
@@ -17,7 +17,9 @@ import {
   User,
   MessageSquare,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  History,
+  Sparkles
 } from 'lucide-react';
 
 interface Donation {
@@ -88,7 +90,6 @@ export default function DonationsHistoryPage() {
         as_donor: filters.asDonor,
       };
 
-      // Применяем фильтры
       if (filters.minAmount) params.min_amount = parseFloat(filters.minAmount);
       if (filters.maxAmount) params.max_amount = parseFloat(filters.maxAmount);
       if (filters.dateFrom) params.date_from = filters.dateFrom;
@@ -98,9 +99,6 @@ export default function DonationsHistoryPage() {
 
       const response = await donationAPI.getMy(params);
       setDonations(response.data);
-      
-      // Для подсчета общего количества можем сделать дополнительный запрос или получить из заголовков
-      // setTotalCount(response.headers['x-total-count'] || response.data.length);
       
     } catch (error) {
       console.error('Failed to load donations:', error);
@@ -123,7 +121,7 @@ export default function DonationsHistoryPage() {
         [name]: value,
       });
     }
-    setCurrentPage(1); // Сброс на первую страницу при изменении фильтров
+    setCurrentPage(1);
   };
 
   const clearFilters = () => {
@@ -143,15 +141,15 @@ export default function DonationsHistoryPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-500/20 text-green-300 border border-green-500/30';
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30';
       case 'failed':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-500/20 text-red-300 border border-red-500/30';
       case 'cancelled':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-500/20 text-gray-300 border border-gray-500/30';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-500/20 text-gray-300 border border-gray-500/30';
     }
   };
 
@@ -180,7 +178,6 @@ export default function DonationsHistoryPage() {
     });
   };
 
-  // Фильтрация по поиску на клиенте
   const filteredDonations = donations.filter(donation => {
     if (!filters.search) return true;
     const searchLower = filters.search.toLowerCase();
@@ -193,12 +190,14 @@ export default function DonationsHistoryPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-600 border-t-transparent mx-auto mb-6"></div>
+            <p className="text-gray-300 text-lg">Загружаем историю донатов...</p>
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
@@ -209,278 +208,316 @@ export default function DonationsHistoryPage() {
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div className="bg-white shadow rounded-lg">
-          {/* Заголовок */}
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">История донатов</h1>
-                <p className="mt-2 text-gray-600">
-                  Просматривайте все {filters.asDonor ? 'отправленные' : 'полученные'} донаты
-                </p>
+    <DashboardLayout>
+      <div className="space-y-8">
+        {/* Header */}
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl blur-xl"></div>
+          <div className="relative bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-700/50 p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-5">
+                <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <History className="w-8 h-8 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                    История донатов
+                  </h1>
+                  <p className="text-gray-300 text-lg mt-1">
+                    Просматривайте все {filters.asDonor ? 'отправленные' : 'полученные'} донаты
+                  </p>
+                </div>
               </div>
               
-              <div className="mt-4 sm:mt-0 flex space-x-3">
+              <div className="flex space-x-3">
                 <Button
-                  variant="outline"
                   onClick={() => setShowFilters(!showFilters)}
+                  className={`px-6 py-3 transition-all duration-200 ${
+                    showFilters 
+                      ? 'bg-purple-600 hover:bg-purple-700' 
+                      : 'bg-gray-700/50 border border-gray-600/50 text-gray-300 hover:bg-gray-600/50'
+                  }`}
                 >
                   <Filter className="w-4 h-4 mr-2" />
                   Фильтры
                 </Button>
-                <Button variant="outline">
+                <Button className="px-6 py-3 bg-green-600 hover:bg-green-700">
                   <Download className="w-4 h-4 mr-2" />
                   Экспорт
                 </Button>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Переключатель типа донатов */}
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center space-x-4">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="donationType"
-                  checked={!filters.asDonor}
-                  onChange={() => setFilters({ ...filters, asDonor: false })}
-                  className="mr-2"
-                />
+        {/* Type Toggle */}
+        <div className="bg-gray-800/70 backdrop-blur-md rounded-xl border border-gray-700/50 p-6">
+          <h3 className="text-lg font-semibold text-white mb-4">Тип донатов</h3>
+          <div className="flex items-center space-x-6">
+            <label className="flex items-center cursor-pointer group">
+              <input
+                type="radio"
+                name="donationType"
+                checked={!filters.asDonor}
+                onChange={() => setFilters({ ...filters, asDonor: false })}
+                className="sr-only"
+              />
+              <div className={`w-5 h-5 rounded-full border-2 mr-3 transition-all ${
+                !filters.asDonor 
+                  ? 'border-purple-500 bg-purple-500' 
+                  : 'border-gray-500 group-hover:border-gray-400'
+              }`}>
+                {!filters.asDonor && (
+                  <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
+                )}
+              </div>
+              <span className="text-gray-200 group-hover:text-white transition-colors">
                 Полученные донаты
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="donationType"
-                  checked={filters.asDonor}
-                  onChange={() => setFilters({ ...filters, asDonor: true })}
-                  className="mr-2"
-                />
+              </span>
+            </label>
+            
+            <label className="flex items-center cursor-pointer group">
+              <input
+                type="radio"
+                name="donationType"
+                checked={filters.asDonor}
+                onChange={() => setFilters({ ...filters, asDonor: true })}
+                className="sr-only"
+              />
+              <div className={`w-5 h-5 rounded-full border-2 mr-3 transition-all ${
+                filters.asDonor 
+                  ? 'border-purple-500 bg-purple-500' 
+                  : 'border-gray-500 group-hover:border-gray-400'
+              }`}>
+                {filters.asDonor && (
+                  <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
+                )}
+              </div>
+              <span className="text-gray-200 group-hover:text-white transition-colors">
                 Отправленные донаты
-              </label>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        {/* Filters */}
+        {showFilters && (
+          <div className="bg-gray-800/70 backdrop-blur-md rounded-xl border border-gray-700/50 p-6">
+            <h3 className="text-lg font-semibold text-white mb-4">Фильтры поиска</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-200 mb-2">
+                  Поиск
+                </label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    name="search"
+                    value={filters.search}
+                    onChange={handleFilterChange}
+                    className="pl-10 w-full px-4 py-3 bg-gray-700/70 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="Имя донатора, сообщение..."
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-200 mb-2">
+                  Мин. сумма (₽)
+                </label>
+                <input
+                  type="number"
+                  name="minAmount"
+                  value={filters.minAmount}
+                  onChange={handleFilterChange}
+                  className="w-full px-4 py-3 bg-gray-700/70 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  placeholder="0"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-200 mb-2">
+                  Макс. сумма (₽)
+                </label>
+                <input
+                  type="number"
+                  name="maxAmount"
+                  value={filters.maxAmount}
+                  onChange={handleFilterChange}
+                  className="w-full px-4 py-3 bg-gray-700/70 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  placeholder="Без ограничений"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-200 mb-2">
+                  Статус
+                </label>
+                <select
+                  name="status"
+                  value={filters.status}
+                  onChange={handleFilterChange}
+                  className="w-full px-4 py-3 bg-gray-700/70 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                  <option value="">Все статусы</option>
+                  <option value="completed">Завершен</option>
+                  <option value="pending">В обработке</option>
+                  <option value="failed">Неудачно</option>
+                  <option value="cancelled">Отменен</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-200 mb-2">
+                  Дата от
+                </label>
+                <input
+                  type="date"
+                  name="dateFrom"
+                  value={filters.dateFrom}
+                  onChange={handleFilterChange}
+                  className="w-full px-4 py-3 bg-gray-700/70 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-200 mb-2">
+                  Дата до
+                </label>
+                <input
+                  type="date"
+                  name="dateTo"
+                  value={filters.dateTo}
+                  onChange={handleFilterChange}
+                  className="w-full px-4 py-3 bg-gray-700/70 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-200 mb-2">
+                  Анонимность
+                </label>
+                <select
+                  name="isAnonymous"
+                  value={filters.isAnonymous}
+                  onChange={handleFilterChange}
+                  className="w-full px-4 py-3 bg-gray-700/70 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                  <option value="">Все</option>
+                  <option value="false">Не анонимные</option>
+                  <option value="true">Анонимные</option>
+                </select>
+              </div>
+              
+              <div className="flex items-end">
+                <Button
+                  onClick={clearFilters}
+                  className="w-full px-4 py-3 bg-gray-600/50 border border-gray-500/50 text-gray-300 hover:bg-gray-500/50"
+                >
+                  Очистить
+                </Button>
+              </div>
             </div>
           </div>
+        )}
 
-          {/* Фильтры */}
-          {showFilters && (
-            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Поиск
-                  </label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      type="text"
-                      name="search"
-                      value={filters.search}
-                      onChange={handleFilterChange}
-                      className="pl-10 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Имя донатора, сообщение..."
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Мин. сумма (₽)
-                  </label>
-                  <input
-                    type="number"
-                    name="minAmount"
-                    value={filters.minAmount}
-                    onChange={handleFilterChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="0"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Макс. сумма (₽)
-                  </label>
-                  <input
-                    type="number"
-                    name="maxAmount"
-                    value={filters.maxAmount}
-                    onChange={handleFilterChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Без ограничений"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Статус
-                  </label>
-                  <select
-                    name="status"
-                    value={filters.status}
-                    onChange={handleFilterChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Все статусы</option>
-                    <option value="completed">Завершен</option>
-                    <option value="pending">В обработке</option>
-                    <option value="failed">Неудачно</option>
-                    <option value="cancelled">Отменен</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Дата от
-                  </label>
-                  <input
-                    type="date"
-                    name="dateFrom"
-                    value={filters.dateFrom}
-                    onChange={handleFilterChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Дата до
-                  </label>
-                  <input
-                    type="date"
-                    name="dateTo"
-                    value={filters.dateTo}
-                    onChange={handleFilterChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Анонимность
-                  </label>
-                  <select
-                    name="isAnonymous"
-                    value={filters.isAnonymous}
-                    onChange={handleFilterChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Все</option>
-                    <option value="false">Не анонимные</option>
-                    <option value="true">Анонимные</option>
-                  </select>
-                </div>
-                
-                <div className="flex items-end">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={clearFilters}
-                    className="w-full"
-                  >
-                    Очистить
-                  </Button>
-                </div>
+        {/* Donations List */}
+        <div className="bg-gray-800/70 backdrop-blur-md rounded-xl border border-gray-700/50 overflow-hidden">
+          {filteredDonations.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 bg-gray-700/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <DollarSign className="w-10 h-10 text-gray-400" />
               </div>
+              <h3 className="text-2xl font-bold text-white mb-2">Донаты не найдены</h3>
+              <p className="text-gray-400 text-lg">
+                {filters.asDonor ? 'Вы еще не отправляли донаты' : 'Вы еще не получали донаты'}
+              </p>
             </div>
-          )}
-
-          {/* Список донатов */}
-          <div className="overflow-hidden">
-            {filteredDonations.length === 0 ? (
-              <div className="text-center py-12">
-                <DollarSign className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">Донаты не найдены</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  {filters.asDonor ? 'Вы еще не отправляли донаты' : 'Вы еще не получали донаты'}
-                </p>
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-200">
-                {filteredDonations.map((donation) => (
-                  <div key={donation.id} className="p-6 hover:bg-gray-50">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="flex-shrink-0">
-                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                            {donation.is_anonymous ? (
-                              <User className="w-5 h-5 text-blue-600" />
-                            ) : (
-                              <User className="w-5 h-5 text-blue-600" />
-                            )}
-                          </div>
-                        </div>
-                        
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center space-x-2">
-                            <p className="text-sm font-medium text-gray-900">
-                              {donation.is_anonymous ? 'Анонимный донат' : donation.donor_name || 'Неизвестный донатор'}
-                            </p>
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(donation.status)}`}>
-                              {getStatusText(donation.status)}
-                            </span>
-                          </div>
-                          
-                          <div className="mt-1 flex items-center space-x-4 text-sm text-gray-500">
-                            <div className="flex items-center">
-                              <Calendar className="w-4 h-4 mr-1" />
-                              {formatDate(donation.created_at)}
-                            </div>
-                            <div className="flex items-center">
-                              <DollarSign className="w-4 h-4 mr-1" />
-                              {formatMoney(donation.amount)}
-                            </div>
-                            {donation.message && (
-                              <div className="flex items-center">
-                                <MessageSquare className="w-4 h-4 mr-1" />
-                                <span className="truncate max-w-xs">
-                                  {donation.message}
-                                </span>
-                              </div>
-                            )}
-                          </div>
+          ) : (
+            <div className="divide-y divide-gray-700/50">
+              {filteredDonations.map((donation) => (
+                <div key={donation.id} className="p-6 hover:bg-gray-700/30 transition-all duration-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex-shrink-0">
+                        <div className="w-14 h-14 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-xl flex items-center justify-center border border-purple-500/30">
+                          {donation.is_anonymous ? (
+                            <User className="w-7 h-7 text-purple-400" />
+                          ) : (
+                            <Sparkles className="w-7 h-7 text-purple-400" />
+                          )}
                         </div>
                       </div>
                       
-                      <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="sm">
-                          <Eye className="w-4 h-4 mr-1" />
-                          Подробнее
-                        </Button>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <p className="text-lg font-bold text-white">
+                            {donation.is_anonymous ? 'Анонимный донат' : donation.donor_name || 'Неизвестный донатор'}
+                          </p>
+                          <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(donation.status)}`}>
+                            {getStatusText(donation.status)}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center space-x-6 text-sm text-gray-300">
+                          <div className="flex items-center">
+                            <Calendar className="w-4 h-4 mr-2 text-blue-400" />
+                            {formatDate(donation.created_at)}
+                          </div>
+                          <div className="flex items-center">
+                            <DollarSign className="w-4 h-4 mr-2 text-green-400" />
+                            <span className="font-bold text-green-400">
+                              {formatMoney(donation.amount)}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {donation.message && (
+                          <div className="mt-3 p-3 bg-gray-700/30 rounded-lg border border-gray-600/30">
+                            <div className="flex items-start">
+                              <MessageSquare className="w-4 h-4 mr-2 text-purple-400 mt-0.5" />
+                              <p className="text-gray-200 text-sm">
+                                {donation.message}
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
+                    
+                    <div className="flex items-center">
+                      <Button className="px-4 py-2 bg-purple-600/20 border border-purple-500/30 text-purple-300 hover:bg-purple-600/30">
+                        <Eye className="w-4 h-4 mr-2" />
+                        Подробнее
+                      </Button>
+                    </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                </div>
+              ))}
+            </div>
+          )}
 
-          {/* Пагинация */}
+          {/* Pagination */}
           {totalPages > 1 && (
-            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-              <div className="text-sm text-gray-700">
+            <div className="px-6 py-4 border-t border-gray-700/50 flex items-center justify-between bg-gray-800/50">
+              <div className="text-sm text-gray-300">
                 Страница {currentPage} из {totalPages}
               </div>
               
               <div className="flex space-x-2">
                 <Button
-                  variant="outline"
-                  size="sm"
                   onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
+                  className="px-4 py-2 bg-gray-700/50 border border-gray-600/50 text-gray-300 hover:bg-gray-600/50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
                 
                 <Button
-                  variant="outline"
-                  size="sm"
                   onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                   disabled={currentPage === totalPages}
+                  className="px-4 py-2 bg-gray-700/50 border border-gray-600/50 text-gray-300 hover:bg-gray-600/50 disabled:opacity-50 disabled:cursor-not-allowed"  
                 >
                   <ChevronRight className="w-4 h-4" />
                 </Button>
@@ -489,6 +526,6 @@ export default function DonationsHistoryPage() {
           )}
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 } 

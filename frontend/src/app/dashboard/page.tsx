@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
-import { Header } from '@/components/layout/Header';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/Button';
 import { donationAPI, streamerAPI, alertAPI } from '@/lib/api';
 import { formatMoney } from '@/lib/utils';
@@ -13,6 +13,7 @@ import {
   Link as LinkIcon, 
   Copy, 
   Eye,
+  EyeOff,
   Sparkles,
   CheckCircle,
   BarChart3,
@@ -47,7 +48,9 @@ export default function DashboardPage() {
   const [streamerProfile, setStreamerProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [copiedLink, setCopiedLink] = useState(false);
-  const [activeSection, setActiveSection] = useState('overview');
+  const [copiedObsLink, setCopiedObsLink] = useState(false);
+  const [showObsLink, setShowObsLink] = useState(false);
+
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -136,60 +139,20 @@ export default function DashboardPage() {
     }
   };
 
-  const menuItems = [
-    { id: 'overview', label: 'Обзор', icon: Home },
-    { id: 'settings', label: 'Настройки', icon: Settings },
-    { id: 'history', label: 'История', icon: History },
-    { id: 'alerts', label: 'Алерты', icon: AlertTriangle },
-    { id: 'widget', label: 'OBS Виджет', icon: Monitor },
-  ];
+  const copyObsLink = async () => {
+    if (streamerProfile?.donation_url) {
+      const link = getWidgetUrl();
+      try {
+        await navigator.clipboard.writeText(link);
+        setCopiedObsLink(true);
+        setTimeout(() => setCopiedObsLink(false), 2000);
+      } catch (error) {
+        console.error('Failed to copy OBS link:', error);
+      }
+    }
+  };
 
-  const Sidebar = () => (
-    <div className="w-64 bg-gray-900/95 backdrop-blur-md border-r border-gray-700/30 h-screen fixed left-0 top-16 z-40">
-      <div className="p-6">
-        <nav className="space-y-1">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveSection(item.id)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 text-left ${
-                  activeSection === item.id
-                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/25'
-                    : 'text-gray-300 hover:bg-gray-800/50 hover:text-white'
-                }`}
-              >
-                <Icon className="w-5 h-5 flex-shrink-0" />
-                <span className="font-medium">{item.label}</span>
-              </button>
-            );
-          })}
-        </nav>
 
-        <div className="mt-8 p-4 bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg border border-purple-500/20">
-          <div className="flex items-center space-x-2 mb-2">
-            <Zap className="w-4 h-4 text-purple-400" />
-            <span className="text-purple-300 text-sm font-medium">Быстрые действия</span>
-          </div>
-          <div className="space-y-2">
-            <button
-              onClick={() => router.push('/dashboard/settings/test')}
-              className="w-full text-left text-xs text-gray-300 hover:text-purple-300 transition-colors"
-            >
-              Тест алертов
-            </button>
-            <button
-              onClick={() => window.open(getDonationUrl(), '_blank')}
-              className="w-full text-left text-xs text-gray-300 hover:text-purple-300 transition-colors"
-            >
-              Открыть страницу
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 
   const StatCard = ({ title, value, icon: Icon, change, color, trend }: {
     title: string;
@@ -309,6 +272,70 @@ export default function DashboardPage() {
               </>
             )}
           </Button>
+        </div>
+      </div>
+
+      <div className="bg-gray-800/60 backdrop-blur-md rounded-xl border border-gray-700/30 p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg flex items-center justify-center">
+              <Monitor className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-white">OBS Виджет</h2>
+              <p className="text-gray-400 text-sm">Ссылка для добавления в OBS Studio</p>
+            </div>
+          </div>
+          <button
+            onClick={() => window.open(getWidgetUrl(), '_blank')}
+            className="flex items-center space-x-2 text-gray-400 hover:text-blue-400 transition-colors"
+          >
+            <ExternalLink className="w-4 h-4" />
+            <span className="text-sm">Открыть</span>
+          </button>
+        </div>
+        
+        <div className="flex items-center space-x-3">
+          <input
+            type="text"
+            readOnly
+            value={showObsLink ? getWidgetUrl() : '••••••••••••••••••••••••••••••••••••••••••••••••••••••••••'}
+            className="flex-1 px-4 py-3 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 font-mono"
+          />
+          <Button 
+            onClick={() => setShowObsLink(!showObsLink)}
+            className="px-4 py-3 bg-gray-600/50 border border-gray-500/50 text-gray-300 hover:bg-gray-500/50"
+            title={showObsLink ? "Скрыть ссылку" : "Показать ссылку"}
+          >
+            {showObsLink ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </Button>
+          <Button 
+            onClick={copyObsLink}
+            className={`px-6 py-3 transition-all duration-200 ${
+              copiedObsLink 
+                ? 'bg-green-600 hover:bg-green-700' 
+                : 'bg-blue-600 hover:bg-blue-700'
+            }`}
+          >
+            {copiedObsLink ? (
+              <>
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Скопировано
+              </>
+            ) : (
+              <>
+                <Copy className="w-4 h-4 mr-2" />
+                Копировать
+              </>
+            )}
+          </Button>
+        </div>
+        
+        <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+          <p className="text-blue-300 text-sm flex items-center">
+            <Monitor className="w-4 h-4 mr-2" />
+            Добавьте эту ссылку как "Источник браузера" в OBS Studio (размер: 800x600)
+          </p>
         </div>
       </div>
 
@@ -612,34 +639,18 @@ export default function DashboardPage() {
     </div>
   );
 
-  const renderContent = () => {
-    switch (activeSection) {
-      case 'overview':
-        return <OverviewSection />;
-      case 'settings':
-        return <SettingsSection />;
-      case 'history':
-        return <HistorySection />;
-      case 'alerts':
-        return <AlertsSection />;
-      case 'widget':
-        return <WidgetSection />;
-      default:
-        return <OverviewSection />;
-    }
-  };
+
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
-        <Header />
+      <DashboardLayout>
         <div className="flex items-center justify-center min-h-[50vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-600 border-t-transparent mx-auto mb-6"></div>
             <p className="text-gray-300 text-lg">Загружаем дашборд...</p>
           </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
@@ -648,40 +659,33 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
-      <Header />
-      <Sidebar />
-      
-      <div className="ml-64 pt-16">
-        <div className="max-w-6xl mx-auto px-8 py-8">
-          {!streamerProfile ? (
-            <div className="max-w-md mx-auto">
-              <div className="bg-gray-800/70 backdrop-blur-md rounded-2xl border border-gray-700/50 p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Sparkles className="w-8 h-8 text-white" />
-                </div>
-                
-                <h2 className="text-2xl font-bold text-white mb-4">
-                  Создайте профиль стримера
-                </h2>
-                <p className="text-gray-300 mb-8">
-                  Настройте профиль за 2 минуты и начните принимать донаты
-                </p>
-                
-                <Button 
-                  onClick={() => router.push('/dashboard/streamer-setup')}
-                  className="w-full py-4 text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                >
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  Создать профиль
-                </Button>
-              </div>
+    <DashboardLayout>
+      {!streamerProfile ? (
+        <div className="max-w-md mx-auto">
+          <div className="bg-gray-800/70 backdrop-blur-md rounded-2xl border border-gray-700/50 p-8 text-center">
+            <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Sparkles className="w-8 h-8 text-white" />
             </div>
-          ) : (
-            renderContent()
-          )}
+            
+            <h2 className="text-2xl font-bold text-white mb-4">
+              Создайте профиль стримера
+            </h2>
+            <p className="text-gray-300 mb-8">
+              Настройте профиль за 2 минуты и начните принимать донаты
+            </p>
+            
+            <Button 
+              onClick={() => router.push('/dashboard/streamer-setup')}
+              className="w-full py-4 text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+            >
+              <Sparkles className="w-5 h-5 mr-2" />
+              Создать профиль
+            </Button>
+          </div>
         </div>
-      </div>
-    </div>
+      ) : (
+        <OverviewSection />
+      )}
+    </DashboardLayout>
   );
 } 

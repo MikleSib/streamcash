@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
-import { Header } from '@/components/layout/Header';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/Button';
 import { streamerAPI } from '@/lib/api';
 
@@ -50,10 +50,7 @@ export default function StreamerSetupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      
-      <div className="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <DashboardLayout>
         <div className="bg-white shadow rounded-lg p-6">
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-900">
@@ -181,7 +178,6 @@ export default function StreamerSetupPage() {
             </div>
           </form>
         </div>
-      </div>
-    </div>
+    </DashboardLayout>
   );
 } 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
-import { Header } from '@/components/layout/Header';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/Button';
 import { alertAPI, streamerAPI } from '@/lib/api';
 import { 
@@ -93,7 +93,7 @@ export default function AlertTestPage() {
 
   const loadStreamerProfile = async () => {
     try {
-      const response = await streamerAPI.getProfile();
+      const response = await streamerAPI.getMe();
       setStreamerProfile(response.data);
     } catch (error) {
       console.error('Failed to load streamer profile:', error);
@@ -253,15 +253,14 @@ export default function AlertTestPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
-        <Header />
+      <DashboardLayout>
         <div className="flex items-center justify-center min-h-[50vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-600 border-t-transparent mx-auto mb-6"></div>
             <p className="text-gray-300 text-lg">Загружаем тест алертов...</p>
           </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
@@ -270,10 +269,7 @@ export default function AlertTestPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
-      <Header />
-      
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <DashboardLayout>
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center space-x-4 mb-6">
@@ -490,16 +486,15 @@ export default function AlertTestPage() {
             </Button>
           </div>
         )}
-      </div>
 
-      {/* CSS для анимаций */}
-      <style jsx>{`
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
-          20%, 40%, 60%, 80% { transform: translateX(2px); }
-        }
-      `}</style>
-    </div>
+        {/* CSS для анимаций */}
+        <style jsx>{`
+          @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+            20%, 40%, 60%, 80% { transform: translateX(2px); }
+          }
+        `}</style>
+    </DashboardLayout>
   );
 } 
