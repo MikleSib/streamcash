@@ -21,9 +21,11 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
+import { useAuth } from '@/lib/auth';
 
 export default function HomePage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [currentFeature, setCurrentFeature] = useState(0);
 
   const features = [
@@ -35,7 +37,7 @@ export default function HomePage() {
     {
       icon: <Shield className="w-8 h-8" />,
       title: "100% безопасность",
-      description: "Защищенные платежи через эквайнинг и платежные системы"
+      description: "Защищенные платежи через эквайринг и платежные системы"
     },
     {
       icon: <Smartphone className="w-8 h-8" />,
@@ -51,7 +53,21 @@ export default function HomePage() {
     { number: "До 0%", label: "Комиссия для стримеров" }
   ];
 
+  const handleStartStreaming = () => {
+    if (user) {
+      router.push('/dashboard');
+    } else {
+      router.push('/register');
+    }
+  };
 
+  const handleCreateAccount = () => {
+    if (user) {
+      router.push('/dashboard');
+    } else {
+      router.push('/register');
+    }
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -88,7 +104,7 @@ export default function HomePage() {
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <Button 
-                onClick={() => router.push('/register')}
+                onClick={handleStartStreaming}
                 className="px-8 py-4 text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transform hover:scale-105 transition-all duration-200 shadow-lg shadow-purple-500/25"
               >
                 <Play className="w-5 h-5 mr-2" />
@@ -170,7 +186,7 @@ export default function HomePage() {
                 description: "Готовые виджеты для OBS с настраиваемым дизайном и анимациями"
               },
               {
-                icon: <Zap className="w-8 h-8 text-yellow-4я00" />,
+                icon: <Zap className="w-8 h-8 text-yellow-400" />,
                 title: "Мгновенные алерты",
                 description: "Алерты появляются на стриме сразу после доната"
               },
@@ -228,7 +244,7 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
-                onClick={() => router.push('/register')}
+                onClick={handleCreateAccount}
                 className="px-8 py-4 text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transform hover:scale-105 transition-all duration-200"
               >
                 <Gift className="w-5 h-5 mr-2" />

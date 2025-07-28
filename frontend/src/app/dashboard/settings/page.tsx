@@ -424,26 +424,7 @@ export default function AlertSettingsPage() {
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto space-y-8">
-        <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-8 text-white">
-          <div className="flex items-center space-x-4 mb-4">
-            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-              <Settings className="w-8 h-8" />
-            </div>
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold mb-2">Настройки алертов</h1>
-              <p className="text-purple-100 text-lg">
-                Создайте уникальные алерты для разных сумм донатов
-              </p>
-            </div>
-            
-            <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="text-3xl font-bold">{settings.tiers.length}</div>
-              <div className="text-sm text-purple-100">
-                {settings.tiers.length === 1 ? 'уровень' : settings.tiers.length < 5 ? 'уровня' : 'уровней'}
-              </div>
-            </div>
-          </div>
-        </div>
+
 
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg">
           <div className="flex items-center justify-between">

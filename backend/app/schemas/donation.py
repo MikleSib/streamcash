@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 from app.models.donation import DonationStatus, PaymentMethod
@@ -7,7 +7,6 @@ class DonationBase(BaseModel):
     amount: float
     message: Optional[str] = None
     donor_name: Optional[str] = None
-    donor_email: Optional[EmailStr] = None
     is_anonymous: bool = False
     is_public: bool = True
 

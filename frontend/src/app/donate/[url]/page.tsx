@@ -26,12 +26,12 @@ export default function DonatePage() {
   const [streamer, setStreamer] = useState<Streamer | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [alertTiers, setAlertTiers] = useState<any[]>([]);
   
   const [donationData, setDonationData] = useState({
     amount: 0,
     message: '',
     donor_name: '',
-    donor_email: '',
     is_anonymous: false,
     payment_method: 'test',
   });
@@ -45,6 +45,23 @@ export default function DonatePage() {
     try {
       const response = await streamerAPI.getByUrl(donationUrl);
       setStreamer(response.data);
+      
+      // Загружаем настройки алертов
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const alertResponse = await fetch(`${API_URL}/v1/alerts/streamer/${donationUrl}`);
+        console.log('Alert response status:', alertResponse.status);
+        if (alertResponse.ok) {
+          const alertData = await alertResponse.json();
+          console.log('Alert data received:', alertData);
+          setAlertTiers(alertData.tiers || []);
+          console.log('Alert tiers set:', alertData.tiers || []);
+        } else {
+          console.log('Alert response not ok:', await alertResponse.text());
+        }
+      } catch (alertError) {
+        console.error('Не удалось загрузить настройки алертов:', alertError);
+      }
     } catch (error) {
       setError('Стример не найден');
     } finally {
@@ -102,6 +119,14 @@ export default function DonatePage() {
   };
 
   const quickAmounts = [50, 100, 200, 500, 1000];
+  
+  const getTierForAmount = (amount: number) => {
+    return alertTiers.find(tier => {
+      const minAmount = tier.min_amount || 0;
+      const maxAmount = tier.max_amount;
+      return amount >= minAmount && (maxAmount === null || maxAmount === undefined || amount <= maxAmount);
+    });
+  };
 
   if (loading) {
     return (
@@ -131,21 +156,33 @@ export default function DonatePage() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-      <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-100">
+      <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-white shadow-lg rounded-lg p-6">
-            <div className="text-center mb-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <div className="bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
+            <div className="text-center mb-8">
+              <div className="relative mb-6">
+                <div className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full mx-auto flex items-center justify-center text-3xl font-bold text-white shadow-lg">
+                  {streamer.display_name.charAt(0).toUpperCase()}
+                </div>
+                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-white flex items-center justify-center">
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                </div>
+              </div>
+              <h1 className="text-4xl font-extrabold text-gray-900 mb-3">
                 {streamer.display_name}
               </h1>
+              <div className="flex items-center justify-center mb-2">
+                <div className="w-2 h-2 bg-gray-400 rounded-full mr-2"></div>
+                <span className="text-sm text-gray-500 uppercase tracking-wide">ОФЛАЙН</span>
+              </div>
               {streamer.stream_title && (
-                <p className="text-lg text-gray-600 mb-4">
+                <p className="text-lg text-gray-600 mb-4 font-medium">
                   {streamer.stream_title}
                 </p>
               )}
               {streamer.stream_description && (
-                <p className="text-gray-500">
+                <p className="text-gray-500 leading-relaxed">
                   {streamer.stream_description}
                 </p>
               )}
@@ -188,15 +225,59 @@ export default function DonatePage() {
                   </p>
                 </div>
               )}
+
+              {alertTiers.length > 0 ? (
+                <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <span className="mr-2">🎉</span>
+                    Уровни алертов
+                  </h3>
+                  <div className="space-y-3">
+                    {alertTiers
+                      .sort((a, b) => (a.min_amount || 0) - (b.min_amount || 0))
+                      .map((tier, index) => (
+                        <div
+                          key={tier.id || index}
+                          className={`p-3 rounded-lg border transition-all duration-200 ${
+                            getTierForAmount(donationData.amount) === tier
+                              ? 'border-purple-500 bg-purple-100 shadow-md'
+                              : 'border-gray-200 bg-white hover:border-purple-300'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-lg">{tier.icon === 'Star' ? '⭐' : '🎁'}</span>
+                              <span className="font-medium text-gray-900">{tier.name}</span>
+                            </div>
+                            <div className="text-sm font-semibold text-purple-600">
+                              {tier.min_amount}₽{tier.max_amount ? `-${tier.max_amount}₽` : '+'}
+                            </div>
+                          </div>
+                          {tier.text_template && (
+                            <div className="text-xs text-gray-600">
+                              {tier.text_template
+                                .replace('{donor_name}', 'Имя')
+                                .replace('{amount}', tier.min_amount + '₽')
+                                .replace('{message}', 'сообщение')}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
 
-          <div className="bg-white shadow-lg rounded-lg p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">
-              Поддержать стримера
-            </h2>
+          <div className="bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Поддержать стримера
+              </h2>
+              <p className="text-gray-500">Отправьте донат и поддержите любимого стримера</p>
+            </div>
 
-            <form onSubmit={handleDonate} className="space-y-4">
+            <form onSubmit={handleDonate} className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Сумма доната (₽)
@@ -207,22 +288,22 @@ export default function DonatePage() {
                   min={streamer.min_donation_amount}
                   max={streamer.max_donation_amount}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-lg font-semibold"
                   placeholder={`От ${streamer.min_donation_amount} до ${streamer.max_donation_amount} ₽`}
                   value={donationData.amount || ''}
                   onChange={handleDonationChange}
                 />
-                <div className="flex flex-wrap gap-2 mt-2">
+                <div className="grid grid-cols-5 gap-2 mt-3">
                   {quickAmounts
                     .filter(amount => amount >= streamer.min_donation_amount && amount <= streamer.max_donation_amount)
                     .map((amount) => (
                     <button
                       key={amount}
                       type="button"
-                      className={`px-3 py-1 text-sm rounded-md transition-colors font-medium ${
+                      className={`px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-200 ${
                         donationData.amount === amount
-                          ? 'bg-blue-600 text-white hover:bg-blue-700'
-                          : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                          ? 'bg-indigo-600 text-white shadow-lg transform scale-105'
+                          : 'bg-gray-100 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 hover:scale-105'
                       }`}
                       onClick={() => setDonationData({ ...donationData, amount })}
                     >
@@ -239,23 +320,9 @@ export default function DonatePage() {
                 <input
                   type="text"
                   name="donor_name"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
                   placeholder="Как вас называть?"
                   value={donationData.donor_name}
-                  onChange={handleDonationChange}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email (необязательно)
-                </label>
-                <input
-                  type="email"
-                  name="donor_email"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="your@email.com"
-                  value={donationData.donor_email}
                   onChange={handleDonationChange}
                 />
               </div>
@@ -266,8 +333,8 @@ export default function DonatePage() {
                 </label>
                 <textarea
                   name="message"
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  rows={4}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 resize-none"
                   placeholder="Оставьте сообщение для стримера..."
                   value={donationData.message}
                   onChange={handleDonationChange}
@@ -278,32 +345,41 @@ export default function DonatePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Способ оплаты
                 </label>
-                <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-600">
-                  Тестовая оплата (для разработки)
+                <div className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-amber-50 text-amber-700 font-medium">
+                  🧪 Тестовая оплата (для разработки)
                 </div>
               </div>
 
-              <div className="flex items-center">
+              <div className="flex items-center p-4 bg-gray-50 rounded-xl">
                 <input
                   type="checkbox"
                   name="is_anonymous"
                   id="is_anonymous"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded-md"
                   checked={donationData.is_anonymous}
                   onChange={handleDonationChange}
                 />
-                <label htmlFor="is_anonymous" className="ml-2 block text-sm text-gray-900">
-                  Анонимный донат
+                <label htmlFor="is_anonymous" className="ml-3 block text-sm font-medium text-gray-900">
+                  🕶️ Анонимный донат
                 </label>
               </div>
 
               <Button
                 type="submit"
                 loading={donatingLoading}
-                className="w-full"
+                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
                 size="lg"
               >
-                Задонатить {donationData.amount > 0 ? formatMoney(donationData.amount) : ''}
+                {donatingLoading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Обработка...
+                  </div>
+                ) : (
+                  <>
+                    🎁 Задонатить {donationData.amount > 0 ? formatMoney(donationData.amount) : ''}
+                  </>
+                )}
               </Button>
             </form>
           </div>

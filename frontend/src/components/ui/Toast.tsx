@@ -67,7 +67,8 @@ export function Toast({ id, title, message, type = 'info', duration = 5000, onCl
         isVisible && !isLeaving
           ? 'translate-x-0 opacity-100'
           : 'translate-x-full opacity-0'
-      } max-w-md w-full ${getColors()} backdrop-blur-md rounded-lg border shadow-lg`}
+      } w-full ${getColors()} backdrop-blur-md rounded-lg border shadow-lg`}
+      style={{ maxWidth: '392px' }}
     >
       <div className="p-4">
         <div className="flex items-start">

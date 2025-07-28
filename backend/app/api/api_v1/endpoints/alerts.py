@@ -871,4 +871,27 @@ def get_alert_widget(
     </html>
     """
     
-    return html_content 
+    return html_content
+
+@router.get("/streamer/{donation_url}")
+def get_streamer_alert_settings(
+    *,
+    db: Session = Depends(deps.get_db),
+    donation_url: str,
+) -> Any:
+    """
+    Получить настройки алертов стримера по donation_url для отображения на странице доната
+    """
+    streamer = crud.streamer.get_by_donation_url(db, donation_url=donation_url)
+    if not streamer:
+        raise HTTPException(status_code=404, detail="Стример не найден")
+    
+    settings = crud.alert_settings.get_by_user_id(db, user_id=streamer.user_id)
+    if not settings:
+        settings = crud.alert_settings.create_default_for_new_user(db, user_id=streamer.user_id)
+    
+    return {
+        "streamer_name": streamer.display_name,
+        "tiers": settings.tiers if settings.tiers else [],
+        "alerts_enabled": settings.alerts_enabled
+    } 

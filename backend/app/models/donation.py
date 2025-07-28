@@ -29,7 +29,6 @@ class Donation(Base):
     amount = Column(Float, nullable=False)
     message = Column(Text)
     donor_name = Column(String)
-    donor_email = Column(String)
     
     payment_method = Column(Enum(PaymentMethod), nullable=False)
     payment_id = Column(String, unique=True)
