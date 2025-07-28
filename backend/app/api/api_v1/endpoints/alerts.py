@@ -498,31 +498,26 @@ def get_alert_widget(
             }}
             
             .alert {{
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%) scale(0);
-                padding: 20px 40px;
-                border-radius: 15px;
-                box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-                text-align: center;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                transform: scale(0);
                 opacity: 0;
                 transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-                max-width: 90%;
-                word-wrap: break-word;
                 z-index: 1000;
-                backdrop-filter: blur(10px);
-                border: 2px solid rgba(255,255,255,0.1);
+                pointer-events: none;
             }}
             
             .alert.show {{
                 opacity: 1;
-                transform: translate(-50%, -50%) scale(1);
+                transform: scale(1);
             }}
             
             .alert.hide {{
                 opacity: 0;
-                transform: translate(-50%, -50%) scale(0.5);
+                transform: scale(0.5);
             }}
             
             .alert.shake {{
@@ -742,7 +737,9 @@ def get_alert_widget(
                 }}
             }}
             
+            // GIF теперь обрабатываются через элементы
             function createGif(gifUrl) {{
+                // Оставляем для совместимости со старыми анимациями
                 const gif = document.createElement('img');
                 gif.src = gifUrl;
                 gif.style.position = 'absolute';
@@ -766,21 +763,91 @@ def get_alert_widget(
                     clearTimeout(currentTimeout);
                 }}
                 
-                // Форматируем текст
-                const formattedText = tier.text_template
-                    .replace('{{donor_name}}', donation.donor_name || 'Аноним')
-                    .replace('{{amount}}', donation.amount)
-                    .replace('{{message}}', donation.message || '');
+                // Очищаем контейнер
+                alertElement.innerHTML = '';
+                animationContainer.innerHTML = '';
                 
-                // Настраиваем стили алерта
-                alertElement.innerHTML = formattedText;
-                alertElement.style.backgroundColor = tier.background_color;
-                alertElement.style.color = tier.text_color;
-                alertElement.style.fontSize = tier.font_size + 'px';
-                alertElement.style.borderColor = tier.highlight_color || 'rgba(255,255,255,0.1)';
-                
-                if (tier.highlight_color) {{
-                    alertElement.style.boxShadow = `0 0 30px ${{tier.highlight_color}}40`;
+                // Используем новую структуру элементов, если есть
+                if (tier.elements && tier.elements.length > 0) {{
+                    tier.elements.forEach(element => {{
+                        if (!element.visible) return;
+                        
+                        if (element.type === 'text') {{
+                            const textElement = document.createElement('div');
+                            
+                            // Форматируем контент
+                            let content = element.content || '';
+                            if (element.id === 'donor-info') {{
+                                content = content
+                                    .replace('{{donor_name}}', donation.donor_name || 'Аноним')
+                                    .replace('{{amount}}', donation.amount);
+                            }} else if (element.id === 'message-text') {{
+                                content = content.replace('{{message}}', donation.message || '');
+                            }} else {{
+                                content = content
+                                    .replace('{{donor_name}}', donation.donor_name || 'Аноним')
+                                    .replace('{{amount}}', donation.amount)
+                                    .replace('{{message}}', donation.message || '');
+                            }}
+                            
+                            textElement.innerHTML = content;
+                            textElement.style.position = 'absolute';
+                            textElement.style.left = element.x + '%';
+                            textElement.style.top = element.y + '%';
+                            textElement.style.transform = 'translate(-50%, -50%)';
+                            textElement.style.fontSize = (element.fontSize || 24) + 'px';
+                            textElement.style.color = element.color || '#ffffff';
+                            textElement.style.fontWeight = 'bold';
+                            textElement.style.textShadow = '2px 2px 4px rgba(0,0,0,0.5)';
+                            textElement.style.padding = (element.padding || 8) + 'px';
+                            textElement.style.backgroundColor = element.backgroundColor || 'transparent';
+                            textElement.style.borderRadius = (element.borderRadius || 0) + 'px';
+                            textElement.style.zIndex = element.zIndex || 1;
+                            textElement.style.textAlign = 'center';
+                            textElement.style.whiteSpace = 'nowrap';
+                            textElement.style.maxWidth = '90vw';
+                            textElement.style.wordWrap = 'break-word';
+                            
+                            if (element.width) {{
+                                textElement.style.width = element.width + 'px';
+                                textElement.style.whiteSpace = 'normal';
+                            }}
+                            if (element.height) {{
+                                textElement.style.height = element.height + 'px';
+                                textElement.style.display = 'flex';
+                                textElement.style.alignItems = 'center';
+                                textElement.style.justifyContent = 'center';
+                            }}
+                            
+                            alertElement.appendChild(textElement);
+                        }} else if (element.type === 'image' && element.imageUrl) {{
+                            const imageElement = document.createElement('img');
+                            imageElement.src = element.imageUrl;
+                            imageElement.style.position = 'absolute';
+                            imageElement.style.left = element.x + '%';
+                            imageElement.style.top = element.y + '%';
+                            imageElement.style.transform = 'translate(-50%, -50%)';
+                            imageElement.style.width = (element.width || 120) + 'px';
+                            imageElement.style.height = (element.height || 120) + 'px';
+                            imageElement.style.objectFit = 'contain';
+                            imageElement.style.borderRadius = (element.borderRadius || 0) + 'px';
+                            imageElement.style.zIndex = element.zIndex || 1;
+                            
+                            alertElement.appendChild(imageElement);
+                        }}
+                    }});
+                }} else {{
+                    // Fallback на старую структуру для обратной совместимости
+                    const formattedText = tier.text_template
+                        .replace('{{donor_name}}', donation.donor_name || 'Аноним')
+                        .replace('{{amount}}', donation.amount)
+                        .replace('{{message}}', donation.message || '');
+                    
+                    alertElement.innerHTML = formattedText;
+                    alertElement.style.backgroundColor = tier.background_color;
+                    alertElement.style.color = tier.text_color;
+                    alertElement.style.fontSize = tier.font_size + 'px';
+                    alertElement.style.borderColor = tier.highlight_color || 'rgba(255,255,255,0.1)';
                 }}
                 
                 // Показываем алерт
@@ -798,8 +865,8 @@ def get_alert_widget(
                     playSound(tier.sound_file_url, tier.sound_volume);
                 }}
                 
-                // Создаем анимацию
-                if (tier.animation_enabled) {{
+                // Создаем анимацию (старая система)
+                if (tier.animation_enabled && tier.animation_type !== 'gif') {{
                     createAnimation(tier.animation_type, tier);
                 }}
                 
