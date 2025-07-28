@@ -347,6 +347,35 @@ async def test_alert(
     
     return {"message": f"Test alert sent for {amount}₽"}
 
+@router.post("/test-with-tier")
+async def test_alert_with_tier(
+    *,
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_active_user),
+    request_data: dict,
+) -> Any:
+    """
+    Тестировать алерт с конкретным тиром (для предпросмотра)
+    """
+    # Получаем стримера текущего пользователя
+    streamer = crud.streamer.get_by_user_id(db, user_id=current_user.id)
+    if not streamer:
+        raise HTTPException(status_code=404, detail="Streamer profile not found")
+    
+    tier_data = request_data.get("tier", {})
+    amount = request_data.get("amount", 100)
+    
+    # Отправляем тестовый донат с конкретным тиром
+    from app.services.websocket_service import notify_new_donation_with_tier
+    await notify_new_donation_with_tier({
+        "donor_name": "Тестер",
+        "amount": amount,
+        "message": f"Тестовый донат {amount}₽!",
+        "is_anonymous": False
+    }, tier_data, streamer.id)
+    
+    return {"message": f"Test alert sent with custom tier for {amount}₽"}
+
 @router.post("/refresh-widget")
 async def refresh_widget(
     *,

@@ -243,7 +243,11 @@ export function AlertPreview({ tier, onTierUpdate, isVisible, className = '', hi
       top: `${element.y}%`,
       zIndex: element.zIndex,
       cursor: element.type === 'background' ? 'default' : 'move',
-      transform: draggedElement === element.id ? 'scale(1.05)' : 'scale(1)',
+      transform: element.type === 'background' 
+        ? (draggedElement === element.id ? 'scale(1.05)' : 'scale(1)')
+        : (draggedElement === element.id 
+          ? 'translate(-50%, -50%) scale(1.05)' 
+          : 'translate(-50%, -50%) scale(1)'),
       transition: draggedElement === element.id ? 'none' : 'transform 0.2s ease, border-color 0.2s ease',
       border: selectedElement === element.id ? '2px solid #8b5cf6' : '2px solid transparent',
       borderRadius: '4px',

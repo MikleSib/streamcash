@@ -116,4 +116,27 @@ async def notify_settings_update(settings, streamer_id: int):
     }
     
     message = json.dumps(message_data)
-    await manager.broadcast_to_streamer(message, streamer_id) 
+    await manager.broadcast_to_streamer(message, streamer_id)
+
+async def notify_new_donation_with_tier(donation_data: dict, tier_data: dict, streamer_id: int):
+    """Отправить уведомление о новом донате с конкретным тиром (для предпросмотра)"""
+    
+    print(f"WebSocket notification with tier: streamer_id={streamer_id}, donation_data={donation_data}")
+    
+    # Формируем сообщение
+    message_data = {
+        "type": "donation",
+        "donation": {
+            "donor_name": donation_data.get("donor_name"),
+            "amount": donation_data.get("amount"),
+            "message": donation_data.get("message", ""),
+            "currency": "₽",
+            "is_anonymous": donation_data.get("is_anonymous", False)
+        },
+        "tier": tier_data  # Используем переданный тир напрямую
+    }
+    
+    print(f"Sending tier with elements: {tier_data.get('id')} - elements: {bool(tier_data.get('elements'))}")
+    
+    message = json.dumps(message_data)
+    await manager.broadcast_to_streamer(message, streamer_id)

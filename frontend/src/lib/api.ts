@@ -74,7 +74,6 @@ export const alertAPI = {
   createTier: () => api.post('/alerts/tier'),
   deleteTier: (tierId: string) => api.delete(`/alerts/tier/${tierId}`),
   testAlert: (amount: number) => api.post(`/alerts/test/${amount}`),
-  refreshWidget: () => api.post('/alerts/refresh-widget'),
   uploadAudio: (file: File) => {
     const formData = new FormData();
     formData.append('file', file);

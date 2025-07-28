@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertPreview } from '@/components/AlertPreview';
 import { AlertLayersPanel } from '@/components/AlertLayersPanel';
 import { alertAPI } from '@/lib/api';
-import { ArrowLeft, Save, TestTube, Monitor } from 'lucide-react';
+import { ArrowLeft, Save, TestTube } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/lib/toast';
 
@@ -98,10 +98,38 @@ export default function AlertPreviewPage() {
     
     setSaving(true);
     try {
-      await alertAPI.updateTier(tier.id, tier);
+      // Отправляем только основные поля тира, исключая возможные лишние
+      const tierData = {
+        id: tier.id,
+        name: tier.name,
+        min_amount: tier.min_amount,
+        max_amount: tier.max_amount,
+        sound_enabled: tier.sound_enabled,
+        sound_file_url: tier.sound_file_url,
+        sound_volume: tier.sound_volume,
+        sound_start_time: tier.sound_start_time,
+        sound_end_time: tier.sound_end_time,
+        visual_enabled: tier.visual_enabled,
+        alert_duration: tier.alert_duration,
+        text_color: tier.text_color,
+        background_color: tier.background_color,
+        font_size: tier.font_size,
+        animation_enabled: tier.animation_enabled,
+        animation_type: tier.animation_type,
+        gif_url: tier.gif_url,
+        text_template: tier.text_template,
+        screen_shake: tier.screen_shake,
+        highlight_color: tier.highlight_color,
+        icon: tier.icon,
+        color: tier.color,
+        elements: tier.elements || []
+      };
+      
+      await alertAPI.updateTier(tier.id, tierData);
       toast.success('Настройки сохранены!');
     } catch (error: any) {
-      const errorMessage = error.response?.data?.detail || 'Ошибка сохранения';
+      console.error('Ошибка сохранения:', error);
+      const errorMessage = error.response?.data?.detail || error.message || 'Ошибка сохранения';
       toast.error(errorMessage);
     } finally {
       setSaving(false);
@@ -120,15 +148,7 @@ export default function AlertPreviewPage() {
     }
   };
 
-  const handleRefreshWidget = async () => {
-    try {
-      await alertAPI.refreshWidget();
-      toast.success('Виджет обновлен!');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.detail || 'Ошибка обновления виджета';
-      toast.error(errorMessage);
-    }
-  };
+
 
   const handleBackToSettings = () => {
     if (tier) {
@@ -192,14 +212,6 @@ export default function AlertPreviewPage() {
           </div>
           
           <div className="flex items-center space-x-3">
-            <button
-              onClick={handleRefreshWidget}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium flex items-center"
-            >
-              <Monitor className="w-4 h-4 mr-2" />
-              Обновить виджет
-            </button>
-
             <button
               onClick={handleTest}
               className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium flex items-center"
