@@ -12,7 +12,9 @@ app = FastAPI(
     title="СтримКэш РФ",
     description="Российская платформа для приёма донатов стримерами",
     version="1.0.0",
-    openapi_url=f"{settings.API_V1_STR}/openapi.json"
+    openapi_url=None,
+    docs_url=None,
+    redoc_url=None
 )
 
 app.add_middleware(
