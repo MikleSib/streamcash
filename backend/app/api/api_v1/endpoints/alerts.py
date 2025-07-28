@@ -347,59 +347,9 @@ async def test_alert(
     
     return {"message": f"Test alert sent for {amount}₽"}
 
-@router.post("/test-with-tier")
-async def test_alert_with_tier(
-    *,
-    db: Session = Depends(deps.get_db),
-    current_user: models.User = Depends(deps.get_current_active_user),
-    request_data: dict,
-) -> Any:
-    """
-    Тестировать алерт с конкретным тиром (для предпросмотра)
-    """
-    # Получаем стримера текущего пользователя
-    streamer = crud.streamer.get_by_user_id(db, user_id=current_user.id)
-    if not streamer:
-        raise HTTPException(status_code=404, detail="Streamer profile not found")
-    
-    tier_data = request_data.get("tier", {})
-    amount = request_data.get("amount", 100)
-    
-    # Отправляем тестовый донат с конкретным тиром
-    from app.services.websocket_service import notify_new_donation_with_tier
-    await notify_new_donation_with_tier({
-        "donor_name": "Тестер",
-        "amount": amount,
-        "message": f"Тестовый донат {amount}₽!",
-        "is_anonymous": False
-    }, tier_data, streamer.id)
-    
-    return {"message": f"Test alert sent with custom tier for {amount}₽"}
 
-@router.post("/refresh-widget")
-async def refresh_widget(
-    *,
-    db: Session = Depends(deps.get_db),
-    current_user: models.User = Depends(deps.get_current_active_user),
-) -> Any:
-    """
-    Принудительно обновить настройки в виджете
-    """
-    # Получаем стримера текущего пользователя
-    streamer = crud.streamer.get_by_user_id(db, user_id=current_user.id)
-    if not streamer:
-        raise HTTPException(status_code=404, detail="Streamer profile not found")
-    
-    # Получаем текущие настройки
-    settings = crud.alert_settings.get_by_user_id(db, user_id=current_user.id)
-    if not settings:
-        raise HTTPException(status_code=404, detail="Alert settings not found")
-    
-    # Отправляем обновленные настройки в виджет
-    from app.services.websocket_service import notify_settings_update
-    await notify_settings_update(settings, streamer.id)
-    
-    return {"message": "Widget settings refreshed"}
+
+
 
 @router.post("/tier", response_model=schemas.AlertSettings)
 def create_tier(
@@ -480,14 +430,6 @@ def update_tier(
     updated_settings = crud.alert_settings.update_by_user_id(
         db, user_id=current_user.id, obj_in=schemas.AlertSettingsUpdate(tiers=updated_tiers)
     )
-    
-    # Получаем стримера для отправки обновлений в виджет
-    streamer = crud.streamer.get_by_user_id(db, user_id=current_user.id)
-    if streamer:
-        # Отправляем обновленные настройки в виджет через WebSocket
-        from app.services.websocket_service import notify_settings_update
-        import asyncio
-        asyncio.create_task(notify_settings_update(updated_settings, streamer.id))
     
     return updated_settings
 
@@ -952,11 +894,7 @@ def get_alert_widget(
                     try {{
                         const data = JSON.parse(event.data);
                         
-                        if (data.type === 'settings_update' && data.settings) {{
-                            // Обновляем локальные настройки
-                            alertSettings.tiers = data.settings.tiers || [];
-                            console.log('Settings updated from server:', alertSettings.tiers.length, 'tiers');
-                        }} else if (data.type === 'donation' && data.donation) {{
+                        if (data.type === 'donation' && data.donation) {{
                             const donation = data.donation;
                             const tier = data.tier;
                             
