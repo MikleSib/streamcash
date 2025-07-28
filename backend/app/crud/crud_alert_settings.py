@@ -27,7 +27,52 @@ def create_default_tier() -> Dict[str, Any]:
         "text_template": "🎉 {donor_name} донатит {amount}₽! {message}",
         "screen_shake": False,
         "icon": "Star",
-        "color": "purple"
+        "color": "purple",
+        "elements": [
+            {
+                "id": "animation",
+                "type": "image",
+                "x": 50,
+                "y": 10,
+                "width": 120,
+                "height": 120,
+                "visible": True,
+                "zIndex": 3,
+                "imageUrl": "https://media.giphy.com/media/26u4cqiYI30juCOGY/giphy.gif"
+            },
+            {
+                "id": "donor-info",
+                "type": "text",
+                "x": 50,
+                "y": 35,
+                "width": 500,
+                "height": 60,
+                "visible": True,
+                "zIndex": 2,
+                "content": "{donor_name} - {amount}₽",
+                "fontSize": 32,
+                "color": "#ffffff",
+                "backgroundColor": "rgba(0,0,0,0.2)",
+                "borderRadius": 8,
+                "padding": 12
+            },
+            {
+                "id": "message-text",
+                "type": "text",
+                "x": 50,
+                "y": 55,
+                "width": 600,
+                "height": 80,
+                "visible": True,
+                "zIndex": 1,
+                "content": "{message}",
+                "fontSize": 24,
+                "color": "#ffffff",
+                "backgroundColor": "rgba(0,0,0,0.1)",
+                "borderRadius": 6,
+                "padding": 16
+            }
+        ]
     }
 
 class CRUDAlertSettings(CRUDBase[AlertSettings, AlertSettingsCreate, AlertSettingsUpdate]):

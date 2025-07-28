@@ -75,6 +75,57 @@ export default function AlertPreviewPage() {
     if (tierData) {
       try {
         const parsedTier = JSON.parse(decodeURIComponent(tierData));
+        
+        // Инициализируем элементы по умолчанию, если они отсутствуют
+        if (!parsedTier.elements || parsedTier.elements.length === 0) {
+          const defaultElements = [
+            {
+              id: 'animation',
+              type: 'image',
+              x: 50,
+              y: 10,
+              width: 120,
+              height: 120,
+              visible: parsedTier.animation_enabled && !!parsedTier.gif_url,
+              zIndex: 3,
+              imageUrl: parsedTier.gif_url || 'https://media.giphy.com/media/26u4cqiYI30juCOGY/giphy.gif',
+            },
+            {
+              id: 'donor-info',
+              type: 'text',
+              x: 50,
+              y: 35,
+              width: 500,
+              height: 60,
+              visible: true,
+              zIndex: 2,
+              content: '{donor_name} - {amount}₽',
+              fontSize: 32,
+              color: '#ffffff',
+              backgroundColor: 'rgba(0,0,0,0.2)',
+              borderRadius: 8,
+              padding: 12,
+            },
+            {
+              id: 'message-text',
+              type: 'text',
+              x: 50,
+              y: 55,
+              width: 600,
+              height: 80,
+              visible: true,
+              zIndex: 1,
+              content: '{message}',
+              fontSize: 24,
+              color: '#ffffff',
+              backgroundColor: 'rgba(0,0,0,0.1)',
+              borderRadius: 6,
+              padding: 16,
+            },
+          ];
+          parsedTier.elements = defaultElements;
+        }
+        
         setTier(parsedTier);
       } catch (error) {
         console.error('Ошибка парсинга данных тира:', error);
@@ -202,7 +253,7 @@ export default function AlertPreviewPage() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-white">
-                  Предпросмотр алерта: {tier.name}
+                  Редактирование алерта: {tier.name}
                 </h1>
                 <p className="text-gray-400 text-sm">
                   {tier.min_amount}₽{tier.max_amount ? ` — ${tier.max_amount}₽` : ' и выше'}
@@ -246,7 +297,7 @@ export default function AlertPreviewPage() {
           <div className="xl:col-span-3">
             <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
               <div className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 p-4 border-b border-gray-700">
-                <h2 className="text-lg font-bold text-white">Область предпросмотра</h2>
+                <h2 className="text-lg font-bold text-white">Область редактирования</h2>
                 <p className="text-gray-300 text-sm">
                   Перетаскивайте элементы для настройки их позиций
                 </p>

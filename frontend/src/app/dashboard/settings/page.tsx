@@ -599,12 +599,12 @@ export default function AlertSettingsPage() {
                       <button
                         onClick={() => {
                           const tierParam = encodeURIComponent(JSON.stringify(currentTier));
-                          window.open(`/dashboard/settings/preview?tier=${tierParam}`, '_blank');
+                          router.push(`/dashboard/settings/preview?tier=${tierParam}`);
                         }}
                         className="px-4 py-2.5 bg-purple-500 hover:bg-purple-600 text-white rounded-xl transition-all duration-200 font-medium shadow-md hover:shadow-lg flex items-center"
                       >
-                        <Eye className="w-4 h-4 mr-2" />
-                        Предпросмотр
+                        <Settings className="w-4 h-4 mr-2" />
+                        Редактирование
                       </button>
                       
                       <button
@@ -859,97 +859,7 @@ export default function AlertSettingsPage() {
                     )}
                   </div>
 
-                  <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6">
-                    <div className="flex items-center space-x-3 mb-6">
-                      <Palette className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                          Визуальные настройки
-                        </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          Настройте внешний вид алерта
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                          Цвет текста
-                        </label>
-                        <div className="flex items-center space-x-3">
-                          <input
-                            type="color"
-                            value={currentTier.text_color}
-                            onChange={(e) => updateTier(currentTier.id, { text_color: e.target.value })}
-                            className="w-12 h-12 border-2 border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer"
-                          />
-                          <input
-                            type="text"
-                            value={currentTier.text_color}
-                            onChange={(e) => updateTier(currentTier.id, { text_color: e.target.value })}
-                            className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                            placeholder="#000000"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                          Цвет фона
-                        </label>
-                        <div className="flex items-center space-x-3">
-                          <input
-                            type="color"
-                            value={currentTier.background_color}
-                            onChange={(e) => updateTier(currentTier.id, { background_color: e.target.value })}
-                            className="w-12 h-12 border-2 border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer"
-                          />
-                          <input
-                            type="text"
-                            value={currentTier.background_color}
-                            onChange={(e) => updateTier(currentTier.id, { background_color: e.target.value })}
-                            className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                            placeholder="#ffffff"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                          <Type className="w-4 h-4 inline mr-1" />
-                          Размер шрифта (px)
-                        </label>
-                        <input
-                          type="number"
-                          min="12"
-                          max="72"
-                          value={currentTier.font_size}
-                          onChange={(e) => updateTier(currentTier.id, { font_size: parseInt(e.target.value) || 12 })}
-                          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                        />
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">От 12 до 72 пикселей</p>
-                      </div>
-                      
-                      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 block">Эффект тряски</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">Встряхивать экран при алерте</span>
-                          </div>
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={currentTier.screen_shake}
-                              onChange={(e) => updateTier(currentTier.id, { screen_shake: e.target.checked })}
-                              className="sr-only peer"
-                            />
-                            <div className="w-12 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 dark:peer-focus:ring-orange-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-orange-600"></div>
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+
 
                   <div className="bg-pink-50 dark:bg-pink-900/20 rounded-xl p-6">
                     <div className="flex items-center justify-between mb-6">
