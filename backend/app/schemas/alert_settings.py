@@ -1,6 +1,25 @@
 from pydantic import BaseModel
-from typing import Optional, List, Any, Dict
+from typing import Optional, List, Any, Dict, Union
 from datetime import datetime
+
+class AlertElement(BaseModel):
+    id: str
+    type: str  # 'text', 'image', 'background'
+    x: float  # позиция в процентах
+    y: float  # позиция в процентах
+    width: Optional[float] = None  # ширина в пикселях или процентах
+    height: Optional[float] = None  # высота в пикселях или процентах
+    visible: bool = True
+    zIndex: int = 0
+    
+    # Контент
+    content: Optional[str] = None
+    imageUrl: Optional[str] = None
+    fontSize: Optional[int] = None
+    color: Optional[str] = None
+    backgroundColor: Optional[str] = None
+    borderRadius: Optional[int] = None
+    padding: Optional[int] = None
 
 class AlertTier(BaseModel):
     id: str
@@ -36,6 +55,9 @@ class AlertTier(BaseModel):
     
     icon: str = "Gift"
     color: str = "purple"
+    
+    # Элементы макета
+    elements: Optional[List[AlertElement]] = None
 
 class AlertSettingsBase(BaseModel):
     alerts_enabled: bool = True

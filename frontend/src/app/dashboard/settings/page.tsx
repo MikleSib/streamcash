@@ -7,6 +7,7 @@ import { useToast } from '@/lib/toast';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/Button';
 import { AudioTrimmer } from '@/components/AudioTrimmer';
+
 import { alertAPI, streamerAPI } from '@/lib/api';
 import { 
   Volume2, 
@@ -39,6 +40,25 @@ import {
   FileText,
   Lightbulb
 } from 'lucide-react';
+
+interface AlertElement {
+  id: string;
+  type: 'text' | 'image' | 'background';
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
+  visible: boolean;
+  zIndex: number;
+  
+  content?: string;
+  imageUrl?: string;
+  fontSize?: number;
+  color?: string;
+  backgroundColor?: string;
+  borderRadius?: number;
+  padding?: number;
+}
 
 interface AlertTier {
   id: string;
@@ -74,6 +94,9 @@ interface AlertTier {
   
   icon: string;
   color: string;
+  
+  // Элементы макета
+  elements?: AlertElement[];
 }
 
 interface AlertSettings {
@@ -124,6 +147,33 @@ export default function AlertSettingsPage() {
       loadStreamerProfile();
     }
   }, [user, authLoading]);
+
+  // Обработка возврата с страницы предпросмотра
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tierParam = urlParams.get('tier');
+    const updated = urlParams.get('updated');
+    
+    if (tierParam && updated === 'true') {
+      try {
+        const updatedTier = JSON.parse(decodeURIComponent(tierParam));
+        // Обновляем тир в настройках
+        setSettings(prev => ({
+          ...prev,
+          tiers: prev.tiers.map(tier => 
+            tier.id === updatedTier.id ? updatedTier : tier
+          )
+        }));
+        
+        // Очищаем URL параметры
+        window.history.replaceState({}, '', '/dashboard/settings');
+        
+        toast.success('Настройки предпросмотра применены!');
+      } catch (error) {
+        console.error('Ошибка обработки данных предпросмотра:', error);
+      }
+    }
+  }, []);
 
   const loadSettings = async () => {
     try {
@@ -545,13 +595,26 @@ export default function AlertSettingsPage() {
                       </div>
                     </div>
                     
-                    <button
-                      onClick={() => testAlert(currentTier)}
-                      className="px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl transition-all duration-200 font-medium shadow-md hover:shadow-lg flex items-center"
-                    >
-                      <TestTube className="w-4 h-4 mr-2" />
-                      Тест
-                    </button>
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => {
+                          const tierParam = encodeURIComponent(JSON.stringify(currentTier));
+                          window.open(`/dashboard/settings/preview?tier=${tierParam}`, '_blank');
+                        }}
+                        className="px-4 py-2.5 bg-purple-500 hover:bg-purple-600 text-white rounded-xl transition-all duration-200 font-medium shadow-md hover:shadow-lg flex items-center"
+                      >
+                        <Eye className="w-4 h-4 mr-2" />
+                        Предпросмотр
+                      </button>
+                      
+                      <button
+                        onClick={() => testAlert(currentTier)}
+                        className="px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl transition-all duration-200 font-medium shadow-md hover:shadow-lg flex items-center"
+                      >
+                        <TestTube className="w-4 h-4 mr-2" />
+                        Тест
+                      </button>
+                    </div>
                   </div>
                 </div>
 
