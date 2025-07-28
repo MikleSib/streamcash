@@ -391,7 +391,7 @@ export default function PricingPage() {
             <div>
               <h4 className="text-white font-semibold mb-4">Поддержка</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="/docs" className="hover:text-purple-400 transition-colors">Документация</a></li>
+                <li><a href="/documents" className="hover:text-purple-400 transition-colors">Документация</a></li>
                 <li><a href="/help" className="hover:text-purple-400 transition-colors">Помощь</a></li>
                 <li><a href="/status" className="hover:text-purple-400 transition-colors">Статус</a></li>
               </ul>

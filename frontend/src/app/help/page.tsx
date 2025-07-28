@@ -61,14 +61,14 @@ export default function HelpPage() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <a 
-                href="mailto:support@streamcash.ru"
+                href="mailto:support@floory-app.ru"
                 className="bg-gray-800/50 rounded-lg p-6 hover:bg-gray-700/50 transition-all duration-300 hover:transform hover:scale-105 cursor-pointer group"
               >
                 <div className="flex items-center justify-center space-x-3 mb-3">
                   <Mail className="w-6 h-6 text-blue-400 group-hover:text-blue-300 transition-colors" />
                   <span className="text-white font-semibold group-hover:text-blue-300 transition-colors">Email</span>
                 </div>
-                <p className="text-gray-400 text-sm group-hover:text-gray-300 transition-colors">support@streamcash.ru</p>
+                <p className="text-gray-400 text-sm group-hover:text-gray-300 transition-colors">support@floory-app.ru</p>
               </a>
               <a 
                 href="https://t.me/streamcash_support"
@@ -113,7 +113,7 @@ export default function HelpPage() {
             <div>
               <h4 className="text-white font-semibold mb-4">Поддержка</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="/docs" className="hover:text-purple-400 transition-colors">Документация</a></li>
+                <li><a href="/documents" className="hover:text-purple-400 transition-colors">Документация</a></li>
                 <li><a href="/help" className="hover:text-purple-400 transition-colors">Помощь</a></li>
                 <li><a href="/status" className="hover:text-purple-400 transition-colors">Статус</a></li>
               </ul>
