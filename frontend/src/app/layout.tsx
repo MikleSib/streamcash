@@ -7,8 +7,63 @@ import Script from 'next/script';
 const inter = Inter({ subsets: ['latin', 'cyrillic'] });
 
 export const metadata: Metadata = {
-  title: 'СтримКэш',
-  description: 'Российская платформа для приёма донатов стримерами',
+  title: {
+    default: 'СтримКэш - Сервис донатов для стримеров',
+    template: '%s | СтримКэш'
+  },
+  description: 'Российская платформа для приёма донатов стримерами. Красивые алерты, гибкие настройки, безопасные платежи. Начните получать поддержку от зрителей уже сегодня!',
+  keywords: [
+    'донаты',
+    'стримеры',
+    'twitch',
+    'youtube',
+    'стрим',
+    'алерты',
+    'донат алерты',
+    'streamcash',
+    'стримкэш',
+    'платформа донатов',
+    'российский сервис'
+  ],
+  authors: [{ name: 'StreamCash Team' }],
+  creator: 'StreamCash',
+  publisher: 'StreamCash',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL('https://стримкэш.рф'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: 'СтримКэш - Сервис донатов для стримеров',
+    description: 'Российская платформа для приёма донатов стримерами. Красивые алерты, гибкие настройки, безопасные платежи.',
+    url: 'https://стримкэш.рф',
+    siteName: 'СтримКэш',
+    locale: 'ru_RU',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'СтримКэш - Сервис донатов для стримеров',
+    description: 'Российская платформа для приёма донатов стримерами. Красивые алерты, гибкие настройки, безопасные платежи.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    yandex: 'f5c0468707bf2cb1',
+  },
 };
 
 export default function RootLayout({
@@ -19,6 +74,7 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <head>
+        <link rel="manifest" href="/manifest.json" />
         <Script
           id="yandex-metrika"
           strategy="afterInteractive"

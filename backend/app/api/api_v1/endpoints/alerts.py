@@ -773,8 +773,13 @@ def get_alert_widget(
                 
                 // Используем новую структуру элементов, если есть
                 if (tier.elements && tier.elements.length > 0) {{
+                    console.log('Processing elements:', tier.elements);
                     tier.elements.forEach(element => {{
-                        if (!element.visible) return;
+                        console.log('Processing element:', element.id, element.type, element.visible);
+                        if (!element.visible) {{
+                            console.log('Skipping invisible element:', element.id);
+                            return;
+                        }}
                         
                         if (element.type === 'text') {{
                             const textElement = document.createElement('div');
@@ -825,6 +830,7 @@ def get_alert_widget(
                             
                             alertElement.appendChild(textElement);
                         }} else if (element.type === 'image' && element.imageUrl) {{
+                            console.log('Creating image element:', element.id, element.imageUrl);
                             const imageElement = document.createElement('img');
                             imageElement.src = element.imageUrl;
                             imageElement.style.position = 'absolute';
@@ -837,7 +843,19 @@ def get_alert_widget(
                             imageElement.style.borderRadius = (element.borderRadius || 0) + 'px';
                             imageElement.style.zIndex = element.zIndex || 1;
                             
+                            console.log('Image element styles:', {{
+                                position: imageElement.style.position,
+                                left: imageElement.style.left,
+                                top: imageElement.style.top,
+                                width: imageElement.style.width,
+                                height: imageElement.style.height,
+                                zIndex: imageElement.style.zIndex
+                            }});
+                            
                             alertElement.appendChild(imageElement);
+                            console.log('Image element added to alert');
+                        }} else if (element.type === 'image') {{
+                            console.log('Skipping image element without imageUrl:', element.id);
                         }}
                     }});
                 }} else {{

@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /static/
+Disallow: /donate/
+Disallow: /documents/
+Disallow: /login/
+Disallow: /register/
+
+Sitemap: https://стримкэш.рф/sitemap.xml 

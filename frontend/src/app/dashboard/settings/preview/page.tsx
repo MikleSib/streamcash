@@ -126,6 +126,20 @@ export default function AlertPreviewPage() {
           parsedTier.elements = defaultElements;
         }
         
+        // Синхронизируем элемент animation с настройками тира
+        if (parsedTier.elements) {
+          parsedTier.elements = parsedTier.elements.map(element => {
+            if (element.id === 'animation') {
+              return {
+                ...element,
+                imageUrl: parsedTier.gif_url || element.imageUrl || 'https://media.giphy.com/media/26u4cqiYI30juCOGY/giphy.gif',
+                visible: parsedTier.animation_enabled && !!parsedTier.gif_url
+              };
+            }
+            return element;
+          });
+        }
+        
         setTier(parsedTier);
       } catch (error) {
         console.error('Ошибка парсинга данных тира:', error);
@@ -141,7 +155,27 @@ export default function AlertPreviewPage() {
   }, [searchParams, router]);
 
   const handleTierUpdate = useCallback((updates: Partial<AlertTier>) => {
-    setTier(prev => prev ? { ...prev, ...updates } : null);
+    setTier(prev => {
+      if (!prev) return null;
+      
+      const updatedTier = { ...prev, ...updates };
+      
+      // Синхронизируем элемент animation с настройками GIF
+      if (updatedTier.elements && (updates.gif_url !== undefined || updates.animation_enabled !== undefined)) {
+        updatedTier.elements = updatedTier.elements.map(element => {
+          if (element.id === 'animation') {
+            return {
+              ...element,
+              imageUrl: updatedTier.gif_url || element.imageUrl,
+              visible: updatedTier.animation_enabled && !!updatedTier.gif_url
+            };
+          }
+          return element;
+        });
+      }
+      
+      return updatedTier;
+    });
   }, []);
 
   const handleSave = async () => {
@@ -191,6 +225,36 @@ export default function AlertPreviewPage() {
     if (!tier) return;
     
     try {
+      // Сначала сохраняем актуальные изменения
+      const tierData = {
+        id: tier.id,
+        name: tier.name,
+        min_amount: tier.min_amount,
+        max_amount: tier.max_amount,
+        sound_enabled: tier.sound_enabled,
+        sound_file_url: tier.sound_file_url,
+        sound_volume: tier.sound_volume,
+        sound_start_time: tier.sound_start_time,
+        sound_end_time: tier.sound_end_time,
+        visual_enabled: tier.visual_enabled,
+        alert_duration: tier.alert_duration,
+        text_color: tier.text_color,
+        background_color: tier.background_color,
+        font_size: tier.font_size,
+        animation_enabled: tier.animation_enabled,
+        animation_type: tier.animation_type,
+        gif_url: tier.gif_url,
+        text_template: tier.text_template,
+        screen_shake: tier.screen_shake,
+        highlight_color: tier.highlight_color,
+        icon: tier.icon,
+        color: tier.color,
+        elements: tier.elements || []
+      };
+      
+      await alertAPI.updateTier(tier.id, tierData);
+      
+      // Потом запускаем тест
       await alertAPI.testAlert(tier.min_amount);
       toast.success('Тест алерт отправлен!');
     } catch (error: any) {
