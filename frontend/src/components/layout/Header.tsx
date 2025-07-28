@@ -31,8 +31,8 @@ export function Header() {
 
   const navigation = [
     { name: 'Стримеры', href: '/streamers', icon: User },
-    { name: 'Возможности', href: '#features', icon: Zap },
-    { name: 'Тарифы', href: '#pricing', icon: BarChart3 },
+    { name: 'Возможности', href: '/features', icon: Zap },
+    { name: 'Тарифы', href: '/pricing', icon: BarChart3 },
   ];
 
   return (

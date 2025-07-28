@@ -12,8 +12,6 @@ import {
   Globe, 
   Star,
   Play,
-  Check,
-  ArrowRight,
   Heart,
   DollarSign,
   Monitor,
@@ -32,69 +30,28 @@ export default function HomePage() {
     {
       icon: <Zap className="w-8 h-8" />,
       title: "Мгновенные уведомления",
-      description: "Алерты в OBS за миллисекунды после оплаты"
+      description: "Алерты в OBS сразу после оплаты"
     },
     {
       icon: <Shield className="w-8 h-8" />,
       title: "100% безопасность",
-      description: "Защищенные платежи через YooKassa и Сбербанк"
+      description: "Защищенные платежи через эквайнинг и платежные системы"
     },
     {
       icon: <Smartphone className="w-8 h-8" />,
-      title: "Мобильная оптимизация",
+      title: "Мобильная версия",
       description: "Ваши зрители могут донатить с любого устройства"
     }
   ];
 
   const stats = [
-    { number: "10K+", label: "Активных стримеров" },
-    { number: "500K+", label: "Донатов в месяц" },
-    { number: "99.9%", label: "Uptime" },
-    { number: "0₽", label: "Комиссия для стримеров" }
+    { number: "2", label: "Активных стримеров" },
+    { number: "10К+", label: "Донатов в месяц" },
+    { number: "99.99%", label: "Uptime" },
+    { number: "До 0%", label: "Комиссия для стримеров" }
   ];
 
-  const plans = [
-    {
-      name: "Стример",
-      price: "Бесплатно",
-      description: "Идеально для начинающих",
-      features: [
-        "Неограниченные донаты",
-        "Алерты для OBS",
-        "Настройка внешнего вида",
-        "Мобильная страница донатов",
-        "Базовая аналитика"
-      ],
-      popular: false
-    },
-    {
-      name: "Профи",
-      price: "299₽/мес",
-      description: "Для профессиональных стримеров",
-      features: [
-        "Все функции Стример",
-        "Расширенная аналитика",
-        "Кастомные звуки алертов",
-        "API для интеграций",
-        "Приоритетная поддержка",
-        "Убрать брендинг"
-      ],
-      popular: true
-    },
-    {
-      name: "Студия",
-      price: "999₽/мес",
-      description: "Для команд и студий",
-      features: [
-        "Все функции Профи",
-        "Множественные аккаунты",
-        "Командная аналитика",
-        "Персональный менеджер",
-        "Кастомные интеграции"
-      ],
-      popular: false
-    }
-  ];
+
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -213,14 +170,14 @@ export default function HomePage() {
                 description: "Готовые виджеты для OBS с настраиваемым дизайном и анимациями"
               },
               {
-                icon: <Zap className="w-8 h-8 text-yellow-400" />,
+                icon: <Zap className="w-8 h-8 text-yellow-4я00" />,
                 title: "Мгновенные алерты",
-                description: "Алерты появляются в стриме через миллисекунды после доната"
+                description: "Алерты появляются на стриме сразу после доната"
               },
               {
                 icon: <Smartphone className="w-8 h-8 text-green-400" />,
                 title: "Мобильные донаты",
-                description: "Оптимизированные страницы для донатов с любых устройств"
+                description: "Страницы для донатов с любых устройств"
               },
               {
                 icon: <Shield className="w-8 h-8 text-blue-400" />,
@@ -256,66 +213,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section className="py-20 bg-gradient-to-r from-gray-900/50 to-purple-900/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Выберите свой <span className="text-purple-400">план</span>
-            </h2>
-            <p className="text-xl text-gray-400">
-              Начните бесплатно и масштабируйтесь вместе с ростом аудитории
-            </p>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {plans.map((plan, index) => (
-              <div key={index} className={`relative ${plan.popular ? 'transform scale-105' : ''}`}>
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1 rounded-full text-sm font-bold">
-                      Популярный
-                    </div>
-                  </div>
-                )}
-                
-                <div className={`bg-gray-800/50 backdrop-blur-sm rounded-xl p-8 border transition-all duration-300 hover:transform hover:scale-105 ${
-                  plan.popular 
-                    ? 'border-purple-500/50 shadow-lg shadow-purple-500/25' 
-                    : 'border-gray-700/50 hover:border-purple-500/30'
-                }`}>
-                  <div className="text-center mb-8">
-                    <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
-                    <div className="text-4xl font-bold text-purple-400 mb-2">{plan.price}</div>
-                    <p className="text-gray-400">{plan.description}</p>
-                  </div>
-
-                  <ul className="space-y-4 mb-8">
-                    {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center text-gray-300">
-                        <Check className="w-5 h-5 text-green-400 mr-3" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Button 
-                    className={`w-full py-3 transition-all duration-200 ${
-                      plan.popular
-                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
-                        : 'bg-gray-700 hover:bg-gray-600 text-white'
-                    }`}
-                    onClick={() => router.push('/register')}
-                  >
-                    {plan.price === 'Бесплатно' ? 'Начать бесплатно' : 'Выбрать план'}
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* CTA Section */}
       <section className="py-20">
@@ -365,27 +263,24 @@ export default function HomePage() {
             <div>
               <h4 className="text-white font-semibold mb-4">Продукт</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-purple-400 transition-colors">Возможности</a></li>
-                <li><a href="#" className="hover:text-purple-400 transition-colors">Тарифы</a></li>
-                <li><a href="#" className="hover:text-purple-400 transition-colors">API</a></li>
+                <li><a href="/features" className="hover:text-purple-400 transition-colors">Возможности</a></li>
+                <li><a href="/pricing" className="hover:text-purple-400 transition-colors">Тарифы</a></li>
               </ul>
             </div>
             
             <div>
               <h4 className="text-white font-semibold mb-4">Поддержка</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-purple-400 transition-colors">Документация</a></li>
-                <li><a href="#" className="hover:text-purple-400 transition-colors">Помощь</a></li>
-                <li><a href="#" className="hover:text-purple-400 transition-colors">Статус</a></li>
+                <li><a href="/docs" className="hover:text-purple-400 transition-colors">Документация</a></li>
+                <li><a href="/help" className="hover:text-purple-400 transition-colors">Помощь</a></li>
+                <li><a href="/status" className="hover:text-purple-400 transition-colors">Статус</a></li>
               </ul>
             </div>
             
             <div>
               <h4 className="text-white font-semibold mb-4">Компания</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-purple-400 transition-colors">О нас</a></li>
-                <li><a href="#" className="hover:text-purple-400 transition-colors">Блог</a></li>
-                <li><a href="#" className="hover:text-purple-400 transition-colors">Карьера</a></li>
+                <li><a href="/about" className="hover:text-purple-400 transition-colors">О нас</a></li>
               </ul>
             </div>
           </div>
