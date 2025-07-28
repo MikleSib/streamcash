@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertPreview } from '@/components/AlertPreview';
 import { AlertLayersPanel } from '@/components/AlertLayersPanel';
 import { alertAPI } from '@/lib/api';
-import { ArrowLeft, Save, TestTube } from 'lucide-react';
+import { ArrowLeft, Save, TestTube, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/lib/toast';
 
@@ -198,7 +198,7 @@ export default function AlertPreviewPage() {
             
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
-                <Monitor className="w-5 h-5 text-white" />
+                <Eye className="w-5 h-5 text-white" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-white">
