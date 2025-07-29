@@ -26,6 +26,7 @@ export default function TbankPayment({
   const containerRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showDemoForm, setShowDemoForm] = useState(false);
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
@@ -101,6 +102,7 @@ export default function TbankPayment({
               },
               config: {
                 loadedCallback: () => {
+                  console.log('T-Bank widget loaded');
                   setLoading(false);
                 },
                 status: {
@@ -115,6 +117,7 @@ export default function TbankPayment({
                 },
                 dialog: {
                   closedCallback: () => {
+                    console.log('T-Bank dialog closed');
                     onClose?.();
                   }
                 },
@@ -124,6 +127,12 @@ export default function TbankPayment({
                     if (alert.type === 'error') {
                       onError?.(alert.message || 'Ошибка платежа');
                     }
+                  }
+                },
+                payment: {
+                  failedPaymentStartCallback: (error: any) => {
+                    console.error('Payment start failed:', error);
+                    onError?.(error.message || 'Ошибка инициализации платежа');
                   }
                 }
               }
@@ -142,7 +151,7 @@ export default function TbankPayment({
         console.log('Payment integration object:', paymentIntegration);
         
         // Устанавливаем доступные методы оплаты согласно настройкам терминала
-        const availableWidgetTypes = ['sbp', 'mirpay', 'sberpay', 'bnpl', 'tpay'];
+        const availableWidgetTypes = ['sbp', 'mirpay', 'sberpay', 'bnpl', 'tinkoffpay'];
         await paymentIntegration.updateWidgetTypes(availableWidgetTypes);
         console.log('Widget types updated:', availableWidgetTypes);
         
@@ -151,8 +160,11 @@ export default function TbankPayment({
           // Проверяем, есть ли содержимое в контейнере
           const container = containerRef.current;
           if (container && container.children.length === 0) {
-            console.warn('Widget container is empty, showing fallback');
-            setError('Виджет не загрузился. Используйте тестовую страницу.');
+            console.warn('Widget container is empty, showing demo form');
+            // Показываем демо-форму вместо ошибки
+            setLoading(false);
+            setError(null);
+            setShowDemoForm(true);
           } else {
             setLoading(false);
           }
@@ -240,13 +252,79 @@ export default function TbankPayment({
             </div>
           )}
 
-          <div 
-            ref={containerRef} 
-            className="tbank-payment-container"
-            style={{ 
-              display: loading || error ? 'none' : 'block'
-            }}
-          />
+          {showDemoForm ? (
+            <div className="tbank-demo-form">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                </div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">Демо-форма оплаты</h4>
+                <p className="text-gray-600">T-Bank виджет недоступен в демо-режиме</p>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 transition-colors">
+                    <div className="text-center">
+                      <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span className="text-green-600 font-bold">СБП</span>
+                      </div>
+                      <span className="text-sm font-medium">Система быстрых платежей</span>
+                    </div>
+                  </button>
+                  
+                  <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 transition-colors">
+                    <div className="text-center">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span className="text-blue-600 font-bold">TP</span>
+                      </div>
+                      <span className="text-sm font-medium">Tinkoff Pay</span>
+                    </div>
+                  </button>
+                  
+                  <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 transition-colors">
+                    <div className="text-center">
+                      <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span className="text-purple-600 font-bold">MP</span>
+                      </div>
+                      <span className="text-sm font-medium">MirPay</span>
+                    </div>
+                  </button>
+                  
+                  <button className="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 transition-colors">
+                    <div className="text-center">
+                      <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span className="text-red-600 font-bold">SP</span>
+                      </div>
+                      <span className="text-sm font-medium">SberPay</span>
+                    </div>
+                  </button>
+                </div>
+                
+                <div className="text-center">
+                  <button
+                    onClick={() => {
+                      const testUrl = `/donate/tbank-test?order_id=${orderId}&amount=${amount}`;
+                      window.open(testUrl, '_blank');
+                    }}
+                    className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+                  >
+                    Перейти к тестовой странице
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div 
+              ref={containerRef} 
+              className="tbank-payment-container"
+              style={{ 
+                display: loading || error ? 'none' : 'block'
+              }}
+            />
+          )}
         </div>
 
         <div className="tbank-modal-footer">

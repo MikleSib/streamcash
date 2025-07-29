@@ -254,6 +254,20 @@ textarea[class*="bg-gray-700"]::placeholder {
   flex-shrink: 0;
 }
 
+/* Demo form styles */
+.tbank-demo-form {
+  padding: 1rem;
+}
+
+.tbank-demo-form button {
+  transition: all 0.2s ease;
+}
+
+.tbank-demo-form button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
 /* Responsive adjustments */
 @media (max-width: 640px) {
   .tbank-modal {
@@ -270,5 +284,9 @@ textarea[class*="bg-gray-700"]::placeholder {
   .tbank-modal-footer {
     padding-left: 1rem;
     padding-right: 1rem;
+  }
+  
+  .tbank-demo-form .grid {
+    grid-template-columns: 1fr;
   }
 }

@@ -155,12 +155,25 @@ class PaymentService:
         api_url = settings.API_URL
         frontend_url = settings.FRONTEND_URL
         
+        # Создаем токен для подписи запроса
+        import hashlib
+        token_data = [
+            {"Amount": str(int(amount * 100))},
+            {"Description": description},
+            {"OrderId": order_id},
+            {"SecretKey": settings.TBANK_PASSWORD},
+            {"TerminalKey": settings.TBANK_TERMINAL}
+        ]
+        token_string = "".join([list(x.values())[0] for x in token_data])
+        token = hashlib.sha256(token_string.encode('utf-8')).hexdigest()
+        
         # Создаем данные для запроса согласно документации T-Bank
         data = {
             "TerminalKey": settings.TBANK_TERMINAL,
             "Amount": int(amount * 100),  # Сумма в копейках
             "OrderId": order_id,
             "Description": description,
+            "Token": token,
             "Language": "ru",
             "NotificationURL": f"{api_url}{settings.API_V1_STR}/payments/webhook/tbank",
             "SuccessURL": f"{frontend_url}/donate/success",
