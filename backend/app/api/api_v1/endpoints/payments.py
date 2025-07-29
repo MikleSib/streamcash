@@ -112,6 +112,13 @@ async def init_tbank_payment(
         # Сортируем по алфавиту по ключу
         token_params.sort(key=lambda x: list(x.keys())[0])
         
+        # Выводим отсортированные параметры для отладки
+        print("🔍 Отсортированные параметры для токена:")
+        for param in token_params:
+            key = list(param.keys())[0]
+            value = list(param.values())[0]
+            print(f"   {key}: {value}")
+        
         # Конкатенируем только значения
         token_string = ''.join([list(param.values())[0] for param in token_params])
         print(f"🔑 Строка для генерации токена: {token_string}")
@@ -122,7 +129,7 @@ async def init_tbank_payment(
         print(f"T-Bank payment data: {payment_data}")
         
         # Отправляем запрос к T-Bank API
-        url = "https://securepay.tinkoff.ru/v2/Init"
+        url = "https://securepay.tinkoff.ru/v2/"
         
         async with httpx.AsyncClient() as client:
             response = await client.post(url, json=payment_data)

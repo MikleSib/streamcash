@@ -183,6 +183,13 @@ class PaymentService:
         # Сортируем по алфавиту по ключу
         token_params.sort(key=lambda x: list(x.keys())[0])
         
+        # Выводим отсортированные параметры для отладки
+        print("🔍 Отсортированные параметры для токена:")
+        for param in token_params:
+            key = list(param.keys())[0]
+            value = list(param.values())[0]
+            print(f"   {key}: {value}")
+        
         # Конкатенируем только значения
         token_string = ''.join([list(param.values())[0] for param in token_params])
         token = hashlib.sha256(token_string.encode('utf-8')).hexdigest()
@@ -191,7 +198,7 @@ class PaymentService:
         print(f"T-Bank payment data: {payment_data}")
         
         # Отправляем запрос к T-Bank API
-        url = "https://securepay.tinkoff.ru/v2/Init"
+        url = "https://securepay.tinkoff.ru/v2/"
         
         try:
             async with httpx.AsyncClient() as client:
