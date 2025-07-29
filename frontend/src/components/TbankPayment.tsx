@@ -28,6 +28,15 @@ export default function TbankPayment({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose?.();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    document.body.style.overflow = 'hidden';
+
     const initTbankPayment = async () => {
       try {
         setLoading(true);
@@ -70,12 +79,14 @@ export default function TbankPayment({
                     body: JSON.stringify({
                       amount: amount,
                       order_id: orderId,
-                      payment_method: 'tbank'
+                      payment_method: 'tbank',
+                      description: `Донат ${amount} ₽`
                     }),
                   });
 
                   if (!response.ok) {
-                    throw new Error('Ошибка инициализации платежа');
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || 'Ошибка инициализации платежа');
                   }
 
                   const result = await response.json();
@@ -103,6 +114,14 @@ export default function TbankPayment({
                   closedCallback: () => {
                     onClose?.();
                   }
+                },
+                alert: {
+                  showAlertCallback: (alert: any) => {
+                    console.log('T-Bank alert:', alert);
+                    if (alert.type === 'error') {
+                      onError?.(alert.message || 'Ошибка платежа');
+                    }
+                  }
                 }
               }
             }
@@ -126,53 +145,80 @@ export default function TbankPayment({
     };
 
     initTbankPayment();
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
   }, [amount, orderId, onSuccess, onError, onClose]);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Оплата через T-Bank</h3>
+    <div className="tbank-modal" onClick={(e) => {
+      if (e.target === e.currentTarget) {
+        onClose?.();
+      }
+    }}>
+      <div className="tbank-modal-content">
+        <div className="tbank-modal-header">
+          <h3 className="text-lg font-semibold text-gray-900">Оплата через T-Bank</h3>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-400 hover:text-gray-600 transition-colors duration-200 p-1"
+            aria-label="Закрыть"
           >
-            ✕
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
-        {loading && (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-gray-600">Загрузка платежной формы...</p>
-          </div>
-        )}
-
-        {error && (
-          <div className="text-center py-8">
-            <div className="text-red-600 mb-4">
-              <svg className="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-              <p className="text-sm">{error}</p>
+        <div className="tbank-modal-body">
+          {loading && (
+            <div className="tbank-loading">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Загрузка платежной формы...</p>
+              </div>
             </div>
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-            >
-              Попробовать снова
-            </button>
+          )}
+
+          {error && (
+            <div className="tbank-error">
+              <div className="text-center">
+                <div className="text-red-600 mb-4">
+                  <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                  <p className="text-sm font-medium">{error}</p>
+                </div>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                >
+                  Попробовать снова
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div 
+            ref={containerRef} 
+            className="tbank-payment-container"
+            style={{ 
+              display: loading || error ? 'none' : 'block'
+            }}
+          />
+        </div>
+
+        <div className="tbank-modal-footer">
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              Сумма к оплате: <span className="font-semibold text-gray-900">{amount} ₽</span>
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Номер заказа: {orderId}
+            </p>
           </div>
-        )}
-
-        <div 
-          ref={containerRef} 
-          className="min-h-[200px]"
-          style={{ display: loading || error ? 'none' : 'block' }}
-        />
-
-        <div className="mt-4 text-xs text-gray-500 text-center">
-          Сумма к оплате: {amount} ₽
         </div>
       </div>
     </div>
