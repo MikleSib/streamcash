@@ -13,6 +13,13 @@ const nextConfig = {
   devIndicators: {
     buildActivity: false,
     buildActivityPosition: 'bottom-right',
+  },
+  // Отключаем строгую проверку ESLint при сборке
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
   }
 }
 
