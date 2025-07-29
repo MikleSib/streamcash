@@ -176,7 +176,7 @@ class PaymentService:
             {"Amount": str(payment_data['Amount'])},
             {"Description": payment_data['Description']},
             {"OrderId": payment_data['OrderId']},
-            {"Password": settings.TBANK_SECRET_KEY},
+            {"Password": settings.TBANK_PASSWORD},
             {"TerminalKey": payment_data['TerminalKey']}
         ]
         
