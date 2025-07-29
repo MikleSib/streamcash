@@ -162,9 +162,11 @@ class PaymentService:
             "OrderId": order_id,
             "Description": description,
             "Language": "ru",
-            "Frame": True,
+            "SuccessURL": f"{settings.FRONTEND_URL}/donate/success?orderId={order_id}&amount={amount}",
+            "FailURL": f"{settings.FRONTEND_URL}/donate/failed?orderId={order_id}&amount={amount}",
+            "NotificationURL": f"{settings.API_URL}/api/v1/payments/webhook/tbank",
             "DATA": {
-                "connection_type": "Widget2.0"
+                "connection_type": "API"
             }
         }
         
@@ -189,7 +191,7 @@ class PaymentService:
                     return {
                         "id": result.get("PaymentId", order_id),
                         "status": "pending",
-                        "confirmation_url": result.get("PaymentURL", f"{settings.FRONTEND_URL}/donate/tbank-test?order_id={order_id}&amount={amount}"),
+                        "confirmation_url": result.get("PaymentURL"),
                         "amount": amount,
                         "currency": "RUB",
                         "order_id": order_id
@@ -201,15 +203,7 @@ class PaymentService:
                     
         except Exception as e:
             print(f"T-Bank API error: {str(e)}")
-            # Fallback на тестовую страницу
-            return {
-                "id": order_id,
-                "status": "pending",
-                "confirmation_url": f"{settings.FRONTEND_URL}/donate/tbank-test?order_id={order_id}&amount={amount}",
-                "amount": amount,
-                "currency": "RUB",
-                "order_id": order_id
-            }
+            raise Exception(f"T-Bank API error: {str(e)}")
 
     async def check_payment_status(self, payment_id: str) -> str:
         try:

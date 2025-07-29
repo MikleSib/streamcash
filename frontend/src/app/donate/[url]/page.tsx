@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { streamerAPI } from '@/lib/api';
 import { api } from '@/lib/api';
-import TbankPayment from '@/components/TbankPayment';
+
 
 interface Streamer {
   id: number;
@@ -61,8 +61,6 @@ function DonationContent() {
   });
   const [alertTiers, setAlertTiers] = useState<AlertTier[]>([]);
   const [processing, setProcessing] = useState(false);
-  const [showTbankPayment, setShowTbankPayment] = useState(false);
-  const [currentPaymentData, setCurrentPaymentData] = useState<any>(null);
 
   useEffect(() => {
     loadStreamerData();
@@ -108,14 +106,22 @@ function DonationContent() {
 
     try {
       if (donationData.payment_method === 'tbank') {
-        // Для T-Bank используем новый компонент
-        setCurrentPaymentData({
+        // Для T-Bank используем API интеграцию
+        const orderId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        const response = await api.post('/api/v1/payments/tbank/init', {
           amount: donationData.amount,
-          orderId: `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          order_id: orderId,
+          payment_method: 'tbank',
           description: `Донат для ${streamer?.name || 'стримера'}`
         });
-        setShowTbankPayment(true);
-        setProcessing(false);
+
+        if (response.data.success && response.data.payment_url) {
+          // Перенаправляем на платежную форму T-Bank
+          window.location.href = response.data.payment_url;
+        } else {
+          throw new Error('Не удалось создать платеж T-Bank');
+        }
         return;
       }
 
@@ -135,19 +141,7 @@ function DonationContent() {
     }
   };
 
-  const handleTbankSuccess = () => {
-    setShowTbankPayment(false);
-    router.push('/donate/success');
-  };
 
-  const handleTbankError = (error: string) => {
-    setShowTbankPayment(false);
-    setError(error);
-  };
-
-  const handleTbankClose = () => {
-    setShowTbankPayment(false);
-  };
 
   if (loading) {
     return (
@@ -280,19 +274,7 @@ function DonationContent() {
         </div>
       </div>
 
-      {showTbankPayment && currentPaymentData && (
-        <TbankPayment
-          amount={currentPaymentData.amount}
-          orderId={currentPaymentData.orderId}
-          donorName={donationData.donor_name}
-          donorEmail=""
-          donorPhone=""
-          description={currentPaymentData.description}
-          onSuccess={handleTbankSuccess}
-          onError={handleTbankError}
-          onClose={handleTbankClose}
-        />
-      )}
+
     </div>
   );
 }
