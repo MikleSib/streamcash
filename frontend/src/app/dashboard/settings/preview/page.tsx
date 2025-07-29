@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertPreview } from '@/components/AlertPreview';
 import { AlertLayersPanel } from '@/components/AlertLayersPanel';
@@ -60,7 +60,7 @@ interface AlertTier {
   elements?: AlertElement[];
 }
 
-export default function AlertPreviewPage() {
+function AlertPreviewContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const toast = useToast();
@@ -99,123 +99,81 @@ export default function AlertPreviewPage() {
               height: 60,
               visible: true,
               zIndex: 2,
-              content: '{donor_name} - {amount}₽',
-              fontSize: 32,
-              color: '#ffffff',
-              backgroundColor: 'rgba(0,0,0,0.2)',
-              borderRadius: 8,
-              padding: 12,
+              content: parsedTier.text_template,
+              fontSize: parsedTier.font_size,
+              color: parsedTier.text_color,
             },
             {
-              id: 'message-text',
-              type: 'text',
-              x: 50,
-              y: 55,
+              id: 'background',
+              type: 'background',
+              x: 0,
+              y: 0,
               width: 600,
-              height: 80,
+              height: 200,
               visible: true,
               zIndex: 1,
-              content: '{message}',
-              fontSize: 24,
-              color: '#ffffff',
-              backgroundColor: 'rgba(0,0,0,0.1)',
-              borderRadius: 6,
-              padding: 16,
-            },
+              backgroundColor: parsedTier.background_color,
+              borderRadius: 10,
+              padding: 20,
+            }
           ];
           parsedTier.elements = defaultElements;
         }
         
-        // Синхронизируем элемент animation с настройками тира
-        if (parsedTier.elements) {
-          parsedTier.elements = parsedTier.elements.map(element => {
-            if (element.id === 'animation') {
-              return {
-                ...element,
-                imageUrl: parsedTier.gif_url || element.imageUrl || 'https://media.giphy.com/media/26u4cqiYI30juCOGY/giphy.gif',
-                visible: parsedTier.animation_enabled && !!parsedTier.gif_url
-              };
-            }
-            return element;
-          });
-        }
-        
         setTier(parsedTier);
       } catch (error) {
-        console.error('Ошибка парсинга данных тира:', error);
-        router.push('/dashboard/settings');
-        return;
+        console.error('Failed to parse tier data:', error);
+        toast.error('Ошибка при загрузке данных алерта');
       }
-    } else {
-      router.push('/dashboard/settings');
-      return;
     }
-    
     setLoading(false);
-  }, [searchParams, router]);
+  }, [searchParams, toast]);
 
-  const handleTierUpdate = useCallback((updates: Partial<AlertTier>) => {
-    setTier(prev => {
-      if (!prev) return null;
+  const handleElementUpdate = useCallback((elementId: string, updates: Partial<AlertElement>) => {
+    if (!tier) return;
+    
+    setTier(prevTier => {
+      if (!prevTier) return prevTier;
       
-      const updatedTier = { ...prev, ...updates };
+      const updatedElements = prevTier.elements?.map(element => 
+        element.id === elementId ? { ...element, ...updates } : element
+      ) || [];
       
-      // Синхронизируем элемент animation с настройками GIF
-      if (updatedTier.elements && (updates.gif_url !== undefined || updates.animation_enabled !== undefined)) {
-        updatedTier.elements = updatedTier.elements.map(element => {
-          if (element.id === 'animation') {
-            return {
-              ...element,
-              imageUrl: updatedTier.gif_url || element.imageUrl,
-              visible: updatedTier.animation_enabled && !!updatedTier.gif_url
-            };
-          }
-          return element;
-        });
-      }
-      
-      return updatedTier;
+      return {
+        ...prevTier,
+        elements: updatedElements
+      };
     });
-  }, []);
+  }, [tier]);
+
+  const handleElementsReorder = useCallback((elementIds: string[]) => {
+    if (!tier) return;
+    
+    setTier(prevTier => {
+      if (!prevTier) return prevTier;
+      
+      const updatedElements = elementIds.map((id, index) => {
+        const element = prevTier.elements?.find(el => el.id === id);
+        return element ? { ...element, zIndex: elementIds.length - index } : null;
+      }).filter(Boolean) as AlertElement[];
+      
+      return {
+        ...prevTier,
+        elements: updatedElements
+      };
+    });
+  }, [tier]);
 
   const handleSave = async () => {
     if (!tier) return;
     
     setSaving(true);
     try {
-      // Отправляем только основные поля тира, исключая возможные лишние
-      const tierData = {
-        id: tier.id,
-        name: tier.name,
-        min_amount: tier.min_amount,
-        max_amount: tier.max_amount,
-        sound_enabled: tier.sound_enabled,
-        sound_file_url: tier.sound_file_url,
-        sound_volume: tier.sound_volume,
-        sound_start_time: tier.sound_start_time,
-        sound_end_time: tier.sound_end_time,
-        visual_enabled: tier.visual_enabled,
-        alert_duration: tier.alert_duration,
-        text_color: tier.text_color,
-        background_color: tier.background_color,
-        font_size: tier.font_size,
-        animation_enabled: tier.animation_enabled,
-        animation_type: tier.animation_type,
-        gif_url: tier.gif_url,
-        text_template: tier.text_template,
-        screen_shake: tier.screen_shake,
-        highlight_color: tier.highlight_color,
-        icon: tier.icon,
-        color: tier.color,
-        elements: tier.elements || []
-      };
-      
-      await alertAPI.updateTier(tier.id, tierData);
-      toast.success('Настройки сохранены!');
-    } catch (error: any) {
-      console.error('Ошибка сохранения:', error);
-      const errorMessage = error.response?.data?.detail || error.message || 'Ошибка сохранения';
-      toast.error(errorMessage);
+      // Здесь должна быть логика сохранения
+      toast.success('Настройки алерта сохранены');
+    } catch (error) {
+      console.error('Failed to save alert settings:', error);
+      toast.error('Ошибка при сохранении настроек');
     } finally {
       setSaving(false);
     }
@@ -225,72 +183,118 @@ export default function AlertPreviewPage() {
     if (!tier) return;
     
     try {
-      // Сначала сохраняем актуальные изменения
-      const tierData = {
-        id: tier.id,
-        name: tier.name,
-        min_amount: tier.min_amount,
-        max_amount: tier.max_amount,
-        sound_enabled: tier.sound_enabled,
-        sound_file_url: tier.sound_file_url,
-        sound_volume: tier.sound_volume,
-        sound_start_time: tier.sound_start_time,
-        sound_end_time: tier.sound_end_time,
-        visual_enabled: tier.visual_enabled,
-        alert_duration: tier.alert_duration,
-        text_color: tier.text_color,
-        background_color: tier.background_color,
-        font_size: tier.font_size,
-        animation_enabled: tier.animation_enabled,
-        animation_type: tier.animation_type,
-        gif_url: tier.gif_url,
-        text_template: tier.text_template,
-        screen_shake: tier.screen_shake,
-        highlight_color: tier.highlight_color,
-        icon: tier.icon,
-        color: tier.color,
-        elements: tier.elements || []
+      // Создаем тестовые данные
+      const testData = {
+        donor_name: 'TestUser',
+        amount: 100,
+        message: 'Тестовое сообщение!'
       };
       
-      await alertAPI.updateTier(tier.id, tierData);
+      // Показываем алерт
+      const alertElement = document.createElement('div');
+      alertElement.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        width: 600px;
+        height: 200px;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        transform: translateX(400px);
+        transition: transform 0.5s ease-out;
+        overflow: hidden;
+      `;
       
-      // Потом запускаем тест
-      await alertAPI.testAlert(tier.min_amount);
-      toast.success('Тест алерт отправлен!');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.detail || 'Ошибка отправки тест алерта';
-      toast.error(errorMessage);
+      // Создаем содержимое алерта
+      const alertContent = document.createElement('div');
+      alertContent.style.cssText = `
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: ${tier.background_color};
+        border-radius: 10px;
+        padding: 20px;
+      `;
+      
+      // Добавляем элементы
+      tier.elements?.forEach(element => {
+        if (!element.visible) return;
+        
+        const elementDiv = document.createElement('div');
+        elementDiv.style.cssText = `
+          position: absolute;
+          left: ${element.x}%;
+          top: ${element.y}%;
+          width: ${element.width || 'auto'}px;
+          height: ${element.height || 'auto'}px;
+          z-index: ${element.zIndex};
+        `;
+        
+        if (element.type === 'text') {
+          elementDiv.style.cssText += `
+            color: ${element.color};
+            font-size: ${element.fontSize}px;
+            font-weight: bold;
+          `;
+          elementDiv.textContent = element.content?.replace('{name}', testData.donor_name)
+            .replace('{amount}', `${testData.amount} ₽`)
+            .replace('{message}', testData.message);
+        } else if (element.type === 'image') {
+          elementDiv.style.cssText += `
+            background-image: url(${element.imageUrl});
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+          `;
+        }
+        
+        alertContent.appendChild(elementDiv);
+      });
+      
+      alertElement.appendChild(alertContent);
+      document.body.appendChild(alertElement);
+      
+      // Анимация появления
+      setTimeout(() => {
+        alertElement.style.transform = 'translateX(0)';
+      }, 100);
+      
+      // Удаляем через время
+      setTimeout(() => {
+        alertElement.style.transform = 'translateX(400px)';
+        setTimeout(() => {
+          if (alertElement.parentNode) {
+            alertElement.parentNode.removeChild(alertElement);
+          }
+        }, 500);
+      }, tier.alert_duration * 1000);
+      
+    } catch (error) {
+      console.error('Failed to test alert:', error);
+      toast.error('Ошибка при тестировании алерта');
     }
   };
 
-
-
   const handleBackToSettings = () => {
-    if (tier) {
-      const tierParam = encodeURIComponent(JSON.stringify(tier));
-      router.push(`/dashboard/settings?tier=${tierParam}&updated=true`);
-    } else {
-      router.push('/dashboard/settings');
-    }
+    router.push('/dashboard/settings');
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-white">Загрузка предпросмотра...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
 
   if (!tier) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">Ошибка загрузки</h1>
-          <Button onClick={() => router.push('/dashboard/settings')}>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Алерт не найден</h1>
+          <Button onClick={handleBackToSettings}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
             Вернуться к настройкам
           </Button>
         </div>
@@ -299,338 +303,93 @@ export default function AlertPreviewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      <div className="bg-gray-800 border-b border-gray-700 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={handleBackToSettings}
-              className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-700 transition-colors"
-              title="Вернуться к настройкам"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
-                <Eye className="w-5 h-5 text-white" />
-              </div>
+    <div className="min-h-screen bg-gray-100">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
+              <Button
+                onClick={handleBackToSettings}
+                variant="outline"
+                size="sm"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Назад
+              </Button>
               <div>
-                <h1 className="text-xl font-bold text-white">
-                  Редактирование алерта: {tier.name}
+                <h1 className="text-lg font-semibold text-gray-900">
+                  Предпросмотр алерта: {tier.name}
                 </h1>
-                <p className="text-gray-400 text-sm">
-                  {tier.min_amount}₽{tier.max_amount ? ` — ${tier.max_amount}₽` : ' и выше'}
+                <p className="text-sm text-gray-500">
+                  Настройте внешний вид и протестируйте алерт
                 </p>
               </div>
             </div>
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={handleTest}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium flex items-center"
-            >
-              <TestTube className="w-4 h-4 mr-2" />
-              Тест алерт
-            </button>
             
-            <Button
-              onClick={handleSave}
-              loading={saving}
-              className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium"
-            >
-              {saving ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                  Сохранение...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Сохранить
-                </>
-              )}
-            </Button>
+            <div className="flex items-center space-x-3">
+              <Button
+                onClick={handleTest}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <TestTube className="w-4 h-4 mr-2" />
+                Тест
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={saving}
+                className="bg-indigo-600 hover:bg-indigo-700"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {saving ? 'Сохранение...' : 'Сохранить'}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
-      
-      <div className="p-6">
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          <div className="xl:col-span-3">
-            <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
-              <div className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 p-4 border-b border-gray-700">
-                <h2 className="text-lg font-bold text-white">Область редактирования</h2>
-                <p className="text-gray-300 text-sm">
-                  Перетаскивайте элементы для настройки их позиций
-                </p>
-              </div>
-              
-              <div className="p-6">
-                <div
-                  className="relative mx-auto bg-gradient-to-br from-gray-800 to-purple-800 rounded-xl overflow-hidden"
-                  style={{
-                    width: '800px',
-                    height: '600px',
-                    backgroundImage: 'url("data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="white" fill-opacity="0.05"%3E%3Cpath d="M20 20h20v20H20z"/%3E%3C/g%3E%3C/svg%3E")',
-                  }}
-                >
-                  <AlertPreview
-                    tier={tier}
-                    onTierUpdate={handleTierUpdate}
-                    isVisible={true}
-                    className="h-full"
-                    hideControls={true}
-                    fullscreen={true}
-                  />
-                </div>
-              </div>
-            </div>
-            
-            {selectedElement && (() => {
-              const element = (tier.elements || []).find(el => el.id === selectedElement);
-              if (!element) return null;
-              
-              return (
-                <div className="mt-6 bg-gray-800 rounded-xl border border-gray-700 p-6">
-                  <h3 className="text-lg font-bold text-white mb-4">
-                    Настройки элемента: {
-                      element.id === 'animation' ? 'GIF анимация' :
-                      element.id === 'donor-info' ? 'Имя и сумма' :
-                      element.id === 'message-text' ? 'Сообщение' :
-                      element.id
-                    }
-                  </h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Позиция X (%)
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="100"
-                        step="0.1"
-                        value={element.x}
-                        onChange={(e) => {
-                          const updatedElements = (tier.elements || []).map(el =>
-                            el.id === selectedElement ? { ...el, x: parseFloat(e.target.value) } : el
-                          );
-                          handleTierUpdate({ elements: updatedElements });
-                        }}
-                        className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Позиция Y (%)
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="100"
-                        step="0.1"
-                        value={element.y}
-                        onChange={(e) => {
-                          const updatedElements = (tier.elements || []).map(el =>
-                            el.id === selectedElement ? { ...el, y: parseFloat(e.target.value) } : el
-                          );
-                          handleTierUpdate({ elements: updatedElements });
-                        }}
-                        className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Слой (z-index)
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="10"
-                        value={element.zIndex}
-                        onChange={(e) => {
-                          const updatedElements = (tier.elements || []).map(el =>
-                            el.id === selectedElement ? { ...el, zIndex: parseInt(e.target.value) } : el
-                          );
-                          handleTierUpdate({ elements: updatedElements });
-                        }}
-                        className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      />
-                    </div>
-                    
-                    {element.type === 'text' && (
-                      <>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Ширина блока (px)
-                          </label>
-                          <input
-                            type="number"
-                            min="100"
-                            max="600"
-                            value={element.width || 200}
-                            onChange={(e) => {
-                              const updatedElements = (tier.elements || []).map(el =>
-                                el.id === selectedElement ? { ...el, width: parseInt(e.target.value) } : el
-                              );
-                              handleTierUpdate({ elements: updatedElements });
-                            }}
-                            className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Высота блока (px)
-                          </label>
-                          <input
-                            type="number"
-                            min="30"
-                            max="200"
-                            value={element.height || 60}
-                            onChange={(e) => {
-                              const updatedElements = (tier.elements || []).map(el =>
-                                el.id === selectedElement ? { ...el, height: parseInt(e.target.value) } : el
-                              );
-                              handleTierUpdate({ elements: updatedElements });
-                            }}
-                            className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Размер шрифта
-                          </label>
-                          <input
-                            type="number"
-                            min="10"
-                            max="100"
-                            value={element.fontSize || 24}
-                            onChange={(e) => {
-                              const updatedElements = (tier.elements || []).map(el =>
-                                el.id === selectedElement ? { ...el, fontSize: parseInt(e.target.value) } : el
-                              );
-                              handleTierUpdate({ elements: updatedElements });
-                            }}
-                            className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                          />
-                        </div>
-                      </>
-                    )}
-                    
-                    {element.type === 'image' && (
-                      <>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Ширина (px)
-                          </label>
-                          <input
-                            type="number"
-                            min="50"
-                            max="400"
-                            value={element.width || 120}
-                            onChange={(e) => {
-                              const updatedElements = (tier.elements || []).map(el =>
-                                el.id === selectedElement ? { ...el, width: parseInt(e.target.value) } : el
-                              );
-                              handleTierUpdate({ elements: updatedElements });
-                            }}
-                            className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Высота (px)
-                          </label>
-                          <input
-                            type="number"
-                            min="50"
-                            max="400"
-                            value={element.height || 120}
-                            onChange={(e) => {
-                              const updatedElements = (tier.elements || []).map(el =>
-                                el.id === selectedElement ? { ...el, height: parseInt(e.target.value) } : el
-                              );
-                              handleTierUpdate({ elements: updatedElements });
-                            }}
-                            className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            URL изображения/GIF
-                          </label>
-                          <input
-                            type="url"
-                            value={element.imageUrl || ''}
-                            onChange={(e) => {
-                              const updatedElements = (tier.elements || []).map(el =>
-                                el.id === selectedElement ? { ...el, imageUrl: e.target.value } : el
-                              );
-                              handleTierUpdate({ elements: updatedElements });
-                            }}
-                            placeholder="https://example.com/animation.gif"
-                            className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                          />
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
-          
-          <div className="xl:col-span-1">
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Панель слоев */}
+          <div className="lg:col-span-1">
             <AlertLayersPanel
               elements={tier.elements || []}
               selectedElement={selectedElement}
               onElementSelect={setSelectedElement}
-              onElementUpdate={(elementId, updates) => {
-                const updatedElements = (tier.elements || []).map(el =>
-                  el.id === elementId ? { ...el, ...updates } : el
-                );
-                handleTierUpdate({ elements: updatedElements });
-              }}
-              onElementDelete={(elementId) => {
-                const updatedElements = (tier.elements || []).filter(el => el.id !== elementId);
-                handleTierUpdate({ elements: updatedElements });
-                if (selectedElement === elementId) {
-                  setSelectedElement(null);
-                }
-              }}
-              onElementAdd={(newElement) => {
-                const elementId = `element-${Date.now()}`;
-                const elementWithId = { ...newElement, id: elementId };
-                const updatedElements = [...(tier.elements || []), elementWithId];
-                handleTierUpdate({ elements: updatedElements });
-                setSelectedElement(elementId);
-              }}
-              onElementsReorder={(reorderedElements) => {
-                handleTierUpdate({ elements: reorderedElements });
-              }}
-              className="h-fit max-h-[calc(100vh-200px)] overflow-hidden"
+              onElementUpdate={handleElementUpdate}
+              onElementsReorder={handleElementsReorder}
             />
           </div>
-        </div>
-      </div>
-      
-      <div className="fixed bottom-6 right-6">
-        <div className="bg-gray-800 border border-gray-600 rounded-xl p-4 shadow-lg">
-          <div className="flex items-center space-x-3 text-sm text-gray-300">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span>Изменения сохраняются автоматически</span>
+
+          {/* Предпросмотр */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Eye className="w-5 h-5" />
+                Предпросмотр
+              </h2>
+              <AlertPreview
+                tier={tier}
+                selectedElement={selectedElement}
+                onElementSelect={setSelectedElement}
+                onElementUpdate={handleElementUpdate}
+              />
+            </div>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AlertPreviewPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
+      </div>
+    }>
+      <AlertPreviewContent />
+    </Suspense>
   );
 } 

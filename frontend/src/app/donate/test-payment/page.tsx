@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 
-export default function TestPaymentPage() {
+function TestPaymentContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -81,5 +81,23 @@ export default function TestPaymentPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function TestPaymentPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">
+              Загрузка...
+            </h1>
+          </div>
+        </div>
+      </div>
+    }>
+      <TestPaymentContent />
+    </Suspense>
   );
 } 
