@@ -151,7 +151,7 @@ export default function TbankPayment({
         console.log('Payment integration object:', paymentIntegration);
         
         // Устанавливаем доступные методы оплаты согласно настройкам терминала
-        const availableWidgetTypes = ['sbp', 'mirpay', 'sberpay', 'bnpl', 'tinkoffpay'];
+        const availableWidgetTypes = ['sbp', 'mirpay', 'sberpay', 'bnpl', 'tpay'];
         await paymentIntegration.updateWidgetTypes(availableWidgetTypes);
         console.log('Widget types updated:', availableWidgetTypes);
         
