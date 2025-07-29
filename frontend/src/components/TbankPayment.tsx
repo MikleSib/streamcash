@@ -44,19 +44,22 @@ export default function TbankPayment({
 
         // Ждем загрузки скрипта T-Bank
         if (!window.PaymentIntegration) {
-          await new Promise<void>((resolve) => {
+          await new Promise<void>((resolve, reject) => {
             const script = document.createElement('script');
             script.src = 'https://acq-paymentform-integrationjs.t-static.ru/integration.js';
             script.async = true;
-            script.onload = () => resolve();
+            script.onload = () => {
+              // Даем время скрипту инициализироваться
+              setTimeout(resolve, 1000);
+            };
             script.onerror = () => {
-              setError('Ошибка загрузки платежного виджета');
-              resolve();
+              reject(new Error('Ошибка загрузки платежного виджета'));
             };
             document.head.appendChild(script);
           });
         }
 
+        // Проверяем еще раз после загрузки
         if (!window.PaymentIntegration) {
           throw new Error('Не удалось загрузить платежный виджет');
         }
@@ -128,19 +131,31 @@ export default function TbankPayment({
           }
         };
 
+        console.log('Initializing T-Bank integration...');
+        
         // Инициализация интеграции
         const integration = await window.PaymentIntegration.init(initConfig);
+        console.log('T-Bank integration initialized:', integration);
         
         // Получаем объект платежной интеграции
         const paymentIntegration = await integration.payments.get('main-integration');
+        console.log('Payment integration object:', paymentIntegration);
         
         // Устанавливаем доступные методы оплаты
         await paymentIntegration.updateWidgetTypes(['tpay', 'sbp', 'mirpay']);
+        console.log('Widget types updated');
 
       } catch (err) {
         console.error('T-Bank integration error:', err);
         setError(err instanceof Error ? err.message : 'Ошибка инициализации платежа');
         setLoading(false);
+        
+        // Fallback: показываем простую форму оплаты
+        setTimeout(() => {
+          if (error) {
+            setError('T-Bank недоступен. Используйте другой способ оплаты.');
+          }
+        }, 3000);
       }
     };
 
@@ -191,12 +206,23 @@ export default function TbankPayment({
                   </svg>
                   <p className="text-sm font-medium">{error}</p>
                 </div>
+                              <div className="space-y-3">
                 <button
                   onClick={() => window.location.reload()}
                   className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
                 >
                   Попробовать снова
                 </button>
+                <button
+                  onClick={() => {
+                    const testUrl = `/donate/tbank-test?order_id=${orderId}&amount=${amount}`;
+                    window.open(testUrl, '_blank');
+                  }}
+                  className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200"
+                >
+                  Тестовая страница
+                </button>
+              </div>
               </div>
             </div>
           )}
