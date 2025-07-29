@@ -197,8 +197,8 @@ class PaymentService:
         
         print(f"T-Bank payment data: {payment_data}")
         
-        # Отправляем запрос к T-Bank API
-        url = "https://securepay.tinkoff.ru/v2/"
+        # Отправляем запрос к T-Bank API (тестовая среда)
+        url = "https://rest-api-test.tinkoff.ru/v2/Init"
         
         try:
             async with httpx.AsyncClient() as client:

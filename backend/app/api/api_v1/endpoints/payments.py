@@ -128,14 +128,29 @@ async def init_tbank_payment(
         
         print(f"T-Bank payment data: {payment_data}")
         
-        # Отправляем запрос к T-Bank API
-        url = "https://securepay.tinkoff.ru/v2/"
+        # Отправляем запрос к T-Bank API (тестовая среда)
+        url = "https://rest-api-test.tinkoff.ru/v2/Init"
         
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, json=payment_data)
-            result = response.json()
+            print(f"🌐 Отправляем запрос на URL: {url}")
+            print(f"📤 Данные запроса: {payment_data}")
             
-            print(f"T-Bank API response: {result}")
+            response = await client.post(url, json=payment_data)
+            
+            print(f"📥 Статус ответа: {response.status_code}")
+            print(f"📥 Заголовки ответа: {dict(response.headers)}")
+            print(f"📥 Текст ответа: {response.text}")
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=400, detail=f"T-Bank API returned status {response.status_code}: {response.text}")
+            
+            try:
+                result = response.json()
+                print(f"T-Bank API response: {result}")
+            except Exception as e:
+                print(f"❌ Ошибка парсинга JSON: {e}")
+                print(f"❌ Текст ответа: {response.text}")
+                raise HTTPException(status_code=400, detail=f"Invalid JSON response from T-Bank: {response.text}")
             
             if result.get("Success"):
                 return {
