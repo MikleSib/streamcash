@@ -284,6 +284,10 @@ function DonationContent() {
         <TbankPayment
           amount={currentPaymentData.amount}
           orderId={currentPaymentData.orderId}
+          donorName={donationData.donor_name}
+          donorEmail=""
+          donorPhone=""
+          description={currentPaymentData.description}
           onSuccess={handleTbankSuccess}
           onError={handleTbankError}
           onClose={handleTbankClose}
