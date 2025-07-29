@@ -56,13 +56,27 @@ async def init_tbank_payment(
     """
     Создание платежа T-Bank с генерацией токена
     """
+    print(f"🔍 Получен запрос на создание T-Bank платежа: {request}")
+    
     try:
         import hashlib
         import time
         import uuid
         
+        # Проверяем обязательные поля
+        if not request.amount or request.amount <= 0:
+            raise HTTPException(status_code=400, detail="Сумма должна быть больше 0")
+        
+        if not settings.TBANK_TERMINAL:
+            raise HTTPException(status_code=400, detail="T-Bank terminal не настроен")
+        
+        if not settings.TBANK_PASSWORD:
+            raise HTTPException(status_code=400, detail="T-Bank password не настроен")
+        
         # Генерируем уникальный ID заказа
         order_id = request.order_id or f"order_{int(time.time() * 1000)}_{uuid.uuid4().hex[:8]}"
+        
+        print(f"🔧 Настройки T-Bank: Terminal={settings.TBANK_TERMINAL}, Password={'*' * len(settings.TBANK_PASSWORD) if settings.TBANK_PASSWORD else 'None'}")
         
         # Подготавливаем данные для создания платежа
         payment_data = {
