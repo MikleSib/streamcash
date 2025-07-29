@@ -97,10 +97,27 @@ async def init_tbank_payment(
         }
         
         # Генерируем токен для подписи
-        token_string = f"{payment_data['TerminalKey']}{payment_data['Amount']}{payment_data['OrderId']}{settings.TBANK_SECRET_KEY}"
-        print(f"🔑 Строка для генерации токена: {token_string}")
+        # Попробуем несколько вариантов генерации токена
+        token_variants = [
+            # Вариант 1: стандартный SHA256
+            f"{payment_data['TerminalKey']}{payment_data['Amount']}{payment_data['OrderId']}{settings.TBANK_SECRET_KEY}",
+            # Вариант 2: без TerminalKey в начале
+            f"{payment_data['Amount']}{payment_data['OrderId']}{settings.TBANK_SECRET_KEY}",
+            # Вариант 3: с разделителями
+            f"{payment_data['TerminalKey']};{payment_data['Amount']};{payment_data['OrderId']};{settings.TBANK_SECRET_KEY}",
+            # Вариант 4: только SecretKey (для тестирования)
+            settings.TBANK_SECRET_KEY
+        ]
+        
+        print(f"🔑 Варианты строк для генерации токена:")
+        for i, variant in enumerate(token_variants, 1):
+            token = hashlib.sha256(variant.encode('utf-8')).hexdigest()
+            print(f"   Вариант {i}: {variant} -> {token}")
+        
+        # Используем первый вариант (стандартный)
+        token_string = token_variants[0]
         token = hashlib.sha256(token_string.encode('utf-8')).hexdigest()
-        print(f"🔑 Сгенерированный токен: {token}")
+        print(f"🔑 Используемый токен: {token}")
         payment_data["Token"] = token
         
         print(f"T-Bank payment data: {payment_data}")
