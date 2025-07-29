@@ -6,11 +6,45 @@ from sqlalchemy.orm import Session
 
 from app import crud
 from app.core import deps
-from app.models.donation import DonationStatus
+from app.models.donation import DonationStatus, PaymentMethod
 from app.services.payment_service import PaymentService
 from app.services.websocket_service import notify_new_donation
+from pydantic import BaseModel
 
 router = APIRouter()
+
+class PaymentInitRequest(BaseModel):
+    amount: float
+    order_id: str
+    payment_method: str
+    description: str = "Донат"
+
+@router.post("/init")
+async def init_payment(
+    request: PaymentInitRequest,
+    db: Session = Depends(deps.get_db),
+) -> Any:
+    try:
+        payment_service = PaymentService()
+        
+        # Определяем метод платежа
+        payment_method = PaymentMethod.TBANK if request.payment_method == 'tbank' else PaymentMethod.TEST
+        
+        # Создаем платеж
+        payment_data = await payment_service.create_payment(
+            amount=request.amount,
+            description=request.description,
+            payment_method=payment_method
+        )
+        
+        return {
+            "success": True,
+            "payment_url": payment_data["confirmation_url"],
+            "payment_id": payment_data["id"]
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.options("/webhook/test")
 async def test_webhook_options():

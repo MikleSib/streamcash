@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     
     TBANK_TERMINAL: Optional[str] = os.getenv("TBANK_TERMINAL", "1753782171950DEMO")
     TBANK_PASSWORD: Optional[str] = os.getenv("TBANK_PASSWORD", "Hs%8cNP6W&hv%3!^")
+    TBANK_RECEIPT_ENABLED: bool = os.getenv("TBANK_RECEIPT_ENABLED", "False").lower() == "true"
     
     EMAIL_HOST: str = os.getenv("EMAIL_HOST", "localhost")
     EMAIL_PORT: int = int(os.getenv("EMAIL_PORT", "587"))

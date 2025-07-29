@@ -9,10 +9,10 @@ function TbankTestPaymentContent() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   
-  const paymentId = searchParams.get('payment_id');
+  const orderId = searchParams.get('order_id');
   const amount = searchParams.get('amount');
 
-  const simulateTbankPayment = async (status: string) => {
+  const simulatePayment = async (success: boolean) => {
     setLoading(true);
     
     try {
@@ -23,87 +23,76 @@ function TbankTestPaymentContent() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          payment_id: paymentId,
-          status: status,
-          amount: parseFloat(amount || '0')
+          PaymentId: orderId,
+          Status: success ? 'CONFIRMED' : 'CANCELLED',
+          Amount: parseFloat(amount || '0') * 100,
+          OrderId: orderId
         }),
       });
 
       if (response.ok) {
-        if (status === 'Подтвержден') {
-          router.push('/donate/success');
-        } else {
-          router.push('/donate/failed');
-        }
+        router.push(success ? '/donate/success' : '/donate/failed');
       } else {
         alert('Ошибка при обработке платежа');
       }
     } catch (error) {
       console.error('T-Bank payment simulation error:', error);
-      alert('Ошибка при симуляции платежа Т-банка');
+      alert('Ошибка при симуляции платежа');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
-        <h1 className="text-2xl font-bold text-center mb-6">Тестовый платеж Т-банк</h1>
-        
-        <div className="mb-6">
-          <p className="text-gray-600 mb-2">ID платежа: <span className="font-mono">{paymentId}</span></p>
-          <p className="text-gray-600 mb-2">Сумма: <span className="font-bold">{amount} ₽</span></p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Тестовый платеж T-Bank
+          </h1>
+          <p className="text-gray-600">
+            Симуляция платежа через T-Bank
+          </p>
+        </div>
+
+        <div className="bg-gray-50 rounded-lg p-4 mb-6">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-gray-600">Номер заказа:</span>
+            <span className="font-mono text-sm">{orderId}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600">Сумма:</span>
+            <span className="font-bold text-lg">{amount} ₽</span>
+          </div>
         </div>
 
         <div className="space-y-3">
           <Button
-            onClick={() => simulateTbankPayment('Резервируется')}
+            onClick={() => simulatePayment(true)}
             disabled={loading}
-            className="w-full bg-blue-500 hover:bg-blue-600"
+            className="w-full bg-green-600 hover:bg-green-700 text-white py-3"
           >
-            {loading ? 'Обработка...' : 'Резервируется'}
+            {loading ? 'Обработка...' : 'Успешный платеж'}
           </Button>
           
           <Button
-            onClick={() => simulateTbankPayment('Подтвержден')}
+            onClick={() => simulatePayment(false)}
             disabled={loading}
-            className="w-full bg-green-500 hover:bg-green-600"
+            className="w-full bg-red-600 hover:bg-red-700 text-white py-3"
           >
-            {loading ? 'Обработка...' : 'Подтвержден'}
+            {loading ? 'Обработка...' : 'Отменить платеж'}
           </Button>
-          
-          <Button
-            onClick={() => simulateTbankPayment('Отменен')}
-            disabled={loading}
-            className="w-full bg-red-500 hover:bg-red-600"
-          >
-            {loading ? 'Обработка...' : 'Отменен'}
-          </Button>
-          
-          <Button
-            onClick={() => simulateTbankPayment('Возвращен')}
-            disabled={loading}
-            className="w-full bg-orange-500 hover:bg-orange-600"
-          >
-            {loading ? 'Обработка...' : 'Возвращен'}
-          </Button>
-          
-          <Button
-            onClick={() => simulateTbankPayment('Возвращен частично')}
-            disabled={loading}
-            className="w-full bg-yellow-500 hover:bg-yellow-600"
-          >
-            {loading ? 'Обработка...' : 'Возвращен частично'}
-          </Button>
-          
-          <Button
-            onClick={() => simulateTbankPayment('Резервирование отменено')}
-            disabled={loading}
-            className="w-full bg-gray-500 hover:bg-gray-600"
-          >
-            {loading ? 'Обработка...' : 'Резервирование отменено'}
-          </Button>
+        </div>
+
+        <div className="mt-6 text-center">
+          <p className="text-xs text-gray-500">
+            Это тестовая страница для симуляции платежей T-Bank
+          </p>
         </div>
       </div>
     </div>
@@ -113,10 +102,8 @@ function TbankTestPaymentContent() {
 export default function TbankTestPaymentPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
-          <h1 className="text-2xl font-bold text-center mb-6">Загрузка...</h1>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     }>
       <TbankTestPaymentContent />

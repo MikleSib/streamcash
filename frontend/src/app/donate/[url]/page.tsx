@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { streamerAPI } from '@/lib/api';
 import { api } from '@/lib/api';
+import TbankPayment from '@/components/TbankPayment';
 
 interface Streamer {
   id: number;
@@ -60,6 +61,8 @@ function DonationContent() {
   });
   const [alertTiers, setAlertTiers] = useState<AlertTier[]>([]);
   const [processing, setProcessing] = useState(false);
+  const [showTbankPayment, setShowTbankPayment] = useState(false);
+  const [currentPaymentData, setCurrentPaymentData] = useState<any>(null);
 
   useEffect(() => {
     loadStreamerData();
@@ -104,18 +107,25 @@ function DonationContent() {
     setProcessing(true);
 
     try {
+      if (donationData.payment_method === 'tbank') {
+        // Для T-Bank используем новый компонент
+        setCurrentPaymentData({
+          amount: donationData.amount,
+          orderId: `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          description: `Донат для ${streamer?.name || 'стримера'}`
+        });
+        setShowTbankPayment(true);
+        setProcessing(false);
+        return;
+      }
+
       const response = await api.post('/donations/', {
         recipient_id: streamer?.id,
         ...donationData
       });
 
       if (response.data.confirmation_url) {
-        if (donationData.payment_method === 'tbank') {
-          // Для Т-банка используем их iframe
-          openTbankPayment(response.data.confirmation_url);
-        } else {
-          window.location.href = response.data.confirmation_url;
-        }
+        window.location.href = response.data.confirmation_url;
       }
     } catch (error) {
       console.error('Ошибка при создании доната:', error);
@@ -125,67 +135,18 @@ function DonationContent() {
     }
   };
 
-  const openTbankPayment = (paymentUrl: string) => {
-    // Создаем модальное окно для Т-банка
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.8);
-      z-index: 10000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    `;
+  const handleTbankSuccess = () => {
+    setShowTbankPayment(false);
+    router.push('/donate/success');
+  };
 
-    const iframe = document.createElement('iframe');
-    iframe.src = paymentUrl;
-    iframe.style.cssText = `
-      width: 90%;
-      height: 90%;
-      border: none;
-      border-radius: 8px;
-      background: white;
-    `;
+  const handleTbankError = (error: string) => {
+    setShowTbankPayment(false);
+    setError(error);
+  };
 
-    const closeButton = document.createElement('button');
-    closeButton.textContent = '✕';
-    closeButton.style.cssText = `
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: white;
-      border: none;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      font-size: 20px;
-      cursor: pointer;
-      z-index: 10001;
-    `;
-    closeButton.onclick = () => {
-      document.body.removeChild(modal);
-    };
-
-    modal.appendChild(closeButton);
-    modal.appendChild(iframe);
-    document.body.appendChild(modal);
-
-    // Слушаем сообщения от iframe
-    window.addEventListener('message', (event) => {
-      if (event.origin.includes('tbank.ru') || event.origin.includes('tinkoff.ru')) {
-        if (event.data.type === 'payment-success') {
-          document.body.removeChild(modal);
-          router.push('/donate/success');
-        } else if (event.data.type === 'payment-failed') {
-          document.body.removeChild(modal);
-          router.push('/donate/failed');
-        }
-      }
-    });
+  const handleTbankClose = () => {
+    setShowTbankPayment(false);
   };
 
   if (loading) {
@@ -318,6 +279,16 @@ function DonationContent() {
           )}
         </div>
       </div>
+
+      {showTbankPayment && currentPaymentData && (
+        <TbankPayment
+          amount={currentPaymentData.amount}
+          orderId={currentPaymentData.orderId}
+          onSuccess={handleTbankSuccess}
+          onError={handleTbankError}
+          onClose={handleTbankClose}
+        />
+      )}
     </div>
   );
 }
