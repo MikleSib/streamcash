@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/Button';
 import { streamerAPI } from '@/lib/api';
 import { api } from '@/lib/api';
 
-
 interface Streamer {
   id: number;
   name: string;
@@ -15,6 +14,7 @@ interface Streamer {
   total_donations: number;
   description?: string;
   avatar_url?: string;
+  goal?: number;
 }
 
 interface AlertTier {
@@ -56,7 +56,7 @@ function DonationContent() {
     donor_name: '',
     amount: 100,
     message: '',
-    payment_method: 'test',
+    payment_method: 'tbank',
     is_anonymous: false
   });
   const [alertTiers, setAlertTiers] = useState<AlertTier[]>([]);
@@ -69,7 +69,11 @@ function DonationContent() {
   const loadStreamerData = async () => {
     try {
       const response = await streamerAPI.getByUrl(donationUrl);
-      setStreamer(response.data);
+      const streamerData = response.data;
+      if (!streamerData.goal) {
+        streamerData.goal = 50000;
+      }
+      setStreamer(streamerData);
       
       try {
         const alertResponse = await api.get(`/alerts/streamer/${donationUrl}`);
@@ -100,13 +104,19 @@ function DonationContent() {
     }));
   };
 
+  const handleAmountButtonClick = (amount: number) => {
+    setDonationData(prev => ({
+      ...prev,
+      amount: amount
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setProcessing(true);
 
     try {
       if (donationData.payment_method === 'tbank') {
-        // Для T-Bank используем API интеграцию
         const orderId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         
         const response = await api.post('/payments/tbank/init', {
@@ -117,7 +127,6 @@ function DonationContent() {
         });
 
         if (response.data.success && response.data.payment_url) {
-          // Перенаправляем на платежную форму T-Bank
           window.location.href = response.data.payment_url;
         } else {
           throw new Error('Не удалось создать платеж T-Bank');
@@ -141,11 +150,9 @@ function DonationContent() {
     }
   };
 
-
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
       </div>
     );
@@ -153,7 +160,7 @@ function DonationContent() {
 
   if (error || !streamer) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             {error || 'Стример не найден'}
@@ -166,115 +173,196 @@ function DonationContent() {
     );
   }
 
+  const progressPercentage = streamer.goal ? (streamer.total_donations / streamer.goal) * 100 : 0;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Донат для {streamer.name}
-            </h1>
-            <p className="text-gray-600">
-              Поддержите стримера и получите особые привилегии!
-            </p>
+    <div className="min-h-screen bg-gray-100 py-8 px-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <div className="flex items-center mb-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center mr-4">
+                <span className="text-white text-2xl font-bold">
+                  {streamer.name.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">{streamer.name}</h1>
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full mr-2"></div>
+                  <span className="text-gray-600 text-sm">ОФЛАЙН</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Стрим о стриме</h3>
+              <p className="text-gray-600">
+                {streamer.description || 'Описание стрима Описание стрима'}
+              </p>
+            </div>
+
+            <div className="bg-blue-50 rounded-xl p-4 mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center">
+                  <span className="text-blue-600 mr-2">❤️</span>
+                  <span className="text-sm font-medium text-gray-700">Всего собрано</span>
+                </div>
+                <span className="text-lg font-bold text-blue-600">
+                  {streamer.total_donations.toLocaleString()} ₽
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-green-50 rounded-xl p-4 mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center">
+                  <span className="text-green-600 mr-2">🎯</span>
+                  <span className="text-sm font-medium text-gray-700">Цель сбора</span>
+                </div>
+                <span className="text-lg font-bold text-green-600">
+                  {(streamer.goal || 50000).toLocaleString()} ₽
+                </span>
+              </div>
+              <div className="w-full bg-green-200 rounded-full h-2 mt-2">
+                <div 
+                  className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${Math.min(progressPercentage, 100)}%` }}
+                ></div>
+              </div>
+              <p className="text-sm text-green-600 mt-1">
+                {progressPercentage.toFixed(1)}% от цели
+              </p>
+            </div>
+
+            {alertTiers.length > 0 && (
+              <div className="bg-purple-50 rounded-xl p-4">
+                <h4 className="text-sm font-semibold text-purple-900 mb-3 flex items-center">
+                  🎉 Уровни алертов
+                </h4>
+                <div className="space-y-2">
+                  {alertTiers.map((tier) => (
+                    <div key={tier.id} className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <span className="text-yellow-500 mr-2">⭐</span>
+                        <span className="text-sm font-medium text-purple-900">{tier.name}</span>
+                      </div>
+                      <span className="text-sm text-purple-600">
+                        {tier.min_amount}₽+
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ваше имя
-              </label>
-              <input
-                type="text"
-                name="donor_name"
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-                value={donationData.donor_name}
-                onChange={handleDonationChange}
-                placeholder="Введите ваше имя"
-                required
-              />
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Поддержать стримера</h2>
+              <p className="text-gray-600">Отправьте донат и поддержите любимого стримера</p>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Сумма доната (₽)
-              </label>
-              <input
-                type="number"
-                name="amount"
-                min="1"
-                step="1"
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-                value={donationData.amount}
-                onChange={handleDonationChange}
-                required
-              />
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Сумма доната (₽)
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    name="amount"
+                    min="100"
+                    max="10000"
+                    step="1"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={donationData.amount}
+                    onChange={handleDonationChange}
+                    placeholder="От 100 до 10000 ₽"
+                    required
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {[100, 200, 500, 1000].map((amount) => (
+                    <button
+                      key={amount}
+                      type="button"
+                      onClick={() => handleAmountButtonClick(amount)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        donationData.amount === amount
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {amount} ₽
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Сообщение (необязательно)
-              </label>
-              <textarea
-                name="message"
-                rows={3}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 resize-none"
-                value={donationData.message}
-                onChange={handleDonationChange}
-                placeholder="Напишите сообщение стримеру..."
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ваше имя
+                </label>
+                <input
+                  type="text"
+                  name="donor_name"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={donationData.donor_name}
+                  onChange={handleDonationChange}
+                  placeholder="Как вас называть?"
+                  required
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Способ оплаты
-              </label>
-              <select
-                name="payment_method"
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-                value={donationData.payment_method}
-                onChange={handleDonationChange}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Сообщение
+                </label>
+                <textarea
+                  name="message"
+                  rows={4}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  value={donationData.message}
+                  onChange={handleDonationChange}
+                  placeholder="Оставьте сообщение для стримера..."
+                />
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="is_anonymous"
+                  id="is_anonymous"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  checked={donationData.is_anonymous}
+                  onChange={handleDonationChange}
+                />
+                <label htmlFor="is_anonymous" className="ml-2 flex items-center text-sm text-gray-900">
+                  <span className="text-purple-600 mr-1">👤</span>
+                  Анонимный донат
+                </label>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={processing}
+                className="w-full py-4 text-lg font-semibold bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-lg transition-all duration-200"
               >
-                <option value="test">🧪 Тестовая оплата (для разработки)</option>
-                <option value="tbank">🏦 Т-банк</option>
-                <option value="yookassa">💳 YooKassa</option>
-                <option value="sberbank">🏛️ Сбербанк</option>
-                <option value="tinkoff">💳 Тинькофф</option>
-              </select>
-            </div>
+                <span className="mr-2">🎁</span>
+                {processing ? 'Обработка...' : 'Задонатить'}
+              </Button>
+            </form>
 
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                name="is_anonymous"
-                id="is_anonymous"
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                checked={donationData.is_anonymous}
-                onChange={handleDonationChange}
-              />
-              <label htmlFor="is_anonymous" className="ml-2 block text-sm text-gray-900">
-                Анонимный донат
-              </label>
-            </div>
-
-            <Button
-              type="submit"
-              disabled={processing}
-              className="w-full py-4 text-lg font-semibold"
-            >
-              {processing ? 'Обработка...' : `Задонатить ${donationData.amount}₽`}
-            </Button>
-          </form>
-
-          {error && (
-            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-600">{error}</p>
-            </div>
-          )}
+            {error && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-red-600">{error}</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-
-
     </div>
   );
 }
@@ -282,7 +370,7 @@ function DonationContent() {
 export default function DonationPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
       </div>
     }>
