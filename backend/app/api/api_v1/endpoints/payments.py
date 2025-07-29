@@ -83,48 +83,45 @@ async def init_tbank_payment(
         print(f"🔧 Настройки T-Bank: Terminal={settings.TBANK_TERMINAL}, SecretKey={settings.TBANK_SECRET_KEY}")
         print(f"🔧 Длина SecretKey: {len(settings.TBANK_SECRET_KEY) if settings.TBANK_SECRET_KEY else 0}")
         
-        # Подготавливаем данные для создания платежа
+        # Подготавливаем данные для создания платежа (только обязательные параметры)
         payment_data = {
             "TerminalKey": settings.TBANK_TERMINAL,
             "Amount": int(request.amount * 100),  # T-Bank ожидает сумму в копейках
             "OrderId": order_id,
-            "Description": request.description,
-            "Language": "ru",
-            "SuccessURL": f"{settings.FRONTEND_URL}/donate/success?orderId={order_id}&amount={request.amount}",
-            "FailURL": f"{settings.FRONTEND_URL}/donate/failed?orderId={order_id}&amount={request.amount}",
-            "NotificationURL": f"{settings.API_URL}/api/v1/payments/webhook/tbank",
-            "DATA": {
-                "connection_type": "API"
-            }
+            "Description": request.description
         }
         
-        # Генерируем токен для подписи
         # Генерируем токен для подписи согласно документации T-Bank
-        # Создаем массив пар ключ-значение
-        token_params = [
-            {"Amount": str(payment_data['Amount'])},
-            {"Description": payment_data['Description']},
-            {"OrderId": payment_data['OrderId']},
-            {"Password": settings.TBANK_PASSWORD},
-            {"TerminalKey": payment_data['TerminalKey']}
-        ]
+        # Создаем словарь параметров (только те, которые не пустые)
+        token_params = {
+            "Amount": payment_data['Amount'],
+            "Description": payment_data['Description'], 
+            "OrderId": payment_data['OrderId'],
+            "TerminalKey": payment_data['TerminalKey']
+        }
         
-        # Сортируем по алфавиту по ключу
-        token_params.sort(key=lambda x: list(x.keys())[0])
+        # Добавляем Password (секретный ключ) для генерации токена
+        token_params["Password"] = settings.TBANK_SECRET_KEY
+        
+        # Сортируем параметры по алфавиту (по ключам)
+        sorted_keys = sorted(token_params.keys())
         
         # Выводим отсортированные параметры для отладки
         print("🔍 Отсортированные параметры для токена:")
-        for param in token_params:
-            key = list(param.keys())[0]
-            value = list(param.values())[0]
+        for key in sorted_keys:
+            value = str(token_params[key])
             print(f"   {key}: {value}")
         
-        # Конкатенируем только значения
-        token_string = ''.join([list(param.values())[0] for param in token_params])
+        # Конкатенируем значения в алфавитном порядке ключей
+        token_string = ''.join([str(token_params[key]) for key in sorted_keys])
         print(f"🔑 Строка для генерации токена: {token_string}")
+        
+        # Генерируем SHA-256 хэш
         token = hashlib.sha256(token_string.encode('utf-8')).hexdigest()
         print(f"🔑 Сгенерированный токен: {token}")
-        payment_data["Token"] = token
+        
+        # Удаляем Password из данных запроса (он не должен передаваться в API)
+        payment_data['Token'] = token
         
         print(f"T-Bank payment data: {payment_data}")
         
