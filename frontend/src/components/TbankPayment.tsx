@@ -33,6 +33,7 @@ export default function TbankPayment({
 }: TbankPaymentProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [paymentToken, setPaymentToken] = useState<string>('');
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
@@ -93,18 +94,56 @@ export default function TbankPayment({
     };
   }, [onClose]);
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     
     if (!formRef.current) return;
 
     try {
-      // Вызываем функцию оплаты T-Bank
-      window.pay(formRef.current);
+      setLoading(true);
+      setError(null);
+
+      // Сначала создаем платеж на сервере
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiUrl}/api/v1/payments/tbank/init`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: amount,
+          order_id: orderId,
+          payment_method: 'tbank',
+          description: description
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Ошибка создания платежа');
+      }
+
+      const paymentData = await response.json();
+      
+      if (paymentData.success && paymentData.payment_url) {
+        // Если получен URL для оплаты, перенаправляем на него
+        window.location.href = paymentData.payment_url;
+      } else if (paymentData.success) {
+        // Если платеж создан успешно, но нет URL, используем виджет
+        console.log('Payment created successfully, using widget');
+        // Устанавливаем токен в форму
+        setPaymentToken(paymentData.token || '');
+        // Используем виджет
+        window.pay(formRef.current);
+      } else {
+        throw new Error('Не удалось создать платеж');
+      }
     } catch (err) {
       console.error('Ошибка при отправке формы:', err);
-      setError('Ошибка при отправке платежа');
-      onError?.('Ошибка при отправке платежа');
+      setError(err instanceof Error ? err.message : 'Ошибка при отправке платежа');
+      onError?.(err instanceof Error ? err.message : 'Ошибка при отправке платежа');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -218,39 +257,45 @@ export default function TbankPayment({
                 <input 
                   className="payform-tbank-row" 
                   type="hidden" 
-                  name="terminalkey" 
+                  name="TerminalKey" 
                   value="1753782171950DEMO"
                 />
                 <input 
                   className="payform-tbank-row" 
                   type="hidden" 
-                  name="frame" 
+                  name="Token" 
+                  value={paymentToken}
+                />
+                <input 
+                  className="payform-tbank-row" 
+                  type="hidden" 
+                  name="Frame" 
                   value="true"
                 />
                 <input 
                   className="payform-tbank-row" 
                   type="hidden" 
-                  name="language" 
+                  name="Language" 
                   value="ru"
                 />
                 <input 
                   className="payform-tbank-row" 
                   type="hidden" 
-                  name="amount" 
-                  value={amount}
+                  name="Amount" 
+                  value={amount * 100}
                   readOnly
                 />
                 <input 
                   className="payform-tbank-row" 
                   type="hidden" 
-                  name="order" 
+                  name="OrderId" 
                   value={orderId}
                   readOnly
                 />
                 <input 
                   className="payform-tbank-row" 
                   type="hidden" 
-                  name="description" 
+                  name="Description" 
                   value={description}
                   readOnly
                 />
@@ -260,7 +305,7 @@ export default function TbankPayment({
                     className="payform-tbank-row" 
                     type="text" 
                     placeholder="ФИО плательщика" 
-                    name="name" 
+                    name="Name" 
                     defaultValue={donorName}
                     readOnly
                   />
@@ -271,7 +316,7 @@ export default function TbankPayment({
                     className="payform-tbank-row" 
                     type="email" 
                     placeholder="E-mail" 
-                    name="email" 
+                    name="Email" 
                     defaultValue={donorEmail}
                     readOnly
                   />
@@ -282,7 +327,7 @@ export default function TbankPayment({
                     className="payform-tbank-row" 
                     type="tel" 
                     placeholder="Контактный телефон" 
-                    name="phone" 
+                    name="Phone" 
                     defaultValue={donorPhone}
                     readOnly
                   />
@@ -293,7 +338,7 @@ export default function TbankPayment({
                   className="payform-tbank-row" 
                   type="hidden" 
                   name="DATA" 
-                  value={`DonorName=${donorName} | OrderId=${orderId}`}
+                  value={`DonorName=${donorName} | OrderId=${orderId} | connection_type=Widget2.0`}
                 />
 
                 <input 

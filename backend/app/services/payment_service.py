@@ -143,21 +143,73 @@ class PaymentService:
 
     async def _create_tbank_payment(self, amount: float, description: str) -> Dict[str, Any]:
         """
-        T-Bank использует готовый виджет, поэтому этот метод больше не нужен.
-        Платежи обрабатываются напрямую через виджет на frontend.
+        Создание платежа через T-Bank API с генерацией токена
         """
-        import uuid
-        order_id = str(uuid.uuid4())
+        if not settings.TBANK_TERMINAL:
+            raise ValueError("T-Bank terminal not configured")
         
-        # Возвращаем fallback URL для тестирования
-        frontend_url = settings.FRONTEND_URL
-        return {
-            "id": order_id,
-            "status": "pending",
-            "confirmation_url": f"{frontend_url}/donate/tbank-test?order_id={order_id}&amount={amount}",
-            "amount": amount,
-            "currency": "RUB"
+        import uuid
+        import hashlib
+        import time
+        
+        # Генерируем уникальный ID заказа
+        order_id = f"order_{int(time.time() * 1000)}_{uuid.uuid4().hex[:8]}"
+        
+        # Подготавливаем данные для создания платежа
+        payment_data = {
+            "TerminalKey": settings.TBANK_TERMINAL,
+            "Amount": int(amount * 100),  # T-Bank ожидает сумму в копейках
+            "OrderId": order_id,
+            "Description": description,
+            "Language": "ru",
+            "Frame": True,
+            "DATA": {
+                "connection_type": "Widget2.0"
+            }
         }
+        
+        # Генерируем токен для подписи
+        token_string = f"{payment_data['TerminalKey']}{payment_data['Amount']}{payment_data['OrderId']}{settings.TBANK_PASSWORD}"
+        token = hashlib.sha256(token_string.encode('utf-8')).hexdigest()
+        payment_data["Token"] = token
+        
+        print(f"T-Bank payment data: {payment_data}")
+        
+        # Отправляем запрос к T-Bank API
+        url = "https://securepay.tinkoff.ru/v2/Init"
+        
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url, json=payment_data)
+                result = response.json()
+                
+                print(f"T-Bank API response: {result}")
+                
+                if result.get("Success"):
+                    return {
+                        "id": result.get("PaymentId", order_id),
+                        "status": "pending",
+                        "confirmation_url": result.get("PaymentURL", f"{settings.FRONTEND_URL}/donate/tbank-test?order_id={order_id}&amount={amount}"),
+                        "amount": amount,
+                        "currency": "RUB",
+                        "order_id": order_id
+                    }
+                else:
+                    error_msg = f"T-Bank payment creation failed: {result}"
+                    print(error_msg)
+                    raise Exception(error_msg)
+                    
+        except Exception as e:
+            print(f"T-Bank API error: {str(e)}")
+            # Fallback на тестовую страницу
+            return {
+                "id": order_id,
+                "status": "pending",
+                "confirmation_url": f"{settings.FRONTEND_URL}/donate/tbank-test?order_id={order_id}&amount={amount}",
+                "amount": amount,
+                "currency": "RUB",
+                "order_id": order_id
+            }
 
     async def check_payment_status(self, payment_id: str) -> str:
         try:

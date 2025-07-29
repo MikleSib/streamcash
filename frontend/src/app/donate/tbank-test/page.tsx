@@ -1,112 +1,110 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
+import TbankPayment from '@/components/TbankPayment';
 
-function TbankTestPaymentContent() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  
-  const orderId = searchParams.get('order_id');
-  const amount = searchParams.get('amount');
+export default function TbankTestPage() {
+  const [showPayment, setShowPayment] = useState(false);
+  const [testData, setTestData] = useState({
+    amount: 100,
+    orderId: `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    donorName: 'Тестовый пользователь'
+  });
 
-  const simulatePayment = async (success: boolean) => {
-    setLoading(true);
-    
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      const response = await fetch(`${apiUrl}/api/v1/payments/webhook/tbank`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          PaymentId: orderId,
-          Status: success ? 'CONFIRMED' : 'CANCELLED',
-          Amount: parseFloat(amount || '0') * 100,
-          OrderId: orderId
-        }),
-      });
+  const handleTestPayment = () => {
+    setShowPayment(true);
+  };
 
-      if (response.ok) {
-        router.push(success ? '/donate/success' : '/donate/failed');
-      } else {
-        alert('Ошибка при обработке платежа');
-      }
-    } catch (error) {
-      console.error('T-Bank payment simulation error:', error);
-      alert('Ошибка при симуляции платежа');
-    } finally {
-      setLoading(false);
-    }
+  const handleSuccess = () => {
+    setShowPayment(false);
+    alert('Платеж успешно создан!');
+  };
+
+  const handleError = (error: string) => {
+    setShowPayment(false);
+    alert(`Ошибка: ${error}`);
+  };
+
+  const handleClose = () => {
+    setShowPayment(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Тестовый платеж T-Bank
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Тест T-Bank интеграции
           </h1>
           <p className="text-gray-600">
-            Симуляция платежа через T-Bank
+            Проверка создания платежа с токеном
           </p>
         </div>
 
-        <div className="bg-gray-50 rounded-lg p-4 mb-6">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-gray-600">Номер заказа:</span>
-            <span className="font-mono text-sm">{orderId}</span>
+        <div className="space-y-4 mb-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Сумма (₽)
+            </label>
+            <input
+              type="number"
+              value={testData.amount}
+              onChange={(e) => setTestData(prev => ({ ...prev, amount: parseInt(e.target.value) || 100 }))}
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-600">Сумма:</span>
-            <span className="font-bold text-lg">{amount} ₽</span>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Имя донатера
+            </label>
+            <input
+              type="text"
+              value={testData.donorName}
+              onChange={(e) => setTestData(prev => ({ ...prev, donorName: e.target.value }))}
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              ID заказа
+            </label>
+            <input
+              type="text"
+              value={testData.orderId}
+              onChange={(e) => setTestData(prev => ({ ...prev, orderId: e.target.value }))}
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
           </div>
         </div>
 
-        <div className="space-y-3">
-          <Button
-            onClick={() => simulatePayment(true)}
-            disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 text-white py-3"
-          >
-            {loading ? 'Обработка...' : 'Успешный платеж'}
-          </Button>
-          
-          <Button
-            onClick={() => simulatePayment(false)}
-            disabled={loading}
-            className="w-full bg-red-600 hover:bg-red-700 text-white py-3"
-          >
-            {loading ? 'Обработка...' : 'Отменить платеж'}
-          </Button>
-        </div>
+        <Button
+          onClick={handleTestPayment}
+          className="w-full py-4 text-lg font-semibold"
+        >
+          Тестировать T-Bank платеж
+        </Button>
 
-        <div className="mt-6 text-center">
-          <p className="text-xs text-gray-500">
-            Это тестовая страница для симуляции платежей T-Bank
-          </p>
+        <div className="mt-4 text-sm text-gray-600">
+          <p>Сумма: {testData.amount} ₽</p>
+          <p>Заказ: {testData.orderId}</p>
+          <p>Донатер: {testData.donorName}</p>
         </div>
       </div>
+
+      {showPayment && (
+        <TbankPayment
+          amount={testData.amount}
+          orderId={testData.orderId}
+          donorName={testData.donorName}
+          description="Тестовый донат"
+          onSuccess={handleSuccess}
+          onError={handleError}
+          onClose={handleClose}
+        />
+      )}
     </div>
-  );
-}
-
-export default function TbankTestPaymentPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    }>
-      <TbankTestPaymentContent />
-    </Suspense>
   );
 } 

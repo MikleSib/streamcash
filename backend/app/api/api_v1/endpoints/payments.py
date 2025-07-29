@@ -1,4 +1,5 @@
 from typing import Any
+import httpx
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app import crud
 from app.core import deps
+from app.core.config import settings
 from app.models.donation import DonationStatus, PaymentMethod
 from app.services.payment_service import PaymentService
 from app.services.websocket_service import notify_new_donation
@@ -44,6 +46,69 @@ async def init_payment(
         }
         
     except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/tbank/init")
+async def init_tbank_payment(
+    request: PaymentInitRequest,
+    db: Session = Depends(deps.get_db),
+) -> Any:
+    """
+    Создание платежа T-Bank с генерацией токена
+    """
+    try:
+        import hashlib
+        import time
+        import uuid
+        
+        # Генерируем уникальный ID заказа
+        order_id = request.order_id or f"order_{int(time.time() * 1000)}_{uuid.uuid4().hex[:8]}"
+        
+        # Подготавливаем данные для создания платежа
+        payment_data = {
+            "TerminalKey": settings.TBANK_TERMINAL,
+            "Amount": int(request.amount * 100),  # T-Bank ожидает сумму в копейках
+            "OrderId": order_id,
+            "Description": request.description,
+            "Language": "ru",
+            "Frame": True,
+            "DATA": {
+                "connection_type": "Widget2.0"
+            }
+        }
+        
+        # Генерируем токен для подписи
+        token_string = f"{payment_data['TerminalKey']}{payment_data['Amount']}{payment_data['OrderId']}{settings.TBANK_PASSWORD}"
+        token = hashlib.sha256(token_string.encode('utf-8')).hexdigest()
+        payment_data["Token"] = token
+        
+        print(f"T-Bank payment data: {payment_data}")
+        
+        # Отправляем запрос к T-Bank API
+        url = "https://securepay.tinkoff.ru/v2/Init"
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, json=payment_data)
+            result = response.json()
+            
+            print(f"T-Bank API response: {result}")
+            
+            if result.get("Success"):
+                return {
+                    "success": True,
+                    "payment_id": result.get("PaymentId", order_id),
+                    "payment_url": result.get("PaymentURL"),
+                    "order_id": order_id,
+                    "amount": request.amount,
+                    "token": token
+                }
+            else:
+                error_msg = f"T-Bank payment creation failed: {result}"
+                print(error_msg)
+                raise HTTPException(status_code=400, detail=error_msg)
+                
+    except Exception as e:
+        print(f"T-Bank API error: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.options("/webhook/test")
