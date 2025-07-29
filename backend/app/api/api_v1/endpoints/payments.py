@@ -89,6 +89,56 @@ async def tinkoff_webhook(
     
         return {"status": "ok"}
 
+@router.post("/webhook/tbank")
+async def tbank_webhook(
+    request: Request,
+    db: Session = Depends(deps.get_db),
+) -> Any:
+    payload = await request.json()
+    print(f"T-Bank webhook payload: {payload}")
+    
+    status = payload.get("status")
+    payment_id = payload.get("payment_id")
+    
+    if not payment_id:
+        return {"status": "error", "message": "No payment_id provided"}
+    
+    donation = crud.donation.get_by_payment_id(db, payment_id=payment_id)
+    if not donation:
+        return {"status": "error", "message": "Donation not found"}
+    
+    if status == "Подтвержден":
+        donation = crud.donation.update(
+            db, 
+            db_obj=donation, 
+            obj_in={"status": DonationStatus.COMPLETED}
+        )
+        
+        streamer = crud.streamer.get(db, id=donation.streamer_id)
+        if streamer:
+            new_total = streamer.current_donations + donation.amount
+            crud.streamer.update(
+                db, 
+                db_obj=streamer, 
+                obj_in={"current_donations": new_total}
+            )
+            
+            await notify_new_donation({
+                "donor_name": donation.donor_name if not donation.is_anonymous else None,
+                "amount": donation.amount,
+                "message": donation.message or "",
+                "is_anonymous": donation.is_anonymous
+            }, streamer.id, db)
+    
+    elif status in ["Отменен", "Возвращен", "Возвращен частично", "Резервирование отменено"]:
+        donation = crud.donation.update(
+            db, 
+            db_obj=donation, 
+            obj_in={"status": DonationStatus.FAILED}
+        )
+    
+    return {"status": "ok"}
+
 @router.post("/webhook/test")
 async def test_webhook(
     request: Request,

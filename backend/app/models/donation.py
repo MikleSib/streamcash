@@ -16,6 +16,7 @@ class PaymentMethod(enum.Enum):
     YOOKASSA = "yookassa"
     SBERBANK = "sberbank"
     TINKOFF = "tinkoff"
+    TBANK = "tbank"
     CARD = "card"
 
 class Donation(Base):

@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     TINKOFF_TERMINAL_KEY: Optional[str] = os.getenv("TINKOFF_TERMINAL_KEY")
     TINKOFF_SECRET_KEY: Optional[str] = os.getenv("TINKOFF_SECRET_KEY")
     
+    TBANK_TERMINAL: Optional[str] = os.getenv("TBANK_TERMINAL", "1753782171950DEMO")
+    TBANK_PASSWORD: Optional[str] = os.getenv("TBANK_PASSWORD", "Hs%8cNP6W&hv%3!^")
+    
     EMAIL_HOST: str = os.getenv("EMAIL_HOST", "localhost")
     EMAIL_PORT: int = int(os.getenv("EMAIL_PORT", "587"))
     EMAIL_HOST_USER: str = os.getenv("EMAIL_HOST_USER", "")

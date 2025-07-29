@@ -25,6 +25,8 @@ class PaymentService:
             return await self._create_tinkoff_payment(amount, description)
         elif payment_method == PaymentMethod.SBERBANK:
             return await self._create_sberbank_payment(amount, description)
+        elif payment_method == PaymentMethod.TBANK:
+            return await self._create_tbank_payment(amount, description)
         else:
             raise ValueError(f"Unsupported payment method: {payment_method}")
 
@@ -138,6 +140,21 @@ class PaymentService:
                 }
             else:
                 raise Exception(f"Sberbank payment creation failed: {result}")
+
+    async def _create_tbank_payment(self, amount: float, description: str) -> Dict[str, Any]:
+        if not settings.TBANK_TERMINAL or not settings.TBANK_PASSWORD:
+            raise ValueError("T-Bank credentials not configured")
+        
+        import uuid
+        payment_id = str(uuid.uuid4())
+        
+        return {
+            "id": payment_id,
+            "status": "pending",
+            "confirmation_url": f"{settings.FRONTEND_URL}/donate/tbank-test?payment_id={payment_id}&amount={amount}",
+            "amount": amount,
+            "currency": "RUB"
+        }
 
     async def check_payment_status(self, payment_id: str) -> str:
         try:
