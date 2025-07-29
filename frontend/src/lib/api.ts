@@ -74,6 +74,8 @@ export const alertAPI = {
   createTier: () => api.post('/alerts/tier'),
   deleteTier: (tierId: string) => api.delete(`/alerts/tier/${tierId}`),
   testAlert: (amount: number) => api.post(`/alerts/test/${amount}`),
+  
+  // Работа с файлами
   uploadAudio: (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
@@ -105,7 +107,15 @@ export const alertAPI = {
     return api.post(`/alerts/preview-audio?${params}`, {}, {
       responseType: 'blob'
     });
-  }
+  },
+  
+  // Работа с множественными гифками
+  addGifToTier: (tierId: string, gifUrl: string) => 
+    api.post(`/alerts/tier/${tierId}/gif?gif_url=${encodeURIComponent(gifUrl)}`),
+  removeGifFromTier: (tierId: string, gifUrl: string) => 
+    api.delete(`/alerts/tier/${tierId}/gif?gif_url=${encodeURIComponent(gifUrl)}`),
+  getTierGifs: (tierId: string) => 
+    api.get(`/alerts/tier/${tierId}/gifs`)
 };
 
 export const paymentAPI = {

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from typing import Optional, List, Any, Dict, Union
 from datetime import datetime
 
@@ -41,9 +41,12 @@ class AlertTier(BaseModel):
     background_color: str = "#1F2937"
     font_size: int = 24
     
-    # Анимация/GIF
+    # Анимация/GIF - теперь поддерживает до 10 гифок
     animation_enabled: bool = False
     animation_type: str = "none"  # none, gif, confetti, fireworks, hearts, sparkles
+    gif_urls: List[str] = []  # До 10 гиф анимаций
+    
+    # Старое поле для обратной совместимости
     gif_url: Optional[str] = None
     
     # Текст
@@ -58,6 +61,19 @@ class AlertTier(BaseModel):
     
     # Элементы макета
     elements: Optional[List[AlertElement]] = None
+    
+    @validator('gif_urls')
+    def validate_gif_urls(cls, v):
+        if len(v) > 10:
+            raise ValueError('Максимум 10 гиф анимаций на уровень')
+        return v
+    
+    def get_random_gif_url(self) -> Optional[str]:
+        """Получить случайную гиф из списка"""
+        if self.gif_urls:
+            import random
+            return random.choice(self.gif_urls)
+        return self.gif_url  # Fallback для обратной совместимости
 
 class AlertSettingsBase(BaseModel):
     alerts_enabled: bool = True

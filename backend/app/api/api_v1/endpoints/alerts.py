@@ -175,11 +175,24 @@ async def get_user_files(
                     "tier_name": tier.get('name', 'Неизвестный уровень')
                 })
             
+            # Поддержка множественных гифок
+            gif_urls = tier.get('gif_urls', [])
+            if gif_urls:
+                for gif_url in gif_urls:
+                    if gif_url and gif_url.startswith('/static/uploads/'):
+                        image_files.append({
+                            "url": gif_url,
+                            "tier_name": tier.get('name', 'Неизвестный уровень')
+                        })
+            
+            # Старое поле для обратной совместимости
             if tier.get('gif_url') and tier['gif_url'].startswith('/static/uploads/'):
-                image_files.append({
-                    "url": tier['gif_url'],
-                    "tier_name": tier.get('name', 'Неизвестный уровень')
-                })
+                # Добавляем только если его нет в gif_urls
+                if tier['gif_url'] not in gif_urls:
+                    image_files.append({
+                        "url": tier['gif_url'],
+                        "tier_name": tier.get('name', 'Неизвестный уровень')
+                    })
         
         # Убираем дубликаты
         audio_files = list({file['url']: file for file in audio_files}.values())
@@ -464,6 +477,154 @@ def delete_tier(
     )
     
     return updated_settings
+
+@router.post("/tier/{tier_id}/gif", response_model=schemas.AlertSettings)
+def add_gif_to_tier(
+    *,
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_active_user),
+    tier_id: str,
+    gif_url: str = Query(..., description="URL гифки для добавления"),
+) -> Any:
+    """
+    Добавить гифку к уровню алерта (максимум 10)
+    """
+    # Получаем текущие настройки
+    settings = crud.alert_settings.get_by_user_id(db, user_id=current_user.id)
+    if not settings:
+        raise HTTPException(status_code=404, detail="Alert settings not found")
+    
+    # Находим нужный тир
+    updated_tiers = []
+    tier_found = False
+    
+    for tier in settings.tiers or []:
+        if tier.get("id") == tier_id:
+            updated_tier = tier.copy()
+            gif_urls = updated_tier.get("gif_urls", [])
+            
+            # Проверяем лимит
+            if len(gif_urls) >= 10:
+                raise HTTPException(status_code=400, detail="Максимум 10 гиф анимаций на уровень")
+            
+            # Проверяем, что гифка не дублируется
+            if gif_url not in gif_urls:
+                gif_urls.append(gif_url)
+                updated_tier["gif_urls"] = gif_urls
+                
+                # Обновляем gif_url для совместимости (если это первая гифка)
+                if len(gif_urls) == 1:
+                    updated_tier["gif_url"] = gif_url
+                
+                # Обновляем элементы анимации
+                if updated_tier.get("elements"):
+                    for element in updated_tier["elements"]:
+                        if element.get("id") == "animation" and element.get("type") == "image":
+                            element["imageUrl"] = gif_urls[0]  # Используем первую гифку по умолчанию
+            
+            updated_tiers.append(updated_tier)
+            tier_found = True
+        else:
+            updated_tiers.append(tier)
+    
+    if not tier_found:
+        raise HTTPException(status_code=404, detail="Tier not found")
+    
+    # Сохраняем обновленные настройки
+    updated_settings = crud.alert_settings.update_by_user_id(
+        db, user_id=current_user.id, obj_in=schemas.AlertSettingsUpdate(tiers=updated_tiers)
+    )
+    
+    return updated_settings
+
+@router.delete("/tier/{tier_id}/gif", response_model=schemas.AlertSettings)
+def remove_gif_from_tier(
+    *,
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_active_user),
+    tier_id: str,
+    gif_url: str = Query(..., description="URL гифки для удаления"),
+) -> Any:
+    """
+    Удалить гифку из уровня алерта
+    """
+    # Получаем текущие настройки
+    settings = crud.alert_settings.get_by_user_id(db, user_id=current_user.id)
+    if not settings:
+        raise HTTPException(status_code=404, detail="Alert settings not found")
+    
+    # Находим нужный тир
+    updated_tiers = []
+    tier_found = False
+    
+    for tier in settings.tiers or []:
+        if tier.get("id") == tier_id:
+            updated_tier = tier.copy()
+            gif_urls = updated_tier.get("gif_urls", [])
+            
+            # Удаляем гифку
+            if gif_url in gif_urls:
+                gif_urls.remove(gif_url)
+                updated_tier["gif_urls"] = gif_urls
+                
+                # Обновляем gif_url для совместимости
+                if gif_urls:
+                    updated_tier["gif_url"] = gif_urls[0]  # Используем первую оставшуюся
+                else:
+                    updated_tier["gif_url"] = None
+                
+                # Обновляем элементы анимации
+                if updated_tier.get("elements"):
+                    for element in updated_tier["elements"]:
+                        if element.get("id") == "animation" and element.get("type") == "image":
+                            if gif_urls:
+                                element["imageUrl"] = gif_urls[0]
+                            else:
+                                element["imageUrl"] = None
+            
+            updated_tiers.append(updated_tier)
+            tier_found = True
+        else:
+            updated_tiers.append(tier)
+    
+    if not tier_found:
+        raise HTTPException(status_code=404, detail="Tier not found")
+    
+    # Сохраняем обновленные настройки
+    updated_settings = crud.alert_settings.update_by_user_id(
+        db, user_id=current_user.id, obj_in=schemas.AlertSettingsUpdate(tiers=updated_tiers)
+    )
+    
+    return updated_settings
+
+@router.get("/tier/{tier_id}/gifs")
+def get_tier_gifs(
+    *,
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_active_user),
+    tier_id: str,
+) -> dict:
+    """
+    Получить список всех гифок уровня алерта
+    """
+    # Получаем текущие настройки
+    settings = crud.alert_settings.get_by_user_id(db, user_id=current_user.id)
+    if not settings:
+        raise HTTPException(status_code=404, detail="Alert settings not found")
+    
+    # Находим нужный тир
+    for tier in settings.tiers or []:
+        if tier.get("id") == tier_id:
+            gif_urls = tier.get("gif_urls", [])
+            return {
+                "tier_id": tier_id,
+                "tier_name": tier.get("name", "Неизвестный уровень"),
+                "gif_urls": gif_urls,
+                "total_gifs": len(gif_urls),
+                "max_gifs": 10
+            }
+    
+    raise HTTPException(status_code=404, detail="Tier not found")
 
 @router.get("/widget/{donation_url}", response_class=HTMLResponse)
 def get_alert_widget(
@@ -758,6 +919,12 @@ def get_alert_widget(
                 setTimeout(() => gif.remove(), 5000);
             }}
             
+            // Функция для выбора случайной гифки из массива
+            function selectRandomGif(gifUrls) {{
+                if (!gifUrls || gifUrls.length === 0) return null;
+                return gifUrls[Math.floor(Math.random() * gifUrls.length)];
+            }}
+            
             // Показ алерта
             function showAlert(donation, tier) {{
                 if (!alertSettings.enabled || !tier) return;
@@ -829,33 +996,44 @@ def get_alert_widget(
                             }}
                             
                             alertElement.appendChild(textElement);
-                        }} else if (element.type === 'image' && element.imageUrl) {{
-                            console.log('Creating image element:', element.id, element.imageUrl);
-                            const imageElement = document.createElement('img');
-                            imageElement.src = element.imageUrl;
-                            imageElement.style.position = 'absolute';
-                            imageElement.style.left = element.x + '%';
-                            imageElement.style.top = element.y + '%';
-                            imageElement.style.transform = 'translate(-50%, -50%)';
-                            imageElement.style.width = (element.width || 120) + 'px';
-                            imageElement.style.height = (element.height || 120) + 'px';
-                            imageElement.style.objectFit = 'contain';
-                            imageElement.style.borderRadius = (element.borderRadius || 0) + 'px';
-                            imageElement.style.zIndex = element.zIndex || 1;
-                            
-                            console.log('Image element styles:', {{
-                                position: imageElement.style.position,
-                                left: imageElement.style.left,
-                                top: imageElement.style.top,
-                                width: imageElement.style.width,
-                                height: imageElement.style.height,
-                                zIndex: imageElement.style.zIndex
-                            }});
-                            
-                            alertElement.appendChild(imageElement);
-                            console.log('Image element added to alert');
                         }} else if (element.type === 'image') {{
-                            console.log('Skipping image element without imageUrl:', element.id);
+                            // Для элементов анимации используем случайную гифку
+                            let imageUrl = element.imageUrl;
+                            
+                            if (element.id === 'animation' && tier.gif_urls && tier.gif_urls.length > 0) {{
+                                // Выбираем случайную гифку из массива
+                                imageUrl = selectRandomGif(tier.gif_urls);
+                                console.log('Selected random GIF for element:', imageUrl, 'from', tier.gif_urls.length, 'options');
+                            }}
+                            
+                            if (imageUrl) {{
+                                console.log('Creating image element:', element.id, imageUrl);
+                                const imageElement = document.createElement('img');
+                                imageElement.src = imageUrl;
+                                imageElement.style.position = 'absolute';
+                                imageElement.style.left = element.x + '%';
+                                imageElement.style.top = element.y + '%';
+                                imageElement.style.transform = 'translate(-50%, -50%)';
+                                imageElement.style.width = (element.width || 120) + 'px';
+                                imageElement.style.height = (element.height || 120) + 'px';
+                                imageElement.style.objectFit = 'contain';
+                                imageElement.style.borderRadius = (element.borderRadius || 0) + 'px';
+                                imageElement.style.zIndex = element.zIndex || 1;
+                                
+                                console.log('Image element styles:', {{
+                                    position: imageElement.style.position,
+                                    left: imageElement.style.left,
+                                    top: imageElement.style.top,
+                                    width: imageElement.style.width,
+                                    height: imageElement.style.height,
+                                    zIndex: imageElement.style.zIndex
+                                }});
+                                
+                                alertElement.appendChild(imageElement);
+                                console.log('Image element added to alert');
+                            }} else {{
+                                console.log('Skipping image element without imageUrl:', element.id);
+                            }}
                         }}
                     }});
                 }} else {{

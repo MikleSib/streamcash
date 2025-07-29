@@ -66,36 +66,30 @@ interface AlertTier {
   min_amount: number;
   max_amount?: number;
   
-  // Звук
   sound_enabled: boolean;
   sound_file_url?: string;
   sound_volume: number;
-  sound_start_time: number;
+  sound_start_time?: number;
   sound_end_time?: number;
   
-  // Визуальное оформление
   visual_enabled: boolean;
   alert_duration: number;
   text_color: string;
   background_color: string;
   font_size: number;
   
-  // Анимация/GIF
   animation_enabled: boolean;
   animation_type: 'none' | 'gif' | 'confetti' | 'fireworks' | 'hearts' | 'sparkles';
   gif_url?: string;
+  gif_urls?: string[];  // Новое поле для множественных гифок
   
-  // Текст
   text_template: string;
-  
-  // Дополнительные эффекты
   screen_shake: boolean;
   highlight_color?: string;
   
   icon: string;
   color: string;
   
-  // Элементы макета
   elements?: AlertElement[];
 }
 
@@ -134,6 +128,34 @@ export default function AlertSettingsPage() {
   const [previewTier, setPreviewTier] = useState<string | null>(null);
   const [userFiles, setUserFiles] = useState<{audio_files: any[], image_files: any[]}>({audio_files: [], image_files: []});
   const [streamerProfile, setStreamerProfile] = useState<any>(null);
+
+  const addGifByUrl = async (tierId: string) => {
+    const inputElement = document.getElementById(`gif-url-input-${tierId}`) as HTMLInputElement;
+    const gifUrl = inputElement?.value.trim();
+    
+    if (!gifUrl) {
+      toast.error('Введите ссылку на GIF');
+      return;
+    }
+    
+    const currentTier = settings.tiers?.find(tier => tier.id === tierId);
+    if (!currentTier) return;
+    
+    const currentGifUrls = currentTier.gif_urls || [];
+    if (currentGifUrls.includes(gifUrl)) {
+      toast.error('Эта GIF уже добавлена');
+      return;
+    }
+    
+    const updatedGifUrls = [...currentGifUrls, gifUrl];
+    updateTier(tierId, { 
+      gif_urls: updatedGifUrls,
+      gif_url: updatedGifUrls[0]
+    });
+    
+    inputElement.value = '';
+    toast.success('GIF добавлена!');
+  };
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -922,96 +944,164 @@ export default function AlertSettingsPage() {
                           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-600">
                             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
                               <Image className="w-4 h-4 inline mr-1" />
-                              GIF или изображение
+                              GIF анимации (до 10 штук)
                             </label>
+                            
                             <div className="space-y-4">
-                              <input
-                                type="url"
-                                value={currentTier.gif_url || ''}
-                                onChange={(e) => updateTier(currentTier.id, { gif_url: e.target.value })}
-                                placeholder="https://example.com/animation.gif"
-                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
-                              />
+                              {/* Отображение существующих гифок */}
+                              {currentTier.gif_urls && currentTier.gif_urls.length > 0 && (
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                                  {currentTier.gif_urls.map((gifUrl, index) => (
+                                    <div key={index} className="relative group">
+                                      <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-3 border border-gray-200 dark:border-gray-600">
+                                        <img
+                                          src={gifUrl}
+                                          alt={`GIF анимация ${index + 1}`}
+                                          className="w-full h-24 object-contain rounded-lg"
+                                          onError={(e) => {
+                                            e.currentTarget.style.display = 'none';
+                                          }}
+                                        />
+                                        <button
+                                          onClick={async () => {
+                                            try {
+                                              const updatedGifUrls = currentTier.gif_urls?.filter((_, i) => i !== index) || [];
+                                              updateTier(currentTier.id, { 
+                                                gif_urls: updatedGifUrls,
+                                                gif_url: updatedGifUrls.length > 0 ? updatedGifUrls[0] : undefined
+                                              });
+                                              toast.success('GIF удалена!');
+                                            } catch (error) {
+                                              toast.error('Ошибка при удалении GIF');
+                                            }
+                                          }}
+                                          className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                          <XCircle className="w-4 h-4" />
+                                        </button>
+                                      </div>
+                                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-center">
+                                        GIF {index + 1}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
                               
-                              <div className="flex items-center justify-center py-2">
-                                <span className="px-4 py-1 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-sm rounded-full">или</span>
-                              </div>
+                              {/* Добавление новой гифки */}
+                              {(!currentTier.gif_urls || currentTier.gif_urls.length < 10) && (
+                                <div className="space-y-4">
+                                  <div className="flex space-x-3">
+                                    <input
+                                      type="url"
+                                      placeholder="https://example.com/animation.gif"
+                                      className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                                      id={`gif-url-input-${currentTier.id}`}
+                                      onKeyPress={(e) => {
+                                        if (e.key === 'Enter') {
+                                          addGifByUrl(currentTier.id);
+                                        }
+                                      }}
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => addGifByUrl(currentTier.id)}
+                                      className="px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl transition-all duration-200 font-medium shadow-md hover:shadow-lg flex items-center whitespace-nowrap"
+                                    >
+                                      <Plus className="w-4 h-4 mr-2" />
+                                      Добавить GIF
+                                    </button>
+                                  </div>
+                                  
+                                  <div className="flex items-center justify-center py-2">
+                                    <span className="px-4 py-1 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-sm rounded-full">или</span>
+                                  </div>
+                                  
+                                  <div className="flex items-center space-x-3">
+                                    <input
+                                      type="file"
+                                      accept=".gif,.png,.jpg,.jpeg,.webp"
+                                      multiple
+                                      onChange={async (e) => {
+                                        const files = Array.from(e.target.files || []);
+                                        if (files.length === 0) return;
+                                        
+                                        const currentGifUrls = currentTier.gif_urls || [];
+                                        if (currentGifUrls.length + files.length > 10) {
+                                          toast.error(`Максимум 10 GIF анимаций. У вас уже ${currentGifUrls.length}, можно добавить еще ${10 - currentGifUrls.length}`);
+                                          return;
+                                        }
+                                        
+                                        try {
+                                          toast.info(`Загружаем ${files.length} файл${files.length > 1 ? 'ов' : ''}...`);
+                                          const uploadPromises = files.map(file => alertAPI.uploadImage(file));
+                                          const responses = await Promise.all(uploadPromises);
+                                          
+                                          const newGifUrls = responses.map(response => response.data.file_url);
+                                          const updatedGifUrls = [...currentGifUrls, ...newGifUrls];
+                                          
+                                          updateTier(currentTier.id, { 
+                                            gif_urls: updatedGifUrls,
+                                            gif_url: updatedGifUrls[0]
+                                          });
+                                          
+                                          await loadUserFiles();
+                                          toast.success(`${files.length} файл${files.length > 1 ? 'ов' : ''} загружено!`);
+                                        } catch (error: any) {
+                                          const errorMessage = error.response?.data?.detail || 'Ошибка загрузки файлов';
+                                          toast.error(errorMessage);
+                                        }
+                                        
+                                        e.target.value = '';
+                                      }}
+                                      className="hidden"
+                                      id={`gif-upload-${currentTier.id}`}
+                                    />
+                                    <label
+                                      htmlFor={`gif-upload-${currentTier.id}`}
+                                      className="px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl cursor-pointer transition-all duration-200 font-medium shadow-md hover:shadow-lg flex items-center"
+                                    >
+                                      <Image className="w-4 h-4 mr-2" />
+                                      Загрузить GIF
+                                    </label>
+                                    
+                                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                                      {currentTier.gif_urls?.length || 0} / 10 GIF
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                               
-                              <div className="flex items-center space-x-3">
-                                <input
-                                  type="file"
-                                  accept=".gif,.png,.jpg,.jpeg,.webp"
-                                  onChange={async (e) => {
-                                     const file = e.target.files?.[0];
-                                     if (file) {
-                                       try {
-                                         toast.info('Загружаем изображение...');
-                                         const response = await alertAPI.uploadImage(file);
-                                         updateTier(currentTier.id, { gif_url: response.data.file_url });
-                                         await loadUserFiles();
-                                         toast.success('Изображение загружено!');
-                                       } catch (error: any) {
-                                         const errorMessage = error.response?.data?.detail || 'Ошибка загрузки файла';
-                                         toast.error(errorMessage);
-                                       }
-                                     }
-                                   }}
-                                  className="hidden"
-                                  id={`image-upload-${currentTier.id}`}
-                                />
-                                <label
-                                  htmlFor={`image-upload-${currentTier.id}`}
-                                  className="px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl cursor-pointer transition-all duration-200 font-medium shadow-md hover:shadow-lg flex items-center"
-                                >
-                                  <Image className="w-4 h-4 mr-2" />
-                                  Загрузить файл
-                                </label>
-                                
-                                {currentTier.gif_url && currentTier.gif_url.startsWith('/static/uploads/') && (
-                                  <button
-                                    type="button"
-                                    onClick={async () => {
-                                      try {
-                                        await alertAPI.deleteFile(currentTier.gif_url!);
-                                        updateTier(currentTier.id, { gif_url: '' });
-                                        await loadUserFiles();
-                                        toast.success('Файл удален!');
-                                      } catch (error: any) {
-                                        const errorMessage = error.response?.data?.detail || 'Ошибка удаления файла';
-                                        toast.error(errorMessage);
-                                      }
-                                    }}
-                                    className="p-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
-                                    title="Удалить файл"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </button>
-                                )}
-                              </div>
-                              
-                              {!currentTier.gif_url && (
+                              {/* Информационные подсказки */}
+                              {(!currentTier.gif_urls || currentTier.gif_urls.length === 0) && (
                                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
                                   <div className="flex items-center">
                                     <Lightbulb className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-3" />
                                     <p className="text-blue-800 dark:text-blue-200 text-sm">
-                                      <strong>Совет:</strong> Используйте анимированные GIF для лучшего эффекта
+                                      <strong>Совет:</strong> Добавьте до 10 GIF анимаций. При донате будет показана случайная из них!
                                     </p>
                                   </div>
                                 </div>
                               )}
                               
-                              {currentTier.gif_url && (
-                                <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
-                                  <p className="text-gray-700 dark:text-gray-300 text-sm font-semibold mb-3">Предпросмотр:</p>
-                                  <div className="flex justify-center">
-                                    <img
-                                      src={currentTier.gif_url}
-                                      alt="Предпросмотр анимации"
-                                      className="max-w-full max-h-40 rounded-lg shadow-md"
-                                      onError={(e) => {
-                                        e.currentTarget.style.display = 'none';
-                                      }}
-                                    />
+                              {currentTier.gif_urls && currentTier.gif_urls.length >= 10 && (
+                                <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl p-4">
+                                  <div className="flex items-center">
+                                    <Info className="w-5 h-5 text-orange-600 dark:text-orange-400 mr-3" />
+                                    <p className="text-orange-800 dark:text-orange-200 text-sm">
+                                      Достигнут лимит в 10 GIF анимаций для этого уровня
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {currentTier.gif_urls && currentTier.gif_urls.length > 1 && (
+                                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
+                                  <div className="flex items-center">
+                                    <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mr-3" />
+                                    <p className="text-green-800 dark:text-green-200 text-sm">
+                                      <strong>Отлично!</strong> При донате будет показана случайная GIF из {currentTier.gif_urls.length} добавленных
+                                    </p>
                                   </div>
                                 </div>
                               )}

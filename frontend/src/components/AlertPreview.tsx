@@ -42,6 +42,7 @@ interface AlertTier {
   animation_enabled: boolean;
   animation_type: 'none' | 'gif' | 'confetti' | 'fireworks' | 'hearts' | 'sparkles';
   gif_url?: string;
+  gif_urls?: string[];
   
   text_template: string;
   screen_shake: boolean;
@@ -77,9 +78,9 @@ export function AlertPreview({ tier, onTierUpdate, isVisible, className = '', hi
       y: 10,
       width: 120,
       height: 120,
-      visible: tier.animation_enabled && !!tier.gif_url,
+      visible: tier.animation_enabled && (!!tier.gif_urls?.length || !!tier.gif_url),
       zIndex: 3,
-      imageUrl: tier.gif_url || 'https://media.giphy.com/media/26u4cqiYI30juCOGY/giphy.gif',
+      imageUrl: tier.gif_urls?.length ? tier.gif_urls[0] : (tier.gif_url || 'https://media.giphy.com/media/26u4cqiYI30juCOGY/giphy.gif'),
     },
     {
       id: 'donor-info',

@@ -24,6 +24,8 @@ def create_default_tier() -> Dict[str, Any]:
         "font_size": 24,
         "animation_enabled": True,
         "animation_type": "sparkles",
+        "gif_urls": ["https://media.giphy.com/media/26u4cqiYI30juCOGY/giphy.gif"],  # Новое поле для множественных гифок
+        "gif_url": "https://media.giphy.com/media/26u4cqiYI30juCOGY/giphy.gif",  # Оставляем для обратной совместимости
         "text_template": "🎉 {donor_name} донатит {amount}₽! {message}",
         "screen_shake": False,
         "icon": "Star",

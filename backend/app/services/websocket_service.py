@@ -1,4 +1,5 @@
 import json
+import random
 from typing import List, Dict, Optional
 from fastapi import WebSocket
 from sqlalchemy.orm import Session
@@ -86,12 +87,31 @@ async def notify_new_donation(donation_data: dict, streamer_id: int, db: Session
     
     # Добавляем информацию о тире, если он найден
     if tier:
-        message_data["tier"] = tier
-        print(f"Sending tier with elements: {tier.get('id')} - elements: {bool(tier.get('elements'))}")
+        # Создаем копию тира для модификации
+        tier_data = tier.copy()
+        
+        # Выбираем случайную гифку из gif_urls
+        gif_urls = tier_data.get("gif_urls", [])
+        if gif_urls:
+            selected_gif_url = random.choice(gif_urls)
+            print(f"Selected random GIF: {selected_gif_url} from {len(gif_urls)} available")
+            
+            # Обновляем gif_url для совместимости
+            tier_data["gif_url"] = selected_gif_url
+            
+            # Обновляем элементы, если есть анимация
+            if tier_data.get("elements"):
+                for element in tier_data["elements"]:
+                    if element.get("id") == "animation" and element.get("type") == "image":
+                        element["imageUrl"] = selected_gif_url
+                        print(f"Updated animation element with selected GIF: {selected_gif_url}")
+        
+        message_data["tier"] = tier_data
+        print(f"Sending tier with elements: {tier_data.get('id')} - elements: {bool(tier_data.get('elements'))}")
         
         # Форматируем текст сообщения согласно шаблону тира
-        if tier.get("text_template"):
-            formatted_text = tier["text_template"].format(
+        if tier_data.get("text_template"):
+            formatted_text = tier_data["text_template"].format(
                 donor_name=donation_data.get("donor_name", "Аноним"),
                 amount=donation_data.get("amount", 0),
                 message=donation_data.get("message", "")
