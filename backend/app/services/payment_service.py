@@ -175,9 +175,9 @@ class PaymentService:
             }
         }
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(verify=False) as client:
             try:
-                print(f"T-Bank API request to: {url}")
+                print(f"T-Bank API request to: {url} (SSL verification disabled)")
                 print(f"T-Bank API data: {data}")
                 
                 response = await client.post(url, json=data, timeout=30.0)
