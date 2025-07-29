@@ -12,7 +12,7 @@ import uuid
 # Настройки
 API_URL = "http://localhost:8000"
 TBANK_TERMINAL = "1753782171950DEMO"
-TBANK_PASSWORD = "Hs%8cNP6W&hv%3!^"
+TBANK_SECRET_KEY = "Hs%8cNP6W&hv%3!^"
 
 def test_tbank_init():
     """Тест создания платежа через наш API"""
@@ -71,7 +71,7 @@ def test_direct_tbank():
     }
     
     # Генерируем токен
-    token_string = f"{payment_data['TerminalKey']}{payment_data['Amount']}{payment_data['OrderId']}{TBANK_PASSWORD}"
+    token_string = f"{payment_data['TerminalKey']}{payment_data['Amount']}{payment_data['OrderId']}{TBANK_SECRET_KEY}"
     token = hashlib.sha256(token_string.encode('utf-8')).hexdigest()
     payment_data["Token"] = token
     

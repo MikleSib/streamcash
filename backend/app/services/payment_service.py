@@ -169,7 +169,7 @@ class PaymentService:
         }
         
         # Генерируем токен для подписи
-        token_string = f"{payment_data['TerminalKey']}{payment_data['Amount']}{payment_data['OrderId']}{settings.TBANK_PASSWORD}"
+        token_string = f"{payment_data['TerminalKey']}{payment_data['Amount']}{payment_data['OrderId']}{settings.TBANK_SECRET_KEY}"
         token = hashlib.sha256(token_string.encode('utf-8')).hexdigest()
         payment_data["Token"] = token
         

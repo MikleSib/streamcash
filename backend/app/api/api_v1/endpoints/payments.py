@@ -70,13 +70,13 @@ async def init_tbank_payment(
         if not settings.TBANK_TERMINAL:
             raise HTTPException(status_code=400, detail="T-Bank terminal не настроен")
         
-        if not settings.TBANK_PASSWORD:
-            raise HTTPException(status_code=400, detail="T-Bank password не настроен")
+        if not settings.TBANK_SECRET_KEY:
+            raise HTTPException(status_code=400, detail="T-Bank secret key не настроен")
         
         # Генерируем уникальный ID заказа
         order_id = request.order_id or f"order_{int(time.time() * 1000)}_{uuid.uuid4().hex[:8]}"
         
-        print(f"🔧 Настройки T-Bank: Terminal={settings.TBANK_TERMINAL}, Password={'*' * len(settings.TBANK_PASSWORD) if settings.TBANK_PASSWORD else 'None'}")
+        print(f"🔧 Настройки T-Bank: Terminal={settings.TBANK_TERMINAL}, SecretKey={'*' * len(settings.TBANK_SECRET_KEY) if settings.TBANK_SECRET_KEY else 'None'}")
         
         # Подготавливаем данные для создания платежа
         payment_data = {
@@ -92,7 +92,7 @@ async def init_tbank_payment(
         }
         
         # Генерируем токен для подписи
-        token_string = f"{payment_data['TerminalKey']}{payment_data['Amount']}{payment_data['OrderId']}{settings.TBANK_PASSWORD}"
+        token_string = f"{payment_data['TerminalKey']}{payment_data['Amount']}{payment_data['OrderId']}{settings.TBANK_SECRET_KEY}"
         token = hashlib.sha256(token_string.encode('utf-8')).hexdigest()
         payment_data["Token"] = token
         

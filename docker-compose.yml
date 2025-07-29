@@ -58,6 +58,7 @@ services:
       - TINKOFF_SECRET_KEY=${TINKOFF_SECRET_KEY:-}
       - TBANK_TERMINAL=${TBANK_TERMINAL:-1753782171950DEMO}
       - TBANK_PASSWORD=${TBANK_PASSWORD:-Hs%8cNP6W&hv%3!^}
+      - TBANK_SECRET_KEY=${TBANK_SECRET_KEY:-Hs%8cNP6W&hv%3!^}
     depends_on:
       - db
       - redis
