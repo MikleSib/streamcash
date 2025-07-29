@@ -151,15 +151,19 @@ class PaymentService:
         # Правильный API endpoint согласно документации Т-банка
         url = "https://securepay.tbank.ru/Init"
         
+        # Используем punycode для URL чтобы избежать проблем с кодировкой
+        api_url = settings.API_URL.replace("https://стримкэш.рф", "https://xn--h1aefoeg0czb.xn--p1ai")
+        frontend_url = settings.FRONTEND_URL.replace("https://стримкэш.рф", "https://xn--h1aefoeg0czb.xn--p1ai")
+        
         data = {
             "TerminalKey": settings.TBANK_TERMINAL,
             "Amount": int(amount * 100),
             "OrderId": order_id,
             "Description": description,
             "Language": "ru",
-            "NotificationURL": f"{settings.API_URL}{settings.API_V1_STR}/payments/webhook/tbank",
-            "SuccessURL": f"{settings.FRONTEND_URL}/donate/success",
-            "FailURL": f"{settings.FRONTEND_URL}/donate/failed",
+            "NotificationURL": f"{api_url}{settings.API_V1_STR}/payments/webhook/tbank",
+            "SuccessURL": f"{frontend_url}/donate/success",
+            "FailURL": f"{frontend_url}/donate/failed",
             "Receipt": {
                 "Email": "donations@streamcash.ru",
                 "Taxation": "usn_income",
@@ -180,8 +184,8 @@ class PaymentService:
             "Accept": "application/json, text/plain, */*",
             "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8",
             "Content-Type": "application/json",
-            "Origin": "https://стримкэш.рф",
-            "Referer": "https://стримкэш.рф/"
+            "Origin": "https://xn--h1aefoeg0czb.xn--p1ai",
+            "Referer": "https://xn--h1aefoeg0czb.xn--p1ai/"
         }
         
         import asyncio
@@ -221,10 +225,11 @@ class PaymentService:
                 # Если Т-банк недоступен, возвращаем тестовую страницу
                 if "503" in str(e) or "DDoS-Guard" in str(e):
                     print("T-Bank API недоступен (DDoS-Guard), возвращаем тестовую страницу")
+                    fallback_url = frontend_url.replace("https://стримкэш.рф", "https://xn--h1aefoeg0czb.xn--p1ai")
                     return {
                         "id": order_id,
                         "status": "pending",
-                        "confirmation_url": f"{settings.FRONTEND_URL}/donate/tbank-test?order_id={order_id}&amount={amount}",
+                        "confirmation_url": f"{fallback_url}/donate/tbank-test?order_id={order_id}&amount={amount}",
                         "amount": amount,
                         "currency": "RUB"
                     }
