@@ -40,6 +40,7 @@ services:
       - "8000:8000"
     extra_hosts:
       - "securepay.tbank.ru:185.178.208.12"
+      - "rest-api-test.tinkoff.ru:185.178.208.12"
     environment:
       - DATABASE_URL=postgresql://postgres:streamcash_dev_2024@db:5432/streamcash_dev
       - REDIS_URL=redis://redis:6379
@@ -57,9 +58,9 @@ services:
       - SBERBANK_PASSWORD=${SBERBANK_PASSWORD:-}
       - TINKOFF_TERMINAL_KEY=${TINKOFF_TERMINAL_KEY:-}
       - TINKOFF_SECRET_KEY=${TINKOFF_SECRET_KEY:-}
-      - TBANK_TERMINAL=${TBANK_TERMINAL:-1753782171950DEMO}
-      - TBANK_PASSWORD=${TBANK_PASSWORD:-Hs%8cNP6W&hv%3!^}
-      - TBANK_SECRET_KEY=${TBANK_SECRET_KEY:-Hs%8cNP6W&hv%3!^}
+      - TBANK_TERMINAL=${TBANK_TERMINAL:-TinkoffBankTest}
+      - TBANK_PASSWORD=${TBANK_PASSWORD:-TinkoffBankTest}
+      - TBANK_SECRET_KEY=${TBANK_SECRET_KEY:-TinkoffBankTest}
       - TBANK_MERCHANT_ID=${TBANK_MERCHANT_ID:-200000001669463}
       - TBANK_TERMINAL_ID=${TBANK_TERMINAL_ID:-25786674}
     depends_on:

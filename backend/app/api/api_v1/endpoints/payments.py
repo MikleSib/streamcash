@@ -131,11 +131,34 @@ async def init_tbank_payment(
         # Отправляем запрос к T-Bank API (тестовая среда)
         url = "https://rest-api-test.tinkoff.ru/v2/Init"
         
-        async with httpx.AsyncClient() as client:
+        # Заголовки согласно документации
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": "StreamCash/1.0"
+        }
+        
+        async with httpx.AsyncClient(timeout=30.0) as client:
             print(f"🌐 Отправляем запрос на URL: {url}")
             print(f"📤 Данные запроса: {payment_data}")
+            print(f"📤 Заголовки: {headers}")
             
-            response = await client.post(url, json=payment_data)
+            # Проверим доступность хоста
+            try:
+                test_response = await client.get("https://rest-api-test.tinkoff.ru/", timeout=10.0)
+                print(f"🔍 Тестовый запрос к хосту: статус {test_response.status_code}")
+            except Exception as e:
+                print(f"❌ Хост недоступен: {e}")
+            
+            # Попробуем разные способы отправки
+            try:
+                # Способ 1: JSON в теле запроса
+                response = await client.post(url, json=payment_data, headers=headers)
+            except Exception as e:
+                print(f"❌ Ошибка при отправке JSON: {e}")
+                # Способ 2: Данные как строка JSON
+                import json
+                headers["Content-Type"] = "application/json"
+                response = await client.post(url, data=json.dumps(payment_data), headers=headers)
             
             print(f"📥 Статус ответа: {response.status_code}")
             print(f"📥 Заголовки ответа: {dict(response.headers)}")
