@@ -118,7 +118,28 @@ export default function StreamerRulesPage() {
                 5.4. Запрещается просить донаты для незаконных целей.
               </p>
 
-              <h2 className="text-2xl font-bold text-white mb-6">6. Настройки уведомлений</h2>
+              <h2 className="text-2xl font-bold text-white mb-6">6. Безопасные сделки</h2>
+              <p className="text-gray-300 mb-4">
+                6.1. Стример может предлагать услуги через сервис «Безопасная сделка»:
+              </p>
+              <ul className="text-gray-300 mb-4 list-disc list-inside space-y-2">
+                <li>Персональные стримы и игровые сессии</li>
+                <li>Обучение игровым навыкам и консультации</li>
+                <li>Создание пользовательского контента</li>
+                <li>Буст-услуги в играх</li>
+                <li>Другие цифровые услуги</li>
+              </ul>
+              <p className="text-gray-300 mb-4">
+                6.2. Комиссия за безопасные сделки составляет 10% от суммы сделки.
+              </p>
+              <p className="text-gray-300 mb-4">
+                6.3. Стример обязан выполнить услугу в заявленные сроки и предоставить доказательства выполнения.
+              </p>
+              <p className="text-gray-300 mb-6">
+                6.4. При невыполнении обязательств средства возвращаются покупателю, а стример может быть заблокирован.
+              </p>
+
+              <h2 className="text-2xl font-bold text-white mb-6">7. Настройки уведомлений</h2>
               <p className="text-gray-300 mb-4">
                 6.1. Стример может настраивать уведомления о донатах в личном кабинете.
               </p>
@@ -129,7 +150,7 @@ export default function StreamerRulesPage() {
                 6.3. Уведомления отображаются в OBS через браузерный источник.
               </p>
 
-              <h2 className="text-2xl font-bold text-white mb-6">7. Нарушения и санкции</h2>
+              <h2 className="text-2xl font-bold text-white mb-6">8. Нарушения и санкции</h2>
               <p className="text-gray-300 mb-4">
                 7.1. За нарушение правил могут применяться санкции:
               </p>
@@ -140,7 +161,7 @@ export default function StreamerRulesPage() {
                 <li>Блокировка выплат</li>
               </ul>
 
-              <h2 className="text-2xl font-bold text-white mb-6">8. Контактная информация</h2>
+              <h2 className="text-2xl font-bold text-white mb-6">9. Контактная информация</h2>
           
               <p className="text-gray-300 mb-2">
                 <strong>Название организации:</strong><br />

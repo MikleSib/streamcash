@@ -73,12 +73,13 @@ export default function DonorRulesPage() {
               <p className="text-gray-300 mb-4">
                 2.1. Донаты принимаются через следующие способы оплаты:
               </p>
-              <ul className="text-gray-300 mb-6 list-disc list-inside space-y-2">
-                <li>Банковские карты (Visa, MasterCard, МИР)</li>
-                <li>Электронные кошельки (ЮMoney, QIWI)</li>
-                <li>Мобильные платежи</li>
-                <li>Криптовалюты (Bitcoin, Ethereum)</li>
+              <ul className="text-gray-300 mb-4 list-disc list-inside space-y-2">
+                <li>Банковские карты (МИР)</li>
+                <li>Электронные кошельки (ЮMoney, Яндекс.Деньги)</li>
               </ul>
+              <p className="text-gray-300 mb-6">
+                2.2. Для безопасных сделок используются те же способы оплаты с дополнительной защитой средств.
+              </p>
 
               <h2 className="text-2xl font-bold text-white mb-6">3. Минимальные суммы</h2>
               <p className="text-gray-300 mb-4">
@@ -96,21 +97,33 @@ export default function DonorRulesPage() {
                 4.1. Комиссия платформы составляет 5% от суммы доната.
               </p>
               <p className="text-gray-300 mb-4">
-                4.2. Дополнительные комиссии могут взиматься платежными системами.
+                4.2. Комиссия за безопасные сделки составляет 10% от суммы сделки (включает все платёжные комиссии).
+              </p>
+              <p className="text-gray-300 mb-4">
+                4.3. Дополнительные комиссии могут взиматься платежными системами.
               </p>
               <p className="text-gray-300 mb-6">
-                4.3. Комиссии отображаются перед подтверждением платежа.
+                4.4. Комиссии отображаются перед подтверждением платежа.
               </p>
 
               <h2 className="text-2xl font-bold text-white mb-6">5. Возврат средств</h2>
               <p className="text-gray-300 mb-4">
                 5.1. Возврат средств возможен в следующих случаях:
               </p>
-              <ul className="text-gray-300 mb-6 list-disc list-inside space-y-2">
+              <ul className="text-gray-300 mb-4 list-disc list-inside space-y-2">
                 <li>Техническая ошибка при обработке платежа</li>
                 <li>Двойное списание средств</li>
                 <li>Недоставка уведомления стримеру</li>
                 <li>Нарушение правил стримером</li>
+              </ul>
+              <p className="text-gray-300 mb-4">
+                5.2. Для безопасных сделок возврат средств гарантируется при:
+              </p>
+              <ul className="text-gray-300 mb-6 list-disc list-inside space-y-2">
+                <li>Невыполнении услуги в заявленные сроки</li>
+                <li>Несоответствии качества услуги описанию</li>
+                <li>Нарушении условий сделки исполнителем</li>
+                <li>Технических проблемах, препятствующих выполнению</li>
               </ul>
 
               <h2 className="text-2xl font-bold text-white mb-6">6. Запрещенные действия</h2>
