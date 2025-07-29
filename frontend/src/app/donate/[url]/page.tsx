@@ -8,13 +8,13 @@ import { api } from '@/lib/api';
 
 interface Streamer {
   id: number;
-  name: string;
-  url: string;
+  display_name: string;
+  donation_url: string;
   current_donations: number;
   total_donations: number;
-  description?: string;
+  stream_description?: string;
   avatar_url?: string;
-  goal?: number;
+  donation_goal?: number;
 }
 
 interface AlertTier {
@@ -67,12 +67,22 @@ function DonationContent() {
   }, [donationUrl]);
 
   const loadStreamerData = async () => {
+    console.log('Loading streamer data for URL:', donationUrl);
     try {
       const response = await streamerAPI.getByUrl(donationUrl);
+      console.log('Streamer API response:', response);
       const streamerData = response.data;
-      if (!streamerData.goal) {
-        streamerData.goal = 50000;
+      
+      if (!streamerData) {
+        console.error('No streamer data received');
+        setError('Стример не найден');
+        return;
       }
+      
+      if (!streamerData.donation_goal) {
+        streamerData.donation_goal = 50000;
+      }
+      console.log('Setting streamer data:', streamerData);
       setStreamer(streamerData);
       
       try {
@@ -90,8 +100,10 @@ function DonationContent() {
         console.error('Не удалось загрузить настройки алертов:', alertError);
       }
     } catch (error) {
+      console.error('Error loading streamer data:', error);
       setError('Стример не найден');
     } finally {
+      console.log('Setting loading to false');
       setLoading(false);
     }
   };
@@ -123,7 +135,7 @@ function DonationContent() {
           amount: donationData.amount,
           order_id: orderId,
           payment_method: 'tbank',
-          description: `Донат для ${streamer?.name || 'стримера'}`
+          description: `Донат для ${streamer?.display_name || 'стримера'}`
         });
 
         if (response.data.success && response.data.payment_url) {
@@ -173,7 +185,7 @@ function DonationContent() {
     );
   }
 
-  const progressPercentage = streamer.goal ? (streamer.total_donations / streamer.goal) * 100 : 0;
+  const progressPercentage = streamer.donation_goal ? (streamer.total_donations / streamer.donation_goal) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4">
@@ -184,11 +196,11 @@ function DonationContent() {
             <div className="flex items-center mb-6">
               <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center mr-4">
                 <span className="text-white text-2xl font-bold">
-                  {streamer.name.charAt(0).toUpperCase()}
+                  {streamer.display_name?.charAt(0).toUpperCase() || 'S'}
                 </span>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">{streamer.name}</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{streamer.display_name}</h1>
                 <div className="flex items-center">
                   <div className="w-2 h-2 bg-gray-400 rounded-full mr-2"></div>
                   <span className="text-gray-600 text-sm">ОФЛАЙН</span>
@@ -199,7 +211,7 @@ function DonationContent() {
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Стрим о стриме</h3>
               <p className="text-gray-600">
-                {streamer.description || 'Описание стрима Описание стрима'}
+                {streamer.stream_description || 'Описание стрима Описание стрима'}
               </p>
             </div>
 
@@ -222,7 +234,7 @@ function DonationContent() {
                   <span className="text-sm font-medium text-gray-700">Цель сбора</span>
                 </div>
                 <span className="text-lg font-bold text-green-600">
-                  {(streamer.goal || 50000).toLocaleString()} ₽
+                  {(streamer.donation_goal || 50000).toLocaleString()} ₽
                 </span>
               </div>
               <div className="w-full bg-green-200 rounded-full h-2 mt-2">
