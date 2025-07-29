@@ -128,8 +128,8 @@ async def init_tbank_payment(
         
         print(f"T-Bank payment data: {payment_data}")
         
-        # Отправляем запрос к T-Bank API (тестовая среда)
-        url = "https://rest-api-test.tinkoff.ru/v2/Init"
+        # Отправляем запрос к T-Bank API (боевая среда для DEMO терминала)
+        url = "https://securepay.tinkoff.ru/v2/Init"
         
         # Заголовки согласно документации
         headers = {
@@ -144,7 +144,7 @@ async def init_tbank_payment(
             
             # Проверим доступность хоста
             try:
-                test_response = await client.get("https://rest-api-test.tinkoff.ru/", timeout=10.0)
+                test_response = await client.get("https://securepay.tinkoff.ru/", timeout=10.0)
                 print(f"🔍 Тестовый запрос к хосту: статус {test_response.status_code}")
             except Exception as e:
                 print(f"❌ Хост недоступен: {e}")
