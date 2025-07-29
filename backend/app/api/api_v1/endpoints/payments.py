@@ -97,17 +97,19 @@ async def tbank_webhook(
     payload = await request.json()
     print(f"T-Bank webhook payload: {payload}")
     
-    status = payload.get("status")
-    payment_id = payload.get("payment_id")
+    # Согласно документации Т-банка, статусы приходят в поле Status
+    status = payload.get("Status")
+    payment_id = payload.get("PaymentId")
     
     if not payment_id:
-        return {"status": "error", "message": "No payment_id provided"}
+        return {"status": "error", "message": "No PaymentId provided"}
     
     donation = crud.donation.get_by_payment_id(db, payment_id=payment_id)
     if not donation:
         return {"status": "error", "message": "Donation not found"}
     
-    if status == "Подтвержден":
+    # Статусы согласно документации Т-банка
+    if status == "CONFIRMED":
         donation = crud.donation.update(
             db, 
             db_obj=donation, 
@@ -130,7 +132,7 @@ async def tbank_webhook(
                 "is_anonymous": donation.is_anonymous
             }, streamer.id, db)
     
-    elif status in ["Отменен", "Возвращен", "Возвращен частично", "Резервирование отменено"]:
+    elif status in ["CANCELLED", "REVERSED", "REFUNDED", "PARTIAL_REFUNDED"]:
         donation = crud.donation.update(
             db, 
             db_obj=donation, 

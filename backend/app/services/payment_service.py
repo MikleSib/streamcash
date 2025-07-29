@@ -148,67 +148,70 @@ class PaymentService:
         import uuid
         order_id = str(uuid.uuid4())
         
-        # Попробуем несколько возможных API endpoints
-        urls = [
-            "https://securepay.tbank.ru/api/v1/payments/init",
-            "https://pay.tbank.ru/api/v1/payments/init", 
-            "https://api.tbank.ru/payments/init",
-            "https://securepay.tbank.ru/payment/init"
-        ]
+        # Правильный API endpoint согласно документации Т-банка
+        url = "https://securepay.tbank.ru/Init"
         
         data = {
-            "terminal": settings.TBANK_TERMINAL,
-            "password": settings.TBANK_PASSWORD,
-            "amount": int(amount * 100),
-            "order_id": order_id,
-            "description": description,
-            "currency": "RUB",
-            "language": "ru",
-            "notification_url": f"{settings.API_URL}/api/v1/payments/webhook/tbank",
-            "success_url": f"{settings.FRONTEND_URL}/donate/success",
-            "fail_url": f"{settings.FRONTEND_URL}/donate/failed"
+            "TerminalKey": settings.TBANK_TERMINAL,
+            "Amount": int(amount * 100),
+            "OrderId": order_id,
+            "Description": description,
+            "Language": "ru",
+            "NotificationURL": f"{settings.API_URL}/api/v1/payments/webhook/tbank",
+            "SuccessURL": f"{settings.FRONTEND_URL}/donate/success",
+            "FailURL": f"{settings.FRONTEND_URL}/donate/failed",
+            "Receipt": {
+                "Email": "donations@streamcash.ru",
+                "Taxation": "usn_income",
+                "Items": [
+                    {
+                        "Name": description,
+                        "Price": int(amount * 100),
+                        "Quantity": 1.00,
+                        "Amount": int(amount * 100),
+                        "Tax": "none"
+                    }
+                ]
+            }
         }
         
         async with httpx.AsyncClient() as client:
-            for url in urls:
-                try:
-                    print(f"Trying T-Bank API: {url}")
-                    response = await client.post(url, json=data, timeout=10.0)
-                    print(f"T-Bank API response status: {response.status_code}")
-                    print(f"T-Bank API response: {response.text}")
+            try:
+                print(f"T-Bank API request to: {url}")
+                print(f"T-Bank API data: {data}")
+                
+                response = await client.post(url, json=data, timeout=30.0)
+                print(f"T-Bank API response status: {response.status_code}")
+                print(f"T-Bank API response: {response.text}")
+                
+                if response.status_code == 200:
+                    result = response.json()
                     
-                    if response.status_code == 200:
-                        result = response.json()
-                        
-                        if result.get("success") or result.get("payment_url"):
-                            return {
-                                "id": result.get("payment_id", order_id),
-                                "status": "pending",
-                                "confirmation_url": result.get("payment_url"),
-                                "amount": amount,
-                                "currency": "RUB"
-                            }
-                        else:
-                            print(f"T-Bank API error response: {result}")
-                            continue
+                    if result.get("Success"):
+                        return {
+                            "id": result["PaymentId"],
+                            "status": "pending",
+                            "confirmation_url": result["PaymentURL"],
+                            "amount": amount,
+                            "currency": "RUB"
+                        }
                     else:
-                        print(f"T-Bank API HTTP error: {response.status_code}")
-                        continue
+                        error_message = result.get("Message", "Unknown error")
+                        raise Exception(f"T-Bank payment creation failed: {error_message}")
+                else:
+                    raise Exception(f"T-Bank API HTTP error: {response.status_code}")
                         
-                except Exception as e:
-                    print(f"T-Bank API error for {url}: {e}")
-                    continue
-            
-            # Если все API endpoints не работают, используем тестовую страницу
-            print("All T-Bank API endpoints failed, using test page")
-            payment_id = str(uuid.uuid4())
-            return {
-                "id": payment_id,
-                "status": "pending",
-                "confirmation_url": f"{settings.FRONTEND_URL}/donate/tbank-test?payment_id={payment_id}&amount={amount}",
-                "amount": amount,
-                "currency": "RUB"
-            }
+            except Exception as e:
+                print(f"T-Bank API error: {e}")
+                # Fallback to test payment if API fails
+                payment_id = str(uuid.uuid4())
+                return {
+                    "id": payment_id,
+                    "status": "pending",
+                    "confirmation_url": f"{settings.FRONTEND_URL}/donate/tbank-test?payment_id={payment_id}&amount={amount}",
+                    "amount": amount,
+                    "currency": "RUB"
+                }
 
     async def check_payment_status(self, payment_id: str) -> str:
         try:
