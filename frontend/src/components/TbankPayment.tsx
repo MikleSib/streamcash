@@ -144,6 +144,14 @@ export default function TbankPayment({
         // Устанавливаем доступные методы оплаты
         await paymentIntegration.updateWidgetTypes(['tpay', 'sbp', 'mirpay']);
         console.log('Widget types updated');
+        
+        // Проверяем, есть ли доступные способы оплаты
+        const availableWidgets = await paymentIntegration.getAvailableWidgetTypes();
+        console.log('Available widgets:', availableWidgets);
+        
+        if (!availableWidgets || availableWidgets.length === 0) {
+          throw new Error('Нет доступных способов оплаты. Используйте тестовую страницу.');
+        }
 
       } catch (err) {
         console.error('T-Bank integration error:', err);
@@ -153,7 +161,7 @@ export default function TbankPayment({
         // Fallback: показываем простую форму оплаты
         setTimeout(() => {
           if (error) {
-            setError('T-Bank недоступен. Используйте другой способ оплаты.');
+            setError('T-Bank недоступен. Используйте тестовую страницу для демонстрации.');
           }
         }, 3000);
       }
