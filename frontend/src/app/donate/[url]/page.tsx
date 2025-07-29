@@ -9,12 +9,18 @@ import { api } from '@/lib/api';
 interface Streamer {
   id: number;
   display_name: string;
-  donation_url: string;
-  current_donations?: number;
-  total_donations?: number;
+  stream_title?: string;
   stream_description?: string;
-  avatar_url?: string;
   donation_goal?: number;
+  current_donations?: number;
+  min_donation_amount?: number;
+  max_donation_amount?: number;
+  donation_url: string;
+  is_verified?: boolean;
+  is_featured?: boolean;
+  username?: string;
+  full_name?: string;
+  avatar_url?: string;
 }
 
 interface AlertTier {
@@ -71,6 +77,7 @@ function DonationContent() {
     try {
       const response = await streamerAPI.getByUrl(donationUrl);
       console.log('Streamer API response:', response);
+      console.log('Streamer data fields:', Object.keys(response.data));
       const streamerData = response.data;
       
       if (!streamerData) {
@@ -79,11 +86,14 @@ function DonationContent() {
         return;
       }
       
-      if (!streamerData.donation_goal) {
-        streamerData.donation_goal = 50000;
-      }
+
       console.log('Setting streamer data:', streamerData);
       setStreamer(streamerData);
+      
+      setDonationData(prev => ({
+        ...prev,
+        amount: streamerData.min_donation_amount || 100
+      }));
       
       try {
         const alertResponse = await api.get(`/alerts/streamer/${donationUrl}`);
@@ -185,7 +195,7 @@ function DonationContent() {
     );
   }
 
-  const progressPercentage = streamer.donation_goal ? ((streamer.total_donations || 0) / streamer.donation_goal) * 100 : 0;
+  const progressPercentage = streamer.donation_goal ? ((streamer.current_donations || 0) / streamer.donation_goal) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4">
@@ -209,9 +219,11 @@ function DonationContent() {
             </div>
 
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Стрим о стриме</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {streamer.stream_title || 'Стрим о стриме'}
+              </h3>
               <p className="text-gray-600">
-                {streamer.stream_description || 'Описание стрима Описание стрима'}
+                {streamer.stream_description || 'Описание стрима'}
               </p>
             </div>
 
@@ -222,31 +234,33 @@ function DonationContent() {
                   <span className="text-sm font-medium text-gray-700">Всего собрано</span>
                 </div>
                 <span className="text-lg font-bold text-blue-600">
-                  {(streamer.total_donations || 0).toLocaleString()} ₽
+                  {(streamer.current_donations || 0).toLocaleString()} ₽
                 </span>
               </div>
             </div>
 
-            <div className="bg-green-50 rounded-xl p-4 mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center">
-                  <span className="text-green-600 mr-2">🎯</span>
-                  <span className="text-sm font-medium text-gray-700">Цель сбора</span>
+            {streamer.donation_goal && streamer.donation_goal > 0 && (
+              <div className="bg-green-50 rounded-xl p-4 mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center">
+                    <span className="text-green-600 mr-2">🎯</span>
+                    <span className="text-sm font-medium text-gray-700">Цель сбора</span>
+                  </div>
+                  <span className="text-lg font-bold text-green-600">
+                    {streamer.donation_goal.toLocaleString()} ₽
+                  </span>
                 </div>
-                <span className="text-lg font-bold text-green-600">
-                  {(streamer.donation_goal || 50000).toLocaleString()} ₽
-                </span>
+                <div className="w-full bg-green-200 rounded-full h-2 mt-2">
+                  <div 
+                    className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${Math.min(progressPercentage, 100)}%` }}
+                  ></div>
+                </div>
+                <p className="text-sm text-green-600 mt-1">
+                  {progressPercentage.toFixed(1)}% от цели
+                </p>
               </div>
-              <div className="w-full bg-green-200 rounded-full h-2 mt-2">
-                <div 
-                  className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${Math.min(progressPercentage, 100)}%` }}
-                ></div>
-              </div>
-              <p className="text-sm text-green-600 mt-1">
-                {progressPercentage.toFixed(1)}% от цели
-              </p>
-            </div>
+            )}
 
             {alertTiers.length > 0 && (
               <div className="bg-purple-50 rounded-xl p-4">
@@ -285,31 +299,46 @@ function DonationContent() {
                   <input
                     type="number"
                     name="amount"
-                    min="100"
-                    max="10000"
+                    min={streamer.min_donation_amount || 10}
+                    max={streamer.max_donation_amount || 10000}
                     step="1"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     value={donationData.amount}
                     onChange={handleDonationChange}
-                    placeholder="От 100 до 10000 ₽"
+                    placeholder={`От ${streamer.min_donation_amount || 10} до ${streamer.max_donation_amount || 10000} ₽`}
                     required
                   />
                 </div>
                 <div className="flex flex-wrap gap-2 mt-3">
-                  {[100, 200, 500, 1000].map((amount) => (
-                    <button
-                      key={amount}
-                      type="button"
-                      onClick={() => handleAmountButtonClick(amount)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        donationData.amount === amount
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {amount} ₽
-                    </button>
-                  ))}
+                  {(() => {
+                    const minAmount = streamer.min_donation_amount || 10;
+                    const maxAmount = streamer.max_donation_amount || 10000;
+                    const suggestedAmounts = [];
+                    
+                    if (minAmount <= 100 && maxAmount >= 100) suggestedAmounts.push(100);
+                    if (minAmount <= 200 && maxAmount >= 200) suggestedAmounts.push(200);
+                    if (minAmount <= 500 && maxAmount >= 500) suggestedAmounts.push(500);
+                    if (minAmount <= 1000 && maxAmount >= 1000) suggestedAmounts.push(1000);
+                    
+                    if (suggestedAmounts.length === 0) {
+                      suggestedAmounts.push(minAmount, Math.min(minAmount * 2, maxAmount), Math.min(minAmount * 5, maxAmount));
+                    }
+                    
+                    return suggestedAmounts.map((amount) => (
+                      <button
+                        key={amount}
+                        type="button"
+                        onClick={() => handleAmountButtonClick(amount)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          donationData.amount === amount
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {amount} ₽
+                      </button>
+                    ));
+                  })()}
                 </div>
               </div>
 
