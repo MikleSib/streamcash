@@ -105,7 +105,7 @@ function DonationContent() {
 
     try {
       const response = await api.post('/donations/', {
-        streamer_url: donationUrl,
+        recipient_id: streamer?.id,
         ...donationData
       });
 
