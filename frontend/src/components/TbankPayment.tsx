@@ -146,14 +146,6 @@ export default function TbankPayment({
         await paymentIntegration.updateWidgetTypes(availableWidgetTypes);
         console.log('Widget types updated:', availableWidgetTypes);
         
-        // Проверяем, есть ли доступные способы оплаты
-        const availableWidgets = await paymentIntegration.getAvailableWidgetTypes();
-        console.log('Available widgets:', availableWidgets);
-        
-        if (!availableWidgets || availableWidgets.length === 0) {
-          console.warn('No available widgets, but continuing...');
-        }
-        
         // Даем время виджету отрендериться
         setTimeout(() => {
           // Проверяем, есть ли содержимое в контейнере
