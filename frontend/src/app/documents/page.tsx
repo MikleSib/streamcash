@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
-import { FileText, Shield, Users, CreditCard, Lock, DollarSign } from 'lucide-react';
+import { FileText, Shield, Users, CreditCard, Lock, DollarSign, ShieldCheck } from 'lucide-react';
 
 export default function DocumentsPage() {
   const router = useRouter();
@@ -47,6 +47,14 @@ export default function DocumentsPage() {
       lastUpdated: "15.01.2025",
       status: "Актуально",
       href: "/documents/security-policy"
+    },
+    {
+      title: "Правила сервиса «Безопасная сделка»",
+      description: "Условия предоставления услуги безопасных транзакций",
+      icon: <ShieldCheck className="w-6 h-6 text-blue-400" />,
+      lastUpdated: "15.01.2025",
+      status: "Актуально",
+      href: "/documents/secure-deal"
     }
   ];
 
