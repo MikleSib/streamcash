@@ -141,17 +141,30 @@ export default function TbankPayment({
         const paymentIntegration = await integration.payments.get('main-integration');
         console.log('Payment integration object:', paymentIntegration);
         
-        // Устанавливаем доступные методы оплаты
-        await paymentIntegration.updateWidgetTypes(['tpay', 'sbp', 'mirpay']);
-        console.log('Widget types updated');
+        // Устанавливаем доступные методы оплаты согласно настройкам терминала
+        const availableWidgetTypes = ['sbp', 'mirpay', 'sberpay', 'bnpl', 'tpay'];
+        await paymentIntegration.updateWidgetTypes(availableWidgetTypes);
+        console.log('Widget types updated:', availableWidgetTypes);
         
         // Проверяем, есть ли доступные способы оплаты
         const availableWidgets = await paymentIntegration.getAvailableWidgetTypes();
         console.log('Available widgets:', availableWidgets);
         
         if (!availableWidgets || availableWidgets.length === 0) {
-          throw new Error('Нет доступных способов оплаты. Используйте тестовую страницу.');
+          console.warn('No available widgets, but continuing...');
         }
+        
+        // Даем время виджету отрендериться
+        setTimeout(() => {
+          // Проверяем, есть ли содержимое в контейнере
+          const container = containerRef.current;
+          if (container && container.children.length === 0) {
+            console.warn('Widget container is empty, showing fallback');
+            setError('Виджет не загрузился. Используйте тестовую страницу.');
+          } else {
+            setLoading(false);
+          }
+        }, 3000);
 
       } catch (err) {
         console.error('T-Bank integration error:', err);
