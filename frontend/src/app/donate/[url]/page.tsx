@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { streamerAPI, donationAPI } from '@/lib/api';
 import { formatMoney } from '@/lib/utils';
 import { Heart, Users, Target } from 'lucide-react';
+import { api } from '@/lib/api';
 
 interface Streamer {
   id: number;
@@ -48,16 +49,15 @@ export default function DonatePage() {
       
       // Загружаем настройки алертов
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        const alertResponse = await fetch(`${API_URL}/v1/alerts/streamer/${donationUrl}`);
+        const alertResponse = await api.get(`/alerts/streamer/${donationUrl}`);
         console.log('Alert response status:', alertResponse.status);
-        if (alertResponse.ok) {
-          const alertData = await alertResponse.json();
+        if (alertResponse.status === 200) {
+          const alertData = alertResponse.data;
           console.log('Alert data received:', alertData);
           setAlertTiers(alertData.tiers || []);
           console.log('Alert tiers set:', alertData.tiers || []);
         } else {
-          console.log('Alert response not ok:', await alertResponse.text());
+          console.log('Alert response not ok:', alertResponse.statusText);
         }
       } catch (alertError) {
         console.error('Не удалось загрузить настройки алертов:', alertError);

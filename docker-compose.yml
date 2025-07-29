@@ -38,6 +38,8 @@ services:
     restart: unless-stopped
     ports:
       - "8000:8000"
+    extra_hosts:
+      - "securepay.tbank.ru:185.178.208.12"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/donation_alerts_ru
       - REDIS_URL=redis://redis:6379
@@ -46,6 +48,7 @@ services:
       - ACCESS_TOKEN_EXPIRE_MINUTES=10080
       - FRONTEND_URL=http://localhost:3000
       - API_URL=http://localhost:8000
+      - API_V1_STR=/v1
       # Добавьте сюда ваши ключи платёжных систем
       - YOOKASSA_SHOP_ID=${YOOKASSA_SHOP_ID:-}
       - YOOKASSA_SECRET_KEY=${YOOKASSA_SECRET_KEY:-}
@@ -81,7 +84,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_API_URL=http://backend:8000
     depends_on:
       - backend
     networks:
@@ -110,4 +113,10 @@ volumes:
 
 networks:
   donationalerts_network:
-    driver: bridge 
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1
+    driver_opts:
+      com.docker.network.driver.mtu: 1450 

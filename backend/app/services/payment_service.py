@@ -157,7 +157,7 @@ class PaymentService:
             "OrderId": order_id,
             "Description": description,
             "Language": "ru",
-            "NotificationURL": f"{settings.API_URL}/api/v1/payments/webhook/tbank",
+            "NotificationURL": f"{settings.API_URL}/v1/payments/webhook/tbank",
             "SuccessURL": f"{settings.FRONTEND_URL}/donate/success",
             "FailURL": f"{settings.FRONTEND_URL}/donate/failed",
             "Receipt": {
@@ -203,15 +203,8 @@ class PaymentService:
                         
             except Exception as e:
                 print(f"T-Bank API error: {e}")
-                # Fallback to test payment if API fails
-                payment_id = str(uuid.uuid4())
-                return {
-                    "id": payment_id,
-                    "status": "pending",
-                    "confirmation_url": f"{settings.FRONTEND_URL}/donate/tbank-test?payment_id={payment_id}&amount={amount}",
-                    "amount": amount,
-                    "currency": "RUB"
-                }
+                # Пробрасываем ошибку вместо fallback
+                raise Exception(f"T-Bank payment creation failed: {str(e)}")
 
     async def check_payment_status(self, payment_id: str) -> str:
         try:
