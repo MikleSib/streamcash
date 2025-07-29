@@ -10,8 +10,8 @@ interface Streamer {
   id: number;
   display_name: string;
   donation_url: string;
-  current_donations: number;
-  total_donations: number;
+  current_donations?: number;
+  total_donations?: number;
   stream_description?: string;
   avatar_url?: string;
   donation_goal?: number;
@@ -185,7 +185,7 @@ function DonationContent() {
     );
   }
 
-  const progressPercentage = streamer.donation_goal ? (streamer.total_donations / streamer.donation_goal) * 100 : 0;
+  const progressPercentage = streamer.donation_goal ? ((streamer.total_donations || 0) / streamer.donation_goal) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4">
@@ -222,7 +222,7 @@ function DonationContent() {
                   <span className="text-sm font-medium text-gray-700">Всего собрано</span>
                 </div>
                 <span className="text-lg font-bold text-blue-600">
-                  {streamer.total_donations.toLocaleString()} ₽
+                  {(streamer.total_donations || 0).toLocaleString()} ₽
                 </span>
               </div>
             </div>
