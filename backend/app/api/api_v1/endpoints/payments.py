@@ -57,6 +57,10 @@ async def init_tbank_payment(
     Создание платежа T-Bank с генерацией токена
     """
     print(f"🔍 Получен запрос на создание T-Bank платежа: {request}")
+    print(f"🔍 Переменные окружения:")
+    print(f"   TBANK_TERMINAL: {settings.TBANK_TERMINAL}")
+    print(f"   TBANK_SECRET_KEY: {settings.TBANK_SECRET_KEY}")
+    print(f"   TBANK_PASSWORD: {settings.TBANK_PASSWORD}")
     
     try:
         import hashlib
@@ -76,7 +80,8 @@ async def init_tbank_payment(
         # Генерируем уникальный ID заказа
         order_id = request.order_id or f"order_{int(time.time() * 1000)}_{uuid.uuid4().hex[:8]}"
         
-        print(f"🔧 Настройки T-Bank: Terminal={settings.TBANK_TERMINAL}, SecretKey={'*' * len(settings.TBANK_SECRET_KEY) if settings.TBANK_SECRET_KEY else 'None'}")
+        print(f"🔧 Настройки T-Bank: Terminal={settings.TBANK_TERMINAL}, SecretKey={settings.TBANK_SECRET_KEY}")
+        print(f"🔧 Длина SecretKey: {len(settings.TBANK_SECRET_KEY) if settings.TBANK_SECRET_KEY else 0}")
         
         # Подготавливаем данные для создания платежа
         payment_data = {
@@ -93,7 +98,9 @@ async def init_tbank_payment(
         
         # Генерируем токен для подписи
         token_string = f"{payment_data['TerminalKey']}{payment_data['Amount']}{payment_data['OrderId']}{settings.TBANK_SECRET_KEY}"
+        print(f"🔑 Строка для генерации токена: {token_string}")
         token = hashlib.sha256(token_string.encode('utf-8')).hexdigest()
+        print(f"🔑 Сгенерированный токен: {token}")
         payment_data["Token"] = token
         
         print(f"T-Bank payment data: {payment_data}")
