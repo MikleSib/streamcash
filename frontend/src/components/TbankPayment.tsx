@@ -105,7 +105,7 @@ export default function TbankPayment({
 
       // Сначала создаем платеж на сервере
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      const response = await fetch(`${apiUrl}/api/v1/payments/tbank/init`, {
+      const response = await fetch(`${apiUrl}/v1/payments/tbank/init`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
