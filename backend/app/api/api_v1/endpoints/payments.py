@@ -100,7 +100,20 @@ async def init_tbank_payment(
         
         # Генерируем токен для подписи
         # Генерируем токен для подписи согласно документации T-Bank
-        token_string = f"{payment_data['TerminalKey']}{payment_data['Amount']}{payment_data['OrderId']}{settings.TBANK_SECRET_KEY}"
+        # Создаем массив пар ключ-значение
+        token_params = [
+            {"Amount": str(payment_data['Amount'])},
+            {"Description": payment_data['Description']},
+            {"OrderId": payment_data['OrderId']},
+            {"Password": settings.TBANK_SECRET_KEY},
+            {"TerminalKey": payment_data['TerminalKey']}
+        ]
+        
+        # Сортируем по алфавиту по ключу
+        token_params.sort(key=lambda x: list(x.keys())[0])
+        
+        # Конкатенируем только значения
+        token_string = ''.join([list(param.values())[0] for param in token_params])
         print(f"🔑 Строка для генерации токена: {token_string}")
         token = hashlib.sha256(token_string.encode('utf-8')).hexdigest()
         print(f"🔑 Сгенерированный токен: {token}")
