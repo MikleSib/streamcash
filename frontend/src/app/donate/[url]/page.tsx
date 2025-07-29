@@ -345,9 +345,18 @@ export default function DonatePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Способ оплаты
                 </label>
-                <div className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-amber-50 text-amber-700 font-medium">
-                  🧪 Тестовая оплата (для разработки)
-                </div>
+                <select
+                  name="payment_method"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                  value={donationData.payment_method}
+                  onChange={handleDonationChange}
+                >
+                  <option value="test">🧪 Тестовая оплата (для разработки)</option>
+                  <option value="tbank">🏦 Т-банк</option>
+                  <option value="yookassa">💳 YooKassa</option>
+                  <option value="sberbank">🏛️ Сбербанк</option>
+                  <option value="tinkoff">💳 Тинькофф</option>
+                </select>
               </div>
 
               <div className="flex items-center p-4 bg-gray-50 rounded-xl">
