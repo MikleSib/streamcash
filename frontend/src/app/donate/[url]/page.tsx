@@ -109,7 +109,7 @@ function DonationContent() {
         // Для T-Bank используем API интеграцию
         const orderId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         
-        const response = await api.post('/api/v1/payments/tbank/init', {
+        const response = await api.post('/payments/tbank/init', {
           amount: donationData.amount,
           order_id: orderId,
           payment_method: 'tbank',
