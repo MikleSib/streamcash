@@ -16,7 +16,8 @@ export TINKOFF_SECRET_KEY=
 export TBANK_TERMINAL=1753782171950DEMO
 export TBANK_PASSWORD=Hs%8cNP6W&hv%3!^
 export FRONTEND_URL=https://стримкэш.рф
-export API_URL=https://стримкэш.рф/api
+export API_URL=https://стримкэш.рф
+export API_V1_STR=/api/v1
 export NEXT_PUBLIC_API_URL=https://стримкэш.рф/api
 
 echo "Запуск SSL версии StreamCash..."

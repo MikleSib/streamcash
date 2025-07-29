@@ -157,7 +157,7 @@ class PaymentService:
             "OrderId": order_id,
             "Description": description,
             "Language": "ru",
-            "NotificationURL": f"{settings.API_URL}/v1/payments/webhook/tbank",
+            "NotificationURL": f"{settings.API_URL}{settings.API_V1_STR}/payments/webhook/tbank",
             "SuccessURL": f"{settings.FRONTEND_URL}/donate/success",
             "FailURL": f"{settings.FRONTEND_URL}/donate/failed",
             "Receipt": {

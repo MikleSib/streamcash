@@ -19,7 +19,8 @@ set TINKOFF_SECRET_KEY=
 set TBANK_TERMINAL=1753782171950DEMO
 set TBANK_PASSWORD=Hs%%8cNP6W^&hv%%3!^
 set FRONTEND_URL=https://стримкэш.рф
-set API_URL=https://стримкэш.рф/api
+set API_URL=https://стримкэш.рф
+set API_V1_STR=/api/v1
 set NEXT_PUBLIC_API_URL=https://стримкэш.рф/api
 
 echo Переменные окружения установлены
