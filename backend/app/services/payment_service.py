@@ -233,6 +233,16 @@ class PaymentService:
                         "amount": amount,
                         "currency": "RUB"
                     }
+                elif "Success" in str(response.text):
+                    # Если получили успешный ответ от Т-банка
+                    result = response.json()
+                    return {
+                        "id": result.get("PaymentId", order_id),
+                        "status": "pending",
+                        "confirmation_url": result.get("PaymentURL", f"{frontend_url}/donate/tbank-test?order_id={order_id}&amount={amount}"),
+                        "amount": amount,
+                        "currency": "RUB"
+                    }
                 else:
                     # Пробрасываем другие ошибки
                     raise Exception(f"T-Bank payment creation failed: {str(e)}")
