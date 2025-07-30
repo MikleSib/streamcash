@@ -184,15 +184,15 @@ export default function RegisterPage() {
         {/* Right Side - Registration Form */}
         <div className="w-full lg:w-1/2 flex items-center justify-center px-4 py-12">
           <div className="w-full max-w-md">
-            <div className="bg-gray-800/50 backdrop-blur-md rounded-2xl p-8 border border-gray-700/50 shadow-2xl">
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full mb-4">
-                  <UserPlus className="w-8 h-8 text-white" />
+            <div className="bg-gray-800/60 backdrop-blur-xl rounded-3xl p-10 border border-gray-700/60 shadow-2xl shadow-purple-500/20 hover:shadow-purple-500/30 transition-all duration-300">
+              <div className="text-center mb-10">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-600 via-purple-500 to-pink-600 rounded-full mb-6 animate-pulse shadow-lg shadow-purple-500/50">
+                  <UserPlus className="w-10 h-10 text-white" />
                 </div>
-                <h2 className="text-3xl font-bold text-white mb-2">
+                <h2 className="text-4xl font-bold text-white mb-3 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
                   Создать аккаунт
                 </h2>
-                <p className="text-gray-400">
+                <p className="text-gray-300 text-lg">
                   Начните принимать донаты прямо сейчас
                 </p>
               </div>
@@ -217,8 +217,8 @@ export default function RegisterPage() {
                       name="username"
                       value={formData.username}
                       onChange={handleChange}
-                      className={`w-full pl-10 pr-4 py-3 bg-gray-700/50 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
-                        errors.username ? 'border-red-500' : 'border-gray-600'
+                      className={`w-full pl-10 pr-4 py-3 bg-gray-700/60 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 hover:bg-gray-700/70 ${
+                        errors.username ? 'border-red-500' : 'border-gray-600 hover:border-gray-500'
                       }`}
                       placeholder="Введите имя пользователя"
                     />
@@ -241,8 +241,8 @@ export default function RegisterPage() {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className={`w-full pl-10 pr-4 py-3 bg-gray-700/50 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
-                        errors.email ? 'border-red-500' : 'border-gray-600'
+                      className={`w-full pl-10 pr-4 py-3 bg-gray-700/60 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 hover:bg-gray-700/70 ${
+                        errors.email ? 'border-red-500' : 'border-gray-600 hover:border-gray-500'
                       }`}
                       placeholder="Введите email"
                     />
@@ -265,8 +265,8 @@ export default function RegisterPage() {
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
-                      className={`w-full pl-10 pr-12 py-3 bg-gray-700/50 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
-                        errors.password ? 'border-red-500' : 'border-gray-600'
+                      className={`w-full pl-10 pr-12 py-3 bg-gray-700/60 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 hover:bg-gray-700/70 ${
+                        errors.password ? 'border-red-500' : 'border-gray-600 hover:border-gray-500'
                       }`}
                       placeholder="Введите пароль"
                     />
@@ -296,8 +296,8 @@ export default function RegisterPage() {
                       name="confirmPassword"
                       value={formData.confirmPassword}
                       onChange={handleChange}
-                      className={`w-full pl-10 pr-4 py-3 bg-gray-700/50 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
-                        errors.confirmPassword ? 'border-red-500' : 'border-gray-600'
+                      className={`w-full pl-10 pr-4 py-3 bg-gray-700/60 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 hover:bg-gray-700/70 ${
+                        errors.confirmPassword ? 'border-red-500' : 'border-gray-600 hover:border-gray-500'
                       }`}
                       placeholder="Повторите пароль"
                     />
@@ -310,10 +310,11 @@ export default function RegisterPage() {
                 <Button
                   type="submit"
                   loading={loading}
-                  className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transform hover:scale-105 transition-all duration-200 text-lg font-semibold"
+                  className="w-full py-4 bg-gradient-to-r from-purple-600 via-purple-500 to-pink-600 hover:from-purple-700 hover:via-purple-600 hover:to-pink-700 transform hover:scale-105 transition-all duration-300 text-lg font-semibold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 relative overflow-hidden"
                 >
-                  <UserPlus className="w-5 h-5 mr-2" />
-                  Создать аккаунт
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+                  <UserPlus className="w-5 h-5 mr-2 relative z-10" />
+                  <span className="relative z-10">Создать аккаунт</span>
                 </Button>
               </form>
 
