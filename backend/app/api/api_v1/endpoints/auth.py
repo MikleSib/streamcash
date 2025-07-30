@@ -10,6 +10,7 @@ from app.core import deps
 from app.core import security
 from app.core.config import settings
 from app.core.security import get_password_hash
+from app.services.email_service import email_service
 
 router = APIRouter()
 
@@ -33,7 +34,7 @@ def login_access_token(
     }
 
 @router.post("/register", response_model=schemas.User)
-def register(
+async def register(
     *,
     db: Session = Depends(deps.get_db),
     user_in: schemas.UserCreate,
@@ -54,6 +55,15 @@ def register(
     
     # Создаем дефолтные настройки алертов для нового пользователя
     crud.alert_settings.create_default_for_new_user(db, user_id=user.id)
+    
+    # Отправляем приветственное email-уведомление
+    try:
+        await email_service.send_welcome_email(
+            user_email=user.email,
+            username=user.username
+        )
+    except Exception as e:
+        print(f"Failed to send welcome email: {e}")
     
     return user
 

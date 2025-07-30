@@ -9,6 +9,7 @@ from app import crud, models, schemas
 from app.core import deps
 from app.services.payment_service import PaymentService
 from app.services.websocket_service import notify_new_donation
+from app.services.email_service import email_service
 
 router = APIRouter()
 
@@ -41,7 +42,7 @@ async def create_donation(
         crud.donation.remove(db=db, id=donation.id)
         raise HTTPException(status_code=400, detail=f"Payment creation failed: {str(e)}")
     
-    # Отправляем уведомление через WebSocket
+    # Отправляем уведомления через WebSocket и Email
     try:
         donation_data = {
             "donor_name": donation.donor_name,
@@ -52,6 +53,20 @@ async def create_donation(
         await notify_new_donation(donation_data, donation.streamer_id, db)
     except Exception as e:
         print(f"Failed to send WebSocket notification: {e}")
+    
+    # Отправляем email-уведомление стримеру
+    try:
+        streamer = crud.streamer.get(db, id=donation.streamer_id)
+        if streamer and streamer.user and streamer.user.email:
+            await email_service.send_donation_notification(
+                streamer_email=streamer.user.email,
+                donor_name=donation.donor_name,
+                amount=donation.amount,
+                message=donation.message or "",
+                streamer_name=streamer.user.username
+            )
+    except Exception as e:
+        print(f"Failed to send email notification: {e}")
     
     return donation
 
