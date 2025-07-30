@@ -13,7 +13,7 @@ from shared.rabbitmq import RabbitMQClient, EventPublisher
 from shared.events import EventType
 from app.core.config import settings
 from app.core.deps import get_current_active_user
-from routers import donations, payments, auth, websocket, streamers, users
+from services.api-gateway.routers import donations, payments, auth, websocket, streamers, users
 
 RABBITMQ_URL = os.getenv("RABBITMQ_URL", "amqp://guest:guest@rabbitmq:5672/")
 
