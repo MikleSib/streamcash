@@ -18,6 +18,9 @@ class User(Base):
     is_streamer = Column(Boolean, default=False)
     avatar_url = Column(String, nullable=True)
     bio = Column(String, nullable=True)
+    email_verified = Column(Boolean, default=False)
+    email_verification_code = Column(String, nullable=True)
+    email_verification_expires = Column(DateTime, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, onupdate=func.now())
 

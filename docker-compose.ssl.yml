@@ -133,6 +133,11 @@ services:
       - TBANK_SECRET_KEY=${TBANK_SECRET_KEY:-KqU8ItCGM#s&Cqn*}
       - TBANK_MERCHANT_ID=${TBANK_MERCHANT_ID:-200000001669463}
       - TBANK_TERMINAL_ID=${TBANK_TERMINAL_ID:-25786674}
+      - EMAIL_HOST=mail.стримкэш.рф
+      - EMAIL_PORT=587
+      - EMAIL_HOST_USER=no-reply@стрикэш.рф
+      - EMAIL_HOST_PASSWORD=UfjuQqDoCk
+      - EMAIL_USE_TLS=true
     depends_on:
       db:
         condition: service_healthy

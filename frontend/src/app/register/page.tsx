@@ -95,7 +95,8 @@ export default function RegisterPage() {
         password: formData.password
       });
       
-      router.push('/login?message=registration_success');
+      // Перенаправляем на страницу подтверждения email
+      router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
     } catch (error: any) {
       const message = error.response?.data?.detail || 'Ошибка регистрации';
       setErrors({ general: message });

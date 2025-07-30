@@ -30,10 +30,10 @@ class Settings(BaseSettings):
     TBANK_TERMINAL_ID: Optional[str] = os.getenv("TBANK_TERMINAL_ID", "25786674")
     TBANK_RECEIPT_ENABLED: bool = os.getenv("TBANK_RECEIPT_ENABLED", "False").lower() == "true"
     
-    EMAIL_HOST: str = os.getenv("EMAIL_HOST", "localhost")
+    EMAIL_HOST: str = os.getenv("EMAIL_HOST", "mail.стримкэш.рф")
     EMAIL_PORT: int = int(os.getenv("EMAIL_PORT", "587"))
-    EMAIL_HOST_USER: str = os.getenv("EMAIL_HOST_USER", "")
-    EMAIL_HOST_PASSWORD: str = os.getenv("EMAIL_HOST_PASSWORD", "")
+    EMAIL_HOST_USER: str = os.getenv("EMAIL_HOST_USER", "no-reply@стрикэш.рф")
+    EMAIL_HOST_PASSWORD: str = os.getenv("EMAIL_HOST_PASSWORD", "UfjuQqDoCk")
     EMAIL_USE_TLS: bool = os.getenv("EMAIL_USE_TLS", "True").lower() == "true"
     
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:3000")

@@ -40,6 +40,8 @@ function LoginContent() {
     const message = searchParams.get('message');
     if (message === 'registration_success') {
       setSuccessMessage('Регистрация успешна! Теперь можете войти в аккаунт.');
+    } else if (message === 'email_verified') {
+      setSuccessMessage('Email успешно подтвержден! Теперь можете войти в аккаунт.');
     }
   }, [user, authLoading, router, searchParams]);
 
@@ -86,6 +88,14 @@ function LoginContent() {
       router.push('/dashboard');
     } catch (error: any) {
       const message = error.response?.data?.detail || 'Ошибка входа. Проверьте данные.';
+      
+      // Проверяем, является ли ошибка связанной с неподтвержденным email
+      if (message.includes('Email not verified')) {
+        // Перенаправляем на страницу подтверждения
+        router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
+        return;
+      }
+      
       setErrors({ general: message });
     } finally {
       setLoading(false);

@@ -24,6 +24,7 @@ class UserUpdate(BaseModel):
 
 class UserInDBBase(UserBase):
     id: int
+    email_verified: bool = False
     created_at: datetime
     updated_at: Optional[datetime] = None
 
@@ -35,6 +36,8 @@ class User(UserInDBBase):
 
 class UserInDB(UserInDBBase):
     hashed_password: str
+    email_verification_code: Optional[str] = None
+    email_verification_expires: Optional[datetime] = None
 
 class Token(BaseModel):
     access_token: str
@@ -45,4 +48,11 @@ class TokenPayload(BaseModel):
 
 class UserLogin(BaseModel):
     email: EmailStr
-    password: str 
+    password: str
+
+class EmailVerificationRequest(BaseModel):
+    email: EmailStr
+
+class EmailVerificationCode(BaseModel):
+    email: EmailStr
+    code: str 

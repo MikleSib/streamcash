@@ -1,4 +1,7 @@
 from typing import Any, Dict, Optional, Union
+from datetime import datetime, timedelta
+import random
+import string
 
 from sqlalchemy.orm import Session
 
@@ -24,6 +27,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             is_streamer=obj_in.is_streamer,
             avatar_url=obj_in.avatar_url,
             bio=obj_in.bio,
+            email_verified=False,
         )
         db.add(db_obj)
         db.commit()
@@ -52,5 +56,50 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
     def is_superuser(self, user: User) -> bool:
         return user.is_superuser
+
+    def generate_verification_code(self) -> str:
+        """Генерирует 6-значный код подтверждения"""
+        return ''.join(random.choices(string.digits, k=6))
+
+    def set_verification_code(self, db: Session, *, user: User) -> str:
+        """Устанавливает код подтверждения для пользователя"""
+        verification_code = self.generate_verification_code()
+        expires_at = datetime.utcnow() + timedelta(minutes=10)
+        
+        user.email_verification_code = verification_code
+        user.email_verification_expires = expires_at
+        
+        db.commit()
+        db.refresh(user)
+        
+        return verification_code
+
+    def verify_email_code(self, db: Session, *, email: str, code: str) -> bool:
+        """Проверяет код подтверждения email"""
+        user = self.get_by_email(db, email=email)
+        if not user:
+            return False
+        
+        if not user.email_verification_code:
+            return False
+        
+        if user.email_verification_expires < datetime.utcnow():
+            return False
+        
+        if user.email_verification_code != code:
+            return False
+        
+        user.email_verified = True
+        user.email_verification_code = None
+        user.email_verification_expires = None
+        
+        db.commit()
+        db.refresh(user)
+        
+        return True
+
+    def is_email_verified(self, user: User) -> bool:
+        """Проверяет, подтвержден ли email пользователя"""
+        return user.email_verified
 
 user = CRUDUser(User) 
