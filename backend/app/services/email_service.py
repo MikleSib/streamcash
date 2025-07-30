@@ -32,12 +32,14 @@ class EmailService:
             message["Subject"] = subject
             message["From"] = self.username
             message["To"] = ", ".join(to_emails)
+            
+            message.set_charset('utf-8')
 
             if text_content:
-                text_part = MIMEText(text_content, "plain")
+                text_part = MIMEText(text_content, "plain", "utf-8")
                 message.attach(text_part)
 
-            html_part = MIMEText(html_content, "html")
+            html_part = MIMEText(html_content, "html", "utf-8")
             message.attach(html_part)
 
             if attachments:
@@ -62,7 +64,7 @@ class EmailService:
                 if self.username and self.password:
                     server.login(self.username, self.password)
                 text = message.as_string()
-                server.sendmail(self.username, to_emails, text)
+                server.sendmail(self.username, to_emails, text.encode('utf-8'))
 
             print(f"Email sent successfully to: {', '.join(to_emails)}")
             return True
