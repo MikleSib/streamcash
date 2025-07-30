@@ -135,7 +135,7 @@ services:
       - TBANK_TERMINAL_ID=${TBANK_TERMINAL_ID:-25786674}
       - EMAIL_HOST=mail.стримкэш.рф
       - EMAIL_PORT=587
-      - EMAIL_HOST_USER=no-reply@стрикэш.рф
+      - EMAIL_HOST_USER=no-reply@xn--h1aefoeg0czb.xn--p1ai
       - EMAIL_HOST_PASSWORD=UfjuQqDoCk
       - EMAIL_USE_TLS=true
     depends_on:

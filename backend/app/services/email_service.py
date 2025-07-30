@@ -4,6 +4,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
+from email.header import Header
 from typing import List, Optional
 from jinja2 import Template
 
@@ -29,9 +30,9 @@ class EmailService:
         """Отправить email"""
         try:
             message = MIMEMultipart("alternative")
-            message["Subject"] = subject
-            message["From"] = self.username
-            message["To"] = ", ".join(to_emails)
+            message["Subject"] = Header(subject, 'utf-8')
+            message["From"] = Header(self.username, 'utf-8')
+            message["To"] = Header(", ".join(to_emails), 'utf-8')
             
             message.set_charset('utf-8')
 
@@ -64,7 +65,7 @@ class EmailService:
                 if self.username and self.password:
                     server.login(self.username, self.password)
                 text = message.as_string()
-                server.sendmail(self.username, to_emails, text.encode('utf-8'))
+                server.sendmail(self.username, to_emails, text)
 
             print(f"Email sent successfully to: {', '.join(to_emails)}")
             return True
