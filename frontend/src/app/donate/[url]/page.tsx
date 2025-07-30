@@ -145,7 +145,8 @@ function DonationContent() {
           amount: donationData.amount,
           order_id: orderId,
           payment_method: 'tbank',
-          description: `Донат для ${streamer?.display_name || 'стримера'}`
+          description: `Донат для ${streamer?.display_name || 'стримера'}`,
+          streamer_id: streamer?.id
         });
 
         if (response.data.success && response.data.payment_url) {
