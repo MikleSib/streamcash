@@ -619,4 +619,67 @@ async def check_payment_status(
         "payment_id": payment_id,
         "status": status,
         "donation_id": donation.id
+    }
+
+@router.post("/check-pending")
+async def manually_check_pending_payments(
+    db: Session = Depends(deps.get_db),
+) -> Any:
+    """
+    Ручной запуск проверки всех PENDING платежей
+    """
+    try:
+        # Запускаем задачу проверки платежей
+        from app.worker import check_pending_payments
+        result = check_pending_payments.delay()
+        
+        return {
+            "success": True,
+            "message": "Проверка PENDING платежей запущена",
+            "task_id": result.id
+        }
+    except Exception as e:
+        logger.error(f"Ошибка запуска проверки: {str(e)}")
+        
+        # Если Celery недоступен, запускаем синхронно
+        try:
+            from app.worker import check_pending_payments
+            result = check_pending_payments()
+            return {
+                "success": True,
+                "message": "Проверка выполнена синхронно (Celery недоступен)",
+                "result": result
+            }
+        except Exception as sync_error:
+            raise HTTPException(status_code=500, detail=f"Ошибка проверки: {str(sync_error)}")
+
+@router.get("/pending-payments")
+async def get_pending_payments(
+    db: Session = Depends(deps.get_db),
+) -> Any:
+    """
+    Получить список всех PENDING платежей
+    """
+    from app.models.donation import Donation
+    
+    pending_donations = db.query(Donation).filter(
+        Donation.status == DonationStatus.PENDING,
+        Donation.payment_method == PaymentMethod.TBANK,
+        Donation.payment_id.is_not(None)
+    ).all()
+    
+    return {
+        "success": True,
+        "count": len(pending_donations),
+        "donations": [
+            {
+                "id": d.id,
+                "payment_id": d.payment_id,
+                "amount": d.amount,
+                "created_at": d.created_at,
+                "donor_name": d.donor_name,
+                "streamer_id": d.streamer_id
+            }
+            for d in pending_donations
+        ]
     } 
