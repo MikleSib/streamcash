@@ -129,33 +129,7 @@ export default function AlertSettingsPage() {
   const [userFiles, setUserFiles] = useState<{audio_files: any[], image_files: any[]}>({audio_files: [], image_files: []});
   const [streamerProfile, setStreamerProfile] = useState<any>(null);
 
-  const addGifByUrl = async (tierId: string) => {
-    const inputElement = document.getElementById(`gif-url-input-${tierId}`) as HTMLInputElement;
-    const gifUrl = inputElement?.value.trim();
-    
-    if (!gifUrl) {
-      toast.error('Введите ссылку на GIF');
-      return;
-    }
-    
-    const currentTier = settings.tiers?.find(tier => tier.id === tierId);
-    if (!currentTier) return;
-    
-    const currentGifUrls = currentTier.gif_urls || [];
-    if (currentGifUrls.includes(gifUrl)) {
-      toast.error('Эта GIF уже добавлена');
-      return;
-    }
-    
-    const updatedGifUrls = [...currentGifUrls, gifUrl];
-    updateTier(tierId, { 
-      gif_urls: updatedGifUrls,
-      gif_url: updatedGifUrls[0]
-    });
-    
-    inputElement.value = '';
-    toast.success('GIF добавлена!');
-  };
+
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -990,34 +964,7 @@ export default function AlertSettingsPage() {
                               
                               {/* Добавление новой гифки */}
                               {(!currentTier.gif_urls || currentTier.gif_urls.length < 10) && (
-                                <div className="space-y-4">
-                                  <div className="flex space-x-3">
-                                    <input
-                                      type="url"
-                                      placeholder="https://example.com/animation.gif"
-                                      className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
-                                      id={`gif-url-input-${currentTier.id}`}
-                                      onKeyPress={(e) => {
-                                        if (e.key === 'Enter') {
-                                          addGifByUrl(currentTier.id);
-                                        }
-                                      }}
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={() => addGifByUrl(currentTier.id)}
-                                      className="px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl transition-all duration-200 font-medium shadow-md hover:shadow-lg flex items-center whitespace-nowrap"
-                                    >
-                                      <Plus className="w-4 h-4 mr-2" />
-                                      Добавить GIF
-                                    </button>
-                                  </div>
-                                  
-                                  <div className="flex items-center justify-center py-2">
-                                    <span className="px-4 py-1 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-sm rounded-full">или</span>
-                                  </div>
-                                  
-                                  <div className="flex items-center space-x-3">
+                                <div className="flex items-center space-x-3">
                                     <input
                                       type="file"
                                       accept=".gif,.png,.jpg,.jpeg,.webp"
@@ -1069,7 +1016,6 @@ export default function AlertSettingsPage() {
                                       {currentTier.gif_urls?.length || 0} / 10 GIF
                                     </div>
                                   </div>
-                                </div>
                               )}
                               
                               {/* Информационные подсказки */}
