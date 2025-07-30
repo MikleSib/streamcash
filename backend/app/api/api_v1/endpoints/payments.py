@@ -1,5 +1,6 @@
 from typing import Any
 import httpx
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,6 +13,10 @@ from app.models.donation import DonationStatus, PaymentMethod
 from app.services.payment_service import PaymentService
 from app.services.websocket_service import notify_new_donation
 from pydantic import BaseModel
+
+# Настройка логгера
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -311,14 +316,35 @@ async def tinkoff_webhook(
     
         return {"status": "ok"}
 
-@router.post("/webhook/tbank")
+@router.api_route("/webhook/tbank", methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
 async def tbank_webhook(
     request: Request,
     db: Session = Depends(deps.get_db),
 ) -> Any:
-    print(f"🔔 Получен T-Bank webhook!")
-    payload = await request.json()
-    print(f"📩 T-Bank webhook payload: {payload}")
+    print(f"🔔 Получен запрос на T-Bank webhook!")
+    print(f"📍 URL: {request.url}")
+    print(f"📍 Method: {request.method}")
+    print(f"📍 Headers: {dict(request.headers)}")
+    print(f"📍 Client: {request.client}")
+    
+    # Если это GET запрос - возвращаем статус (для проверки доступности)
+    if request.method == "GET":
+        print("✅ GET запрос на webhook - возвращаем статус OK")
+        return {"status": "ok", "message": "T-Bank webhook endpoint is accessible", "method": "GET"}
+    
+    # Если это OPTIONS запрос - возвращаем CORS заголовки
+    if request.method == "OPTIONS":
+        print("✅ OPTIONS запрос на webhook - возвращаем CORS заголовки")
+        return {"status": "ok", "message": "CORS preflight", "method": "OPTIONS"}
+    
+    try:
+        payload = await request.json()
+        print(f"📩 T-Bank webhook payload: {payload}")
+    except Exception as e:
+        print(f"❌ Ошибка парсинга JSON: {e}")
+        body = await request.body()
+        print(f"📩 Raw body: {body}")
+        return {"status": "error", "message": "Invalid JSON"}
     
     # Согласно документации Т-банка, статусы приходят в поле Status
     status = payload.get("Status")
@@ -343,10 +369,16 @@ async def tbank_webhook(
                 print(f"   Донат ID: {d.id}, payment_id: {d.payment_id}")
         return {"status": "error", "message": f"Donation not found for payment_id: {payment_id}"}
     
+    # Проверяем токен уведомления (если требуется)
+    notification_token = payload.get("Token")
+    if notification_token:
+        print(f"🔐 Получен токен уведомления: {notification_token}")
+        # TODO: Добавить проверку токена согласно документации T-Bank
+    
     # Статусы согласно документации Т-банка
     # Для тестовых платежей и некоторых реальных может приходить статус NEW
     if status in ["CONFIRMED", "NEW"]:
-        print(f"Processing successful payment with status: {status}")
+        print(f"✅ Обрабатываем успешный платеж со статусом: {status}")
         donation = crud.donation.update(
             db, 
             db_obj=donation, 
@@ -370,16 +402,23 @@ async def tbank_webhook(
                 "is_anonymous": donation.is_anonymous
             }, streamer.id, db)
             
-            print(f"Notification sent successfully")
+            print(f"✅ Уведомление отправлено успешно")
     
     elif status in ["CANCELLED", "REVERSED", "REFUNDED", "PARTIAL_REFUNDED"]:
+        print(f"❌ Обрабатываем неуспешный платеж со статусом: {status}")
         donation = crud.donation.update(
             db, 
             db_obj=donation, 
             obj_in={"status": DonationStatus.FAILED}
         )
     
-    return {"status": "ok"}
+    else:
+        print(f"ℹ️ Получен статус {status}, обновляем донат")
+        # Для других статусов просто логируем
+    
+    # Возвращаем ответ согласно документации T-Bank
+    print(f"✅ Webhook обработан успешно, возвращаем OK")
+    return {"OK": True}
 
 @router.post("/webhook/test")
 async def test_webhook(
