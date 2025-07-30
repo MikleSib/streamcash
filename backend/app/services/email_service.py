@@ -53,6 +53,8 @@ class EmailService:
                         message.attach(part)
 
             context = ssl.create_default_context()
+            context.check_hostname = False
+            context.verify_mode = ssl.CERT_NONE
             
             with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
                 if self.use_tls:
