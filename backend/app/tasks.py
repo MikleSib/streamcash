@@ -1,20 +1,17 @@
 import asyncio
 import logging
 from typing import List
-from celery import Celery
 from sqlalchemy.orm import Session
 
-from app.celery_app import celery_app
 from app.core.database import SessionLocal
 from app import crud
 from app.models.donation import DonationStatus, PaymentMethod, Donation
-from app.api.api_v1.endpoints.payments import check_tbank_payment_status
-from app.core import deps
+from app.celery_app import celery_app
 
 logger = logging.getLogger(__name__)
 
-@celery_app.task
-def check_pending_payments():
+@celery_app.task(bind=True)
+def check_pending_payments(self):
     """
     Периодическая задача для проверки статусов PENDING платежей
     """

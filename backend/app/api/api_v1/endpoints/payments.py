@@ -630,7 +630,7 @@ async def manually_check_pending_payments(
     """
     try:
         # Запускаем задачу проверки платежей
-        from app.worker import check_pending_payments
+        from app.tasks import check_pending_payments
         result = check_pending_payments.delay()
         
         return {
@@ -643,7 +643,7 @@ async def manually_check_pending_payments(
         
         # Если Celery недоступен, запускаем синхронно
         try:
-            from app.worker import check_pending_payments
+            from app.tasks import check_pending_payments
             result = check_pending_payments()
             return {
                 "success": True,
