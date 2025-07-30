@@ -26,6 +26,9 @@ class PaymentInitRequest(BaseModel):
     payment_method: str
     description: str = "Донат"
     streamer_id: int
+    donor_name: str = "Аноним"
+    message: str = ""
+    is_anonymous: bool = True
 
 @router.post("/init")
 async def init_payment(
@@ -200,9 +203,9 @@ async def init_tbank_payment(
                 
                 donation_create = DonationCreate(
                     amount=request.amount,
-                    donor_name="Аноним",  # Будет обновлено после успешного платежа
-                    message="",
-                    is_anonymous=True,
+                    donor_name=request.donor_name if not request.is_anonymous else "Аноним",
+                    message=request.message,
+                    is_anonymous=request.is_anonymous,
                     recipient_id=streamer.user_id,
                     payment_method=PaymentMethod.TBANK
                 )

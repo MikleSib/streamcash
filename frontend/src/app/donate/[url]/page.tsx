@@ -120,10 +120,21 @@ function DonationContent() {
 
   const handleDonationChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    setDonationData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-    }));
+    const newValue = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
+    
+    setDonationData(prev => {
+      const newData = {
+        ...prev,
+        [name]: newValue
+      };
+      
+      // Если отмечаем анонимный донат - очищаем имя
+      if (name === 'is_anonymous' && newValue === true) {
+        newData.donor_name = '';
+      }
+      
+      return newData;
+    });
   };
 
   const handleAmountButtonClick = (amount: number) => {
@@ -146,7 +157,10 @@ function DonationContent() {
           order_id: orderId,
           payment_method: 'tbank',
           description: `Донат для ${streamer?.display_name || 'стримера'}`,
-          streamer_id: streamer?.id
+          streamer_id: streamer?.id,
+          donor_name: donationData.donor_name,
+          message: donationData.message,
+          is_anonymous: donationData.is_anonymous
         });
 
         if (response.data.success && response.data.payment_url) {
@@ -350,11 +364,14 @@ function DonationContent() {
                 <input
                   type="text"
                   name="donor_name"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-opacity ${
+                    donationData.is_anonymous ? 'opacity-50 bg-gray-100' : ''
+                  }`}
                   value={donationData.donor_name}
                   onChange={handleDonationChange}
-                  placeholder="Как вас называть?"
-                  required
+                  placeholder={donationData.is_anonymous ? "Анонимный донат" : "Как вас называть?"}
+                  required={!donationData.is_anonymous}
+                  disabled={donationData.is_anonymous}
                 />
               </div>
 
