@@ -171,8 +171,9 @@ async def process_pending_payments():
 def check_database_connection():
     """Проверка подключения к базе данных"""
     try:
+        from sqlalchemy import text
         db = SessionLocal()
-        db.execute("SELECT 1")
+        db.execute(text("SELECT 1"))
         db.close()
         logger.info("✅ Подключение к базе данных успешно")
         return True
