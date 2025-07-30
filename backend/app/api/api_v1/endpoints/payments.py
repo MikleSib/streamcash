@@ -186,19 +186,34 @@ async def init_tbank_payment(
                 payment_id = result.get("PaymentId", order_id)
                 
                 # Создаем запись доната с данными из запроса
-                donation_data = {
-                    "amount": request.amount,
-                    "donor_name": "Аноним",  # Будет обновлено после успешного платежа
-                    "message": "",
-                    "is_anonymous": True,
-                    "payment_id": payment_id,
-                    "status": DonationStatus.PENDING,
-                    "payment_method": PaymentMethod.TBANK,
-                    "streamer_id": request.streamer_id
-                }
+                from app.schemas.donation import DonationCreate
                 
-                print(f"💾 Создаем запись доната: {donation_data}")
-                donation = crud.donation.create(db, obj_in=donation_data)
+                # Найдем streamer по ID, чтобы получить recipient_id (user_id)
+                streamer = crud.streamer.get(db, id=request.streamer_id)
+                if not streamer:
+                    raise HTTPException(status_code=404, detail="Streamer not found")
+                
+                donation_create = DonationCreate(
+                    amount=request.amount,
+                    donor_name="Аноним",  # Будет обновлено после успешного платежа
+                    message="",
+                    is_anonymous=True,
+                    recipient_id=streamer.user_id,
+                    payment_method=PaymentMethod.TBANK
+                )
+                
+                print(f"💾 Создаем запись доната: {donation_create}")
+                donation = crud.donation.create(db, obj_in=donation_create)
+                
+                # Обновляем донат с payment_id и статусом
+                donation = crud.donation.update(
+                    db, 
+                    db_obj=donation, 
+                    obj_in={
+                        "payment_id": payment_id,
+                        "status": DonationStatus.PENDING
+                    }
+                )
                 print(f"✅ Донат создан с ID: {donation.id}")
                 
                 return {
