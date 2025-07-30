@@ -4,7 +4,7 @@ services:
   # База данных PostgreSQL
   db:
     image: postgres:15-alpine
-    container_name: streamcash_ssl_db
+    container_name: streamcash_db
     restart: unless-stopped
     environment:
       POSTGRES_DB: streamcash_dev
@@ -13,28 +13,59 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_ssl_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     networks:
-      - streamcash_ssl_network
+      - streamcash_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  # Redis для кэширования и очередей
+  # Redis для кэширования
   redis:
     image: redis:7-alpine
-    container_name: streamcash_ssl_redis
+    container_name: streamcash_redis
     restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
-      - redis_ssl_data:/data
+      - redis_data:/data
     networks:
-      - streamcash_ssl_network
+      - streamcash_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  # Backend API
-  backend:
+  # RabbitMQ для обмена сообщениями между микросервисами
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: streamcash_rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: streamcash
+      RABBITMQ_DEFAULT_PASS: streamcash_dev_2024
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - streamcash_network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # API Gateway - основной входной пункт
+  api-gateway:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    container_name: streamcash_ssl_backend
+    container_name: streamcash_api_gateway
     restart: unless-stopped
     ports:
       - "8000:8000"
@@ -44,8 +75,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:streamcash_dev_2024@db:5432/streamcash_dev
       - REDIS_URL=redis://redis:6379
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - RABBITMQ_URL=amqp://streamcash:streamcash_dev_2024@rabbitmq:5672/
       - SECRET_KEY=streamcash-dev-secret-key-super-long-and-secure-2024
       - ALGORITHM=HS256
       - ACCESS_TOKEN_EXPIRE_MINUTES=10080
@@ -66,20 +96,139 @@ services:
       - TBANK_MERCHANT_ID=${TBANK_MERCHANT_ID:-200000001669463}
       - TBANK_TERMINAL_ID=${TBANK_TERMINAL_ID:-25786674}
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     volumes:
       - ./backend:/app
       - ./backend/static:/app/static
     networks:
-      - streamcash_ssl_network
+      - streamcash_network
     command: >
       sh -c "
-        echo 'Waiting for database to be ready...' &&
-        while ! nc -z db 5432; do sleep 1; done &&
-        echo 'Database is ready!' &&
+        echo '🚀 Запуск API Gateway...' &&
         alembic upgrade head &&
-        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+        python3 /app/services/api-gateway/main.py
+      "
+
+  # Микросервис управления донатами
+  donations-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: streamcash_donations_service
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://postgres:streamcash_dev_2024@db:5432/streamcash_dev
+      - RABBITMQ_URL=amqp://streamcash:streamcash_dev_2024@rabbitmq:5672/
+      - SECRET_KEY=streamcash-dev-secret-key-super-long-and-secure-2024
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - streamcash_network
+    command: >
+      sh -c "
+        echo '🎯 Запуск Donations Service...' &&
+        while ! nc -z rabbitmq 5672; do sleep 2; done &&
+        python3 /app/services/donations/main.py
+      "
+
+  # Микросервис обработки платежей
+  payments-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: streamcash_payments_service
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://postgres:streamcash_dev_2024@db:5432/streamcash_dev
+      - RABBITMQ_URL=amqp://streamcash:streamcash_dev_2024@rabbitmq:5672/
+      - SECRET_KEY=streamcash-dev-secret-key-super-long-and-secure-2024
+      - YOOKASSA_SHOP_ID=test_shop_id
+      - YOOKASSA_SECRET_KEY=test_secret_key
+      - TBANK_TERMINAL=${TBANK_TERMINAL:-1753782172001}
+      - TBANK_SECRET_KEY=${TBANK_SECRET_KEY:-KqU8ItCGM#s&Cqn*}
+      - FRONTEND_URL=https://стримкэш.рф
+      - API_URL=https://стримкэш.рф
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - streamcash_network
+    command: >
+      sh -c "
+        echo '💳 Запуск Payments Service...' &&
+        while ! nc -z rabbitmq 5672; do sleep 2; done &&
+        python3 /app/services/payments/main.py
+      "
+
+  # Микросервис уведомлений
+  notifications-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: streamcash_notifications_service
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://postgres:streamcash_dev_2024@db:5432/streamcash_dev
+      - RABBITMQ_URL=amqp://streamcash:streamcash_dev_2024@rabbitmq:5672/
+      - SECRET_KEY=streamcash-dev-secret-key-super-long-and-secure-2024
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - streamcash_network
+    command: >
+      sh -c "
+        echo '🔔 Запуск Notifications Service...' &&
+        while ! nc -z rabbitmq 5672; do sleep 2; done &&
+        python3 /app/services/notifications/main.py
+      "
+
+  # Микросервис проверки платежей
+  payment-checker-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: streamcash_payment_checker_service
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://postgres:streamcash_dev_2024@db:5432/streamcash_dev
+      - RABBITMQ_URL=amqp://streamcash:streamcash_dev_2024@rabbitmq:5672/
+      - SECRET_KEY=streamcash-dev-secret-key-super-long-and-secure-2024
+      - TBANK_TERMINAL=${TBANK_TERMINAL:-1753782172001}
+      - TBANK_SECRET_KEY=${TBANK_SECRET_KEY:-KqU8ItCGM#s&Cqn*}
+      - PAYMENT_CHECK_INTERVAL=10
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - streamcash_network
+    command: >
+      sh -c "
+        echo '🔍 Запуск Payment Checker Service...' &&
+        while ! nc -z rabbitmq 5672; do sleep 2; done &&
+        python3 /app/services/payment-checker/main.py
       "
 
   # Frontend
@@ -87,65 +236,26 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
-    container_name: streamcash_ssl_frontend
+    container_name: streamcash_frontend
     restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=https://стримкэш.рф/api
     depends_on:
-      - backend
+      - api-gateway
     volumes:
       - ./frontend:/app
       - /app/node_modules
       - /app/.next
     networks:
-      - streamcash_ssl_network
+      - streamcash_network
     command: npm run dev
-
-  # Простой скрипт проверки платежей (вместо Celery)
-  payment-checker:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.dev
-    container_name: streamcash_ssl_payment_checker
-    restart: unless-stopped
-    environment:
-      - DATABASE_URL=postgresql://postgres:streamcash_dev_2024@db:5432/streamcash_dev
-      - SECRET_KEY=streamcash-dev-secret-key-super-long-and-secure-2024
-      - ALGORITHM=HS256
-      - ACCESS_TOKEN_EXPIRE_MINUTES=10080
-      - FRONTEND_URL=https://стримкэш.рф
-      - API_URL=https://стримкэш.рф
-      - API_V1_STR=/api/v1
-      - DEBUG=true
-      - ENVIRONMENT=development
-      - TBANK_TERMINAL=${TBANK_TERMINAL:-1753782172001}
-      - TBANK_PASSWORD=${TBANK_PASSWORD:-KqU8ItCGM#s&Cqn*}
-      - TBANK_SECRET_KEY=${TBANK_SECRET_KEY:-KqU8ItCGM#s&Cqn*}
-      - TBANK_MERCHANT_ID=${TBANK_MERCHANT_ID:-200000001669463}
-      - TBANK_TERMINAL_ID=${TBANK_TERMINAL_ID:-25786674}
-    depends_on:
-      - db
-    volumes:
-      - ./backend:/app
-    networks:
-      - streamcash_ssl_network
-    command: >
-      sh -c "
-        echo '🔄 Запуск автоматической проверки платежей...' &&
-        while ! nc -z db 5432; do 
-          echo '⏳ Ожидание базы данных...' 
-          sleep 2
-        done &&
-        echo '✅ База данных готова!' &&
-        python3 /app/payment_checker.py
-      "
 
   # Nginx reverse proxy с SSL
   nginx:
     image: nginx:alpine
-    container_name: streamcash_ssl_nginx
+    container_name: streamcash_nginx
     restart: unless-stopped
     ports:
       - "80:80"
@@ -154,17 +264,18 @@ services:
       - ./nginx/nginx.ssl.conf:/etc/nginx/conf.d/default.conf
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
-      - backend
+      - api-gateway
       - frontend
     networks:
-      - streamcash_ssl_network
+      - streamcash_network
 
 volumes:
-  postgres_ssl_data:
-  redis_ssl_data:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
 
 networks:
-  streamcash_ssl_network:
+  streamcash_network:
     driver: bridge
     ipam:
       config:
