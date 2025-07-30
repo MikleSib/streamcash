@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertPreview } from '@/components/AlertPreview';
 import { AlertLayersPanel } from '@/components/AlertLayersPanel';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { alertAPI } from '@/lib/api';
 import { ArrowLeft, Save, TestTube, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -282,32 +283,40 @@ function AlertPreviewContent() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
-      </div>
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-20 w-20 border-4 border-purple-600 border-t-transparent mx-auto mb-8"></div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Загружаем предпросмотр</h3>
+            <p className="text-gray-600 dark:text-gray-300">Подготавливаем редактор алерта...</p>
+          </div>
+        </div>
+      </DashboardLayout>
     );
   }
 
   if (!tier) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Алерт не найден</h1>
-          <Button onClick={handleBackToSettings}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Вернуться к настройкам
-          </Button>
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Алерт не найден</h1>
+            <Button onClick={handleBackToSettings}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Вернуться к настройкам
+            </Button>
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+    <DashboardLayout>
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Button
                 onClick={handleBackToSettings}
@@ -318,10 +327,10 @@ function AlertPreviewContent() {
                 Назад
               </Button>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                   Предпросмотр алерта: {tier.name}
                 </h1>
-                <p className="text-sm text-gray-500">
+                <p className="text-gray-600 dark:text-gray-300">
                   Настройте внешний вид и протестируйте алерт
                 </p>
               </div>
@@ -338,7 +347,7 @@ function AlertPreviewContent() {
               <Button
                 onClick={handleSave}
                 disabled={saving}
-                className="bg-indigo-600 hover:bg-indigo-700"
+                className="bg-purple-600 hover:bg-purple-700"
               >
                 <Save className="w-4 h-4 mr-2" />
                 {saving ? 'Сохранение...' : 'Сохранить'}
@@ -346,9 +355,7 @@ function AlertPreviewContent() {
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Панель слоев */}
           <div className="lg:col-span-1">
@@ -363,10 +370,10 @@ function AlertPreviewContent() {
 
           {/* Предпросмотр */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Eye className="w-5 h-5" />
-                Предпросмотр
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg p-6">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
+                <Eye className="w-6 h-6 text-purple-600" />
+                Предпросмотр алерта
               </h2>
               <AlertPreview
                 tier={tier}
@@ -378,16 +385,22 @@ function AlertPreviewContent() {
           </div>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
 
 export default function AlertPreviewPage() {
   return (
     <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
-      </div>
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-20 w-20 border-4 border-purple-600 border-t-transparent mx-auto mb-8"></div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Загружаем редактор</h3>
+            <p className="text-gray-600 dark:text-gray-300">Инициализируем предпросмотр алерта...</p>
+          </div>
+        </div>
+      </DashboardLayout>
     }>
       <AlertPreviewContent />
     </Suspense>
