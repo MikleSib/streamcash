@@ -18,6 +18,26 @@ from pydantic import BaseModel
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+async def send_notification_and_mark_shown(donation, streamer_id: int, db: Session):
+    """Отправить уведомление и пометить как показанное"""
+    try:
+        await notify_new_donation({
+            "donor_name": donation.donor_name if not donation.is_anonymous else None,
+            "amount": donation.amount,
+            "message": donation.message or "",
+            "is_anonymous": donation.is_anonymous
+        }, streamer_id, db)
+        
+        # Помечаем уведомление как показанное
+        crud.donation.update(
+            db, 
+            db_obj=donation, 
+            obj_in={"is_alert_shown": True}
+        )
+        print(f"🔔 Отправлено уведомление и помечено как показанное для donation {donation.id}")
+    except Exception as e:
+        print(f"❌ Ошибка отправки уведомления: {e}")
+
 router = APIRouter()
 
 class PaymentInitRequest(BaseModel):
@@ -26,9 +46,6 @@ class PaymentInitRequest(BaseModel):
     payment_method: str
     description: str = "Донат"
     streamer_id: int
-    donor_name: str = "Аноним"
-    message: str = ""
-    is_anonymous: bool = True
 
 @router.post("/init")
 async def init_payment(
@@ -203,9 +220,9 @@ async def init_tbank_payment(
                 
                 donation_create = DonationCreate(
                     amount=request.amount,
-                    donor_name=request.donor_name if not request.is_anonymous else "Аноним",
-                    message=request.message,
-                    is_anonymous=request.is_anonymous,
+                    donor_name="Аноним",  # Будет обновлено после успешного платежа
+                    message="",
+                    is_anonymous=True,
                     recipient_id=streamer.user_id,
                     payment_method=PaymentMethod.TBANK
                 )
@@ -274,12 +291,7 @@ async def yookassa_webhook(
                     obj_in={"current_donations": new_total}
                 )
                 
-                await notify_new_donation({
-                    "donor_name": donation.donor_name if not donation.is_anonymous else None,
-                    "amount": donation.amount,
-                    "message": donation.message or "",
-                    "is_anonymous": donation.is_anonymous
-                }, streamer.id, db)
+                await send_notification_and_mark_shown(donation, streamer.id, db)
     
     return {"status": "ok"}
 
@@ -310,12 +322,7 @@ async def tinkoff_webhook(
                     obj_in={"current_donations": new_total}
                 )
                 
-                await notify_new_donation({
-                    "donor_name": donation.donor_name if not donation.is_anonymous else None,
-                    "amount": donation.amount,
-                    "message": donation.message or "",
-                    "is_anonymous": donation.is_anonymous
-                }, streamer.id, db)
+                await send_notification_and_mark_shown(donation, streamer.id, db)
     
         return {"status": "ok"}
 
@@ -477,13 +484,8 @@ async def check_tbank_payment_status(
                                 obj_in={"current_donations": new_total}
                             )
                             
-                            # Отправляем уведомление
-                            await notify_new_donation({
-                                "donor_name": donation.donor_name if not donation.is_anonymous else None,
-                                "amount": donation.amount,
-                                "message": donation.message or "",
-                                "is_anonymous": donation.is_anonymous
-                            }, streamer.id, db)
+                            # Отправляем уведомление и помечаем как показанное
+                            await send_notification_and_mark_shown(donation, streamer.id, db)
                             
                             print(f"🎉 Донат успешно обработан!")
                     
@@ -543,13 +545,7 @@ async def check_tbank_payment_status(
             )
             
             print(f"Sending notification for donation: {donation.id} to streamer: {streamer.id}")
-            await notify_new_donation({
-                "donor_name": donation.donor_name if not donation.is_anonymous else None,
-                "amount": donation.amount,
-                "message": donation.message or "",
-                "is_anonymous": donation.is_anonymous
-            }, streamer.id, db)
-            
+            await send_notification_and_mark_shown(donation, streamer.id, db)
             print(f"✅ Уведомление отправлено успешно")
     
     elif status in ["CANCELLED", "REVERSED", "REFUNDED", "PARTIAL_REFUNDED"]:
@@ -597,12 +593,7 @@ async def test_webhook(
                     obj_in={"current_donations": new_total}
                 )
                 
-                await notify_new_donation({
-                    "donor_name": donation.donor_name if not donation.is_anonymous else None,
-                    "amount": donation.amount,
-                    "message": donation.message or "",
-                    "is_anonymous": donation.is_anonymous
-                }, streamer.id, db)
+                await send_notification_and_mark_shown(donation, streamer.id, db)
     
     return {"status": "ok"}
 

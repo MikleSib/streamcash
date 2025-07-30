@@ -29,6 +29,25 @@ from app.core.database import SessionLocal
 from app.models.donation import DonationStatus, PaymentMethod, Donation
 from app import crud
 
+async def send_notification_and_mark_shown(donation: Donation, db):
+    """Отправить WebSocket уведомление и пометить как показанное"""
+    try:
+        from app.services.websocket_service import notify_new_donation
+        await notify_new_donation({
+            "donor_name": donation.donor_name if not donation.is_anonymous else None,
+            "amount": donation.amount,
+            "message": donation.message or "",
+            "is_anonymous": donation.is_anonymous
+        }, donation.streamer_id, db)
+        
+        # Помечаем уведомление как показанное
+        donation.is_alert_shown = True
+        db.commit()
+        
+        logger.info(f"🔔 Отправлено WebSocket уведомление для donation {donation.id}")
+    except Exception as ws_error:
+        logger.error(f"❌ Ошибка отправки WebSocket уведомления: {ws_error}")
+
 async def check_tbank_payment_status(payment_id: str):
     """Проверка статуса платежа в T-Bank"""
     try:
@@ -78,7 +97,7 @@ async def check_tbank_payment_status(payment_id: str):
         return {"success": False, "error": str(e)}
 
 async def process_pending_payments():
-    """Обработка всех PENDING платежей"""
+    """Обработка всех PENDING платежей и COMPLETED без уведомлений"""
     db = SessionLocal()
     try:
         # Получаем все PENDING платежи T-Bank
@@ -88,17 +107,27 @@ async def process_pending_payments():
             Donation.payment_id.is_not(None)
         ).all()
         
-        if not pending_donations:
-            logger.info("📊 PENDING платежей не найдено")
+        # Получаем все COMPLETED платежи без отправленных уведомлений
+        completed_donations = db.query(Donation).filter(
+            Donation.status == DonationStatus.COMPLETED,
+            Donation.is_alert_shown == False,
+            Donation.payment_method == PaymentMethod.TBANK
+        ).all()
+        
+        total_donations = len(pending_donations) + len(completed_donations)
+        
+        if total_donations == 0:
+            logger.info("📊 Нет платежей для обработки")
             return 0
         
-        logger.info(f"📊 Найдено {len(pending_donations)} PENDING платежей для проверки")
+        logger.info(f"📊 Найдено {len(pending_donations)} PENDING и {len(completed_donations)} COMPLETED (без уведомлений) платежей для проверки")
         
         updated_count = 0
         
+        # Обрабатываем PENDING платежи
         for donation in pending_donations:
             try:
-                logger.info(f"🔍 Проверяем donation ID: {donation.id}, payment_id: {donation.payment_id}")
+                logger.info(f"🔍 Проверяем PENDING donation ID: {donation.id}, payment_id: {donation.payment_id}")
                 
                 # Проверяем статус через T-Bank API
                 result = await check_tbank_payment_status(donation.payment_id)
@@ -126,18 +155,8 @@ async def process_pending_payments():
                                 )
                                 logger.info(f"📊 Обновлена статистика стримера {streamer.id}: +{donation.amount} руб")
                         
-                        # Отправляем WebSocket уведомление
-                        try:
-                            from app.services.websocket_service import notify_new_donation
-                            await notify_new_donation({
-                                "donor_name": donation.donor_name if not donation.is_anonymous else None,
-                                "amount": donation.amount,
-                                "message": donation.message or "",
-                                "is_anonymous": donation.is_anonymous
-                            }, donation.streamer_id, db)
-                            logger.info(f"🔔 Отправлено WebSocket уведомление для donation {donation.id}")
-                        except Exception as ws_error:
-                            logger.error(f"❌ Ошибка отправки WebSocket уведомления: {ws_error}")
+                        # Отправляем WebSocket уведомление и помечаем как показанное
+                        await send_notification_and_mark_shown(donation, db)
                     
                     elif payment_status in ["CANCELLED", "REVERSED", "REFUNDED"]:
                         logger.info(f"❌ Обновляем donation {donation.id} на FAILED")
@@ -152,13 +171,29 @@ async def process_pending_payments():
                     logger.warning(f"⚠️ Не удалось проверить статус donation {donation.id}: {result.get('error')}")
                 
             except Exception as e:
-                logger.error(f"❌ Ошибка при обработке donation {donation.id}: {str(e)}")
+                logger.error(f"❌ Ошибка при обработке PENDING donation {donation.id}: {str(e)}")
+                continue
+        
+        # Обрабатываем COMPLETED платежи без уведомлений
+        for donation in completed_donations:
+            try:
+                logger.info(f"🔔 Отправляем уведомление для COMPLETED donation ID: {donation.id}")
+                
+                # Для уже COMPLETED донатов только отправляем уведомление
+                # Статистика должна была обновиться при изменении статуса на COMPLETED
+                
+                # Отправляем WebSocket уведомление и помечаем как показанное
+                await send_notification_and_mark_shown(donation, db)
+                updated_count += 1
+                
+            except Exception as e:
+                logger.error(f"❌ Ошибка при отправке уведомления для COMPLETED donation {donation.id}: {str(e)}")
                 continue
         
         if updated_count > 0:
-            logger.info(f"✅ Обработка завершена. Обновлено: {updated_count} из {len(pending_donations)}")
+            logger.info(f"✅ Обработка завершена. Обновлено/отправлено уведомлений: {updated_count} из {total_donations} платежей")
         else:
-            logger.info(f"✅ Обработка завершена. Все {len(pending_donations)} платежей остались в статусе PENDING")
+            logger.info(f"✅ Обработка завершена. Все {total_donations} платежей не требовали изменений")
         
         return updated_count
         
