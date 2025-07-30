@@ -287,7 +287,9 @@ async def tbank_webhook(
         return {"status": "error", "message": "Donation not found"}
     
     # Статусы согласно документации Т-банка
-    if status == "CONFIRMED":
+    # Для тестовых платежей и некоторых реальных может приходить статус NEW
+    if status in ["CONFIRMED", "NEW"]:
+        print(f"Processing successful payment with status: {status}")
         donation = crud.donation.update(
             db, 
             db_obj=donation, 
@@ -303,12 +305,15 @@ async def tbank_webhook(
                 obj_in={"current_donations": new_total}
             )
             
+            print(f"Sending notification for donation: {donation.id} to streamer: {streamer.id}")
             await notify_new_donation({
                 "donor_name": donation.donor_name if not donation.is_anonymous else None,
                 "amount": donation.amount,
                 "message": donation.message or "",
                 "is_anonymous": donation.is_anonymous
             }, streamer.id, db)
+            
+            print(f"Notification sent successfully")
     
     elif status in ["CANCELLED", "REVERSED", "REFUNDED", "PARTIAL_REFUNDED"]:
         donation = crud.donation.update(
