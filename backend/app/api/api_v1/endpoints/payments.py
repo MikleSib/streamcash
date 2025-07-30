@@ -20,6 +20,7 @@ class PaymentInitRequest(BaseModel):
     order_id: str
     payment_method: str
     description: str = "Донат"
+    streamer_id: int
 
 @router.post("/init")
 async def init_payment(
@@ -83,12 +84,16 @@ async def init_tbank_payment(
         print(f"🔧 Настройки T-Bank: Terminal={settings.TBANK_TERMINAL}, SecretKey={settings.TBANK_SECRET_KEY}")
         print(f"🔧 Длина SecretKey: {len(settings.TBANK_SECRET_KEY) if settings.TBANK_SECRET_KEY else 0}")
         
-        # Подготавливаем данные для создания платежа (только обязательные параметры)
+        # Подготавливаем данные для создания платежа
         payment_data = {
             "TerminalKey": settings.TBANK_TERMINAL,
             "Amount": int(request.amount * 100),  # T-Bank ожидает сумму в копейках
             "OrderId": order_id,
-            "Description": request.description
+            "Description": request.description,
+            "Language": "ru",
+            "NotificationURL": f"{settings.API_URL}/api/v1/payments/webhook/tbank",
+            "SuccessURL": f"{settings.FRONTEND_URL}/donate/success?orderId={order_id}&amount={request.amount}",
+            "FailURL": f"{settings.FRONTEND_URL}/donate/failed?orderId={order_id}&amount={request.amount}"
         }
         
         # Генерируем токен для подписи согласно документации T-Bank
@@ -96,7 +101,11 @@ async def init_tbank_payment(
         token_params = {
             "Amount": payment_data['Amount'],
             "Description": payment_data['Description'], 
+            "FailURL": payment_data['FailURL'],
+            "Language": payment_data['Language'],
+            "NotificationURL": payment_data['NotificationURL'],
             "OrderId": payment_data['OrderId'],
+            "SuccessURL": payment_data['SuccessURL'],
             "TerminalKey": payment_data['TerminalKey']
         }
         
@@ -173,12 +182,32 @@ async def init_tbank_payment(
                 raise HTTPException(status_code=400, detail=f"Invalid JSON response from T-Bank: {response.text}")
             
             if result.get("Success"):
+                # Создаем запись доната в базе данных
+                payment_id = result.get("PaymentId", order_id)
+                
+                # Создаем запись доната с данными из запроса
+                donation_data = {
+                    "amount": request.amount,
+                    "donor_name": "Аноним",  # Будет обновлено после успешного платежа
+                    "message": "",
+                    "is_anonymous": True,
+                    "payment_id": payment_id,
+                    "status": DonationStatus.PENDING,
+                    "payment_method": PaymentMethod.TBANK,
+                    "streamer_id": request.streamer_id
+                }
+                
+                print(f"💾 Создаем запись доната: {donation_data}")
+                donation = crud.donation.create(db, obj_in=donation_data)
+                print(f"✅ Донат создан с ID: {donation.id}")
+                
                 return {
                     "success": True,
-                    "payment_id": result.get("PaymentId", order_id),
+                    "payment_id": payment_id,
                     "payment_url": result.get("PaymentURL"),
                     "order_id": order_id,
                     "amount": request.amount,
+                    "donation_id": donation.id,
                     "token": token
                 }
             else:
@@ -272,19 +301,32 @@ async def tbank_webhook(
     request: Request,
     db: Session = Depends(deps.get_db),
 ) -> Any:
+    print(f"🔔 Получен T-Bank webhook!")
     payload = await request.json()
-    print(f"T-Bank webhook payload: {payload}")
+    print(f"📩 T-Bank webhook payload: {payload}")
     
     # Согласно документации Т-банка, статусы приходят в поле Status
     status = payload.get("Status")
     payment_id = payload.get("PaymentId")
+    order_id = payload.get("OrderId")
+    
+    print(f"📊 Статус: {status}, PaymentId: {payment_id}, OrderId: {order_id}")
     
     if not payment_id:
+        print(f"❌ Отсутствует PaymentId в webhook")
         return {"status": "error", "message": "No PaymentId provided"}
     
     donation = crud.donation.get_by_payment_id(db, payment_id=payment_id)
     if not donation:
-        return {"status": "error", "message": "Donation not found"}
+        print(f"❌ Донат не найден для payment_id: {payment_id}")
+        print(f"🔍 Попробуем найти по order_id: {order_id}")
+        # Попробуем найти по order_id как резервный вариант
+        if order_id:
+            all_donations = crud.donation.get_multi(db)
+            print(f"🔍 Всего донатов в базе: {len(all_donations)}")
+            for d in all_donations:
+                print(f"   Донат ID: {d.id}, payment_id: {d.payment_id}")
+        return {"status": "error", "message": f"Donation not found for payment_id: {payment_id}"}
     
     # Статусы согласно документации Т-банка
     # Для тестовых платежей и некоторых реальных может приходить статус NEW
