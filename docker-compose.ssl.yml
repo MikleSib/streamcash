@@ -103,18 +103,15 @@ services:
       - streamcash_ssl_network
     command: npm run dev
 
-  # Celery Worker для проверки платежей
-  celery-worker:
+  # Простой скрипт проверки платежей (вместо Celery)
+  payment-checker:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    container_name: streamcash_ssl_celery_worker
+    container_name: streamcash_ssl_payment_checker
     restart: unless-stopped
     environment:
       - DATABASE_URL=postgresql://postgres:streamcash_dev_2024@db:5432/streamcash_dev
-      - REDIS_URL=redis://redis:6379
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
       - SECRET_KEY=streamcash-dev-secret-key-super-long-and-secure-2024
       - ALGORITHM=HS256
       - ACCESS_TOKEN_EXPIRE_MINUTES=10080
@@ -123,83 +120,26 @@ services:
       - API_V1_STR=/api/v1
       - DEBUG=true
       - ENVIRONMENT=development
-      - YOOKASSA_SHOP_ID=test_shop_id
-      - YOOKASSA_SECRET_KEY=test_secret_key
-      - SBERBANK_USERNAME=${SBERBANK_USERNAME:-}
-      - SBERBANK_PASSWORD=${SBERBANK_PASSWORD:-}
-      - TINKOFF_TERMINAL_KEY=${TINKOFF_TERMINAL_KEY:-}
-      - TINKOFF_SECRET_KEY=${TINKOFF_SECRET_KEY:-}
       - TBANK_TERMINAL=${TBANK_TERMINAL:-1753782172001}
       - TBANK_PASSWORD=${TBANK_PASSWORD:-KqU8ItCGM#s&Cqn*}
       - TBANK_SECRET_KEY=${TBANK_SECRET_KEY:-KqU8ItCGM#s&Cqn*}
       - TBANK_MERCHANT_ID=${TBANK_MERCHANT_ID:-200000001669463}
       - TBANK_TERMINAL_ID=${TBANK_TERMINAL_ID:-25786674}
-      - C_FORCE_ROOT=1
     depends_on:
       - db
-      - redis
     volumes:
       - ./backend:/app
     networks:
       - streamcash_ssl_network
     command: >
       sh -c "
-        echo 'Waiting for database and redis to be ready...' &&
-        while ! nc -z db 5432; do sleep 1; done &&
-        while ! nc -z redis 6379; do sleep 1; done &&
-        echo 'Database and Redis are ready!' &&
-        echo 'Starting Celery Worker...' &&
-        celery -A app.celery_app worker --loglevel=info --concurrency=1
-      "
-
-  # Celery Beat для расписания задач
-  celery-beat:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.dev
-    container_name: streamcash_ssl_celery_beat
-    restart: unless-stopped
-    environment:
-      - DATABASE_URL=postgresql://postgres:streamcash_dev_2024@db:5432/streamcash_dev
-      - REDIS_URL=redis://redis:6379
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - SECRET_KEY=streamcash-dev-secret-key-super-long-and-secure-2024
-      - ALGORITHM=HS256
-      - ACCESS_TOKEN_EXPIRE_MINUTES=10080
-      - FRONTEND_URL=https://стримкэш.рф
-      - API_URL=https://стримкэш.рф
-      - API_V1_STR=/api/v1
-      - DEBUG=true
-      - ENVIRONMENT=development
-      - YOOKASSA_SHOP_ID=test_shop_id
-      - YOOKASSA_SECRET_KEY=test_secret_key
-      - SBERBANK_USERNAME=${SBERBANK_USERNAME:-}
-      - SBERBANK_PASSWORD=${SBERBANK_PASSWORD:-}
-      - TINKOFF_TERMINAL_KEY=${TINKOFF_TERMINAL_KEY:-}
-      - TINKOFF_SECRET_KEY=${TINKOFF_SECRET_KEY:-}
-      - TBANK_TERMINAL=${TBANK_TERMINAL:-1753782172001}
-      - TBANK_PASSWORD=${TBANK_PASSWORD:-KqU8ItCGM#s&Cqn*}
-      - TBANK_SECRET_KEY=${TBANK_SECRET_KEY:-KqU8ItCGM#s&Cqn*}
-      - TBANK_MERCHANT_ID=${TBANK_MERCHANT_ID:-200000001669463}
-      - TBANK_TERMINAL_ID=${TBANK_TERMINAL_ID:-25786674}
-      - C_FORCE_ROOT=1
-    depends_on:
-      - db
-      - redis
-      - celery-worker
-    volumes:
-      - ./backend:/app
-    networks:
-      - streamcash_ssl_network
-    command: >
-      sh -c "
-        echo 'Waiting for database, redis, and celery-worker to be ready...' &&
-        while ! nc -z db 5432; do sleep 1; done &&
-        while ! nc -z redis 6379; do sleep 1; done &&
-        sleep 10 &&
-        echo 'Starting Celery Beat (scheduler)...' &&
-        celery -A app.celery_app beat --loglevel=info --scheduler=celery.beat:PersistentScheduler
+        echo '🔄 Запуск автоматической проверки платежей...' &&
+        while ! nc -z db 5432; do 
+          echo '⏳ Ожидание базы данных...' 
+          sleep 2
+        done &&
+        echo '✅ База данных готова!' &&
+        python3 /app/payment_checker.py
       "
 
   # Nginx reverse proxy с SSL
