@@ -21,6 +21,8 @@ class User(Base):
     email_verified = Column(Boolean, default=False)
     email_verification_code = Column(String, nullable=True)
     email_verification_expires = Column(DateTime, nullable=True)
+    password_reset_token = Column(String, nullable=True)
+    password_reset_expires = Column(DateTime, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, onupdate=func.now())
 

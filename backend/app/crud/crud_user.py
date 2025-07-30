@@ -2,6 +2,7 @@ from typing import Any, Dict, Optional, Union
 from datetime import datetime, timedelta
 import random
 import string
+import secrets
 
 from sqlalchemy.orm import Session
 
@@ -101,5 +102,57 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def is_email_verified(self, user: User) -> bool:
         """Проверяет, подтвержден ли email пользователя"""
         return user.email_verified
+
+    def generate_reset_code(self) -> str:
+        """Генерирует 6-значный код для сброса пароля"""
+        return ''.join(random.choices(string.digits, k=6))
+
+    def set_password_reset_code(self, db: Session, *, user: User) -> str:
+        """Устанавливает код для сброса пароля"""
+        reset_code = self.generate_reset_code()
+        expires_at = datetime.utcnow() + timedelta(hours=1)
+        
+        user.password_reset_token = reset_code
+        user.password_reset_expires = expires_at
+        
+        db.commit()
+        db.refresh(user)
+        
+        return reset_code
+
+    def verify_reset_code(self, db: Session, *, email: str, code: str) -> bool:
+        """Проверяет код сброса пароля"""
+        user = self.get_by_email(db, email=email)
+        if not user:
+            return False
+        
+        if not user.password_reset_token:
+            return False
+        
+        if user.password_reset_expires < datetime.utcnow():
+            return False
+        
+        if user.password_reset_token != code:
+            return False
+        
+        return True
+
+    def reset_password_with_code(self, db: Session, *, email: str, code: str, new_password: str) -> bool:
+        """Сбрасывает пароль по коду"""
+        if not self.verify_reset_code(db, email=email, code=code):
+            return False
+        
+        user = self.get_by_email(db, email=email)
+        if not user:
+            return False
+        
+        user.hashed_password = get_password_hash(new_password)
+        user.password_reset_token = None
+        user.password_reset_expires = None
+        
+        db.commit()
+        db.refresh(user)
+        
+        return True
 
 user = CRUDUser(User) 

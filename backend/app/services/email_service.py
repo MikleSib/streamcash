@@ -303,6 +303,77 @@ class EmailService:
             html_content=html_content
         )
 
+    async def send_password_reset_code(self, user_email: str, username: str, reset_code: str) -> bool:
+        """Отправить код для сброса пароля"""
+        
+        subject = f"Код для сброса пароля - СтримКэш"
+        
+        html_template = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <style>
+                body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; }
+                .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+                .header { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 30px; text-align: center; }
+                .content { padding: 30px; }
+                .reset-code { background: #f8f9fa; padding: 30px; border-radius: 8px; margin: 20px 0; text-align: center; border: 2px dashed #dc3545; }
+                .code { font-size: 32px; font-weight: bold; color: #dc3545; letter-spacing: 8px; font-family: monospace; }
+                .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
+                .cta-button { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0; }
+                .footer { background: #6c757d; color: white; padding: 20px; text-align: center; font-size: 12px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🔐 Сброс пароля</h1>
+                    <p>Код для создания нового пароля</p>
+                </div>
+                <div class="content">
+                    <p>Привет, {{ username }}!</p>
+                    <p>Вы запросили сброс пароля. Используйте этот код для создания нового пароля:</p>
+                    
+                    <div class="reset-code">
+                        <div class="code">{{ reset_code }}</div>
+                        <p style="margin-top: 10px; color: #6c757d; font-size: 14px;">
+                            Код действителен в течение 1 часа
+                        </p>
+                    </div>
+                    
+                    <div class="warning">
+                        <strong>⚠️ Важно:</strong> Если вы не запрашивали сброс пароля, просто проигнорируйте это письмо. Никогда не передавайте этот код третьим лицам.
+                    </div>
+                    
+                    <p style="text-align: center;">
+                        <a href="{{ frontend_url }}/forgot-password" class="cta-button">
+                            Сбросить пароль
+                        </a>
+                    </p>
+                </div>
+                <div class="footer">
+                    <p>СтримКэш - лучший сервис для приёма донатов</p>
+                    <p>Это автоматическое уведомление. Не отвечайте на это письмо.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        template = Template(html_template)
+        html_content = template.render(
+            username=username,
+            reset_code=reset_code,
+            frontend_url=settings.FRONTEND_URL
+        )
+        
+        return await self.send_email(
+            to_emails=[user_email],
+            subject=subject,
+            html_content=html_content
+        )
+
     async def send_password_reset_email(self, user_email: str, reset_token: str) -> bool:
         """Отправить письмо для сброса пароля"""
         

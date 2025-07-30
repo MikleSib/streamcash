@@ -11,7 +11,7 @@ from app.core import security
 from app.core.config import settings
 from app.core.security import get_password_hash
 from app.services.email_service import email_service
-from app.schemas.user import EmailVerificationCode, EmailVerificationRequest
+from app.schemas.user import EmailVerificationCode, EmailVerificationRequest, PasswordResetRequest, PasswordResetConfirm
 
 router = APIRouter()
 
@@ -147,4 +147,55 @@ async def resend_verification(
 
 @router.post("/test-token", response_model=schemas.User)
 def test_token(current_user: models.User = Depends(deps.get_current_user)) -> Any:
-    return current_user 
+    return current_user
+
+@router.post("/forgot-password", response_model=dict)
+async def forgot_password(
+    *,
+    db: Session = Depends(deps.get_db),
+    password_reset_request: PasswordResetRequest,
+) -> Any:
+    user = crud.user.get_by_email(db, email=password_reset_request.email)
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="User with this email not found."
+        )
+    
+    reset_code = crud.user.set_password_reset_code(db, user=user)
+    
+    try:
+        await email_service.send_password_reset_code(
+            user_email=user.email,
+            username=user.username,
+            reset_code=reset_code
+        )
+    except Exception as e:
+        print(f"Failed to send password reset email: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to send password reset email."
+        )
+    
+    return {"message": "Password reset code sent to your email"}
+
+@router.post("/reset-password", response_model=dict)
+async def reset_password(
+    *,
+    db: Session = Depends(deps.get_db),
+    password_reset_confirm: PasswordResetConfirm,
+) -> Any:
+    success = crud.user.reset_password_with_code(
+        db, 
+        email=password_reset_confirm.email,
+        code=password_reset_confirm.code,
+        new_password=password_reset_confirm.new_password
+    )
+    
+    if not success:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or expired reset code."
+        )
+    
+    return {"message": "Password reset successfully"} 
