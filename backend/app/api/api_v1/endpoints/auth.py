@@ -11,6 +11,7 @@ from app.core import security
 from app.core.config import settings
 from app.core.security import get_password_hash
 from app.services.email_service import email_service
+from app.schemas.user import EmailVerificationCode, EmailVerificationRequest
 
 router = APIRouter()
 
@@ -92,7 +93,7 @@ async def register(
 async def verify_email(
     *,
     db: Session = Depends(deps.get_db),
-    verification_data: schemas.EmailVerificationCode,
+    verification_data: EmailVerificationCode,
 ) -> Any:
     success = crud.user.verify_email_code(
         db, email=verification_data.email, code=verification_data.code
@@ -110,7 +111,7 @@ async def verify_email(
 async def resend_verification(
     *,
     db: Session = Depends(deps.get_db),
-    email_request: schemas.EmailVerificationRequest,
+    email_request: EmailVerificationRequest,
 ) -> Any:
     user = crud.user.get_by_email(db, email=email_request.email)
     if not user:
