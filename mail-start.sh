@@ -21,7 +21,7 @@ read -p "Введите номер (1 или 2): " choice
 case $choice in
     1)
         echo "📧 Запускаем MailHog для разработки..."
-        docker-compose --profile dev up -d mailhog
+        docker-compose -f docker-compose.ssl.yml --profile dev up -d mailhog
         
         if [ $? -eq 0 ]; then
             echo ""
@@ -47,7 +47,7 @@ case $choice in
             docker network create streamcash_network
         fi
         
-        docker-compose --profile production up -d mail
+        docker-compose -f docker-compose.ssl.yml --profile production up -d mail
         
         if [ $? -eq 0 ]; then
             echo ""
