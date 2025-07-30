@@ -111,7 +111,8 @@ services:
       sh -c "
         echo '🚀 Запуск API Gateway...' &&
         alembic upgrade head &&
-        python3 /app/services/api-gateway/main.py
+        cd /app/services/api-gateway &&
+        python3 main.py
       "
 
   # Микросервис управления донатами
