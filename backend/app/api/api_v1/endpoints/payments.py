@@ -368,7 +368,152 @@ async def tbank_webhook(
             for d in all_donations:
                 print(f"   Донат ID: {d.id}, payment_id: {d.payment_id}")
         return {"status": "error", "message": f"Donation not found for payment_id: {payment_id}"}
+
+@router.get("/tbank/check/{order_id}")
+async def check_tbank_payment_status(
+    order_id: str,
+    db: Session = Depends(deps.get_db),
+) -> Any:
+    """
+    Проверить статус платежа T-Bank по OrderId
+    """
+    print(f"🔍 Проверяем статус платежа T-Bank для OrderId: {order_id}")
     
+    try:
+        import hashlib
+        
+        # Подготавливаем данные для запроса GetState
+        request_data = {
+            "TerminalKey": settings.TBANK_TERMINAL,
+            "OrderId": order_id
+        }
+        
+        # Генерируем токен для GetState
+        token_params = {
+            "OrderId": order_id,
+            "TerminalKey": settings.TBANK_TERMINAL
+        }
+        
+        # Добавляем Password для генерации токена
+        token_params["Password"] = settings.TBANK_SECRET_KEY
+        
+        # Сортируем параметры по алфавиту
+        sorted_keys = sorted(token_params.keys())
+        
+        print("🔍 Параметры для токена GetState:")
+        for key in sorted_keys:
+            value = str(token_params[key])
+            print(f"   {key}: {value}")
+        
+        # Генерируем токен
+        token_string = ''.join([str(token_params[key]) for key in sorted_keys])
+        token = hashlib.sha256(token_string.encode('utf-8')).hexdigest()
+        print(f"🔑 Токен GetState: {token}")
+        
+        request_data['Token'] = token
+        
+        # Отправляем запрос GetState к T-Bank API
+        url = "https://securepay.tinkoff.ru/v2/GetState"
+        
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": "StreamCash/1.0"
+        }
+        
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            print(f"🌐 Отправляем GetState запрос: {request_data}")
+            response = await client.post(url, json=request_data, headers=headers)
+            
+            print(f"📥 Статус ответа GetState: {response.status_code}")
+            print(f"📥 Текст ответа GetState: {response.text}")
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=400, detail=f"T-Bank API returned status {response.status_code}")
+            
+            result = response.json()
+            print(f"📊 T-Bank GetState response: {result}")
+            
+            if result.get("Success"):
+                payment_status = result.get("Status")
+                payment_id = result.get("PaymentId")
+                
+                print(f"💳 Статус платежа: {payment_status}, PaymentId: {payment_id}")
+                
+                # Найдем донат в базе данных
+                donation = None
+                if payment_id:
+                    donation = crud.donation.get_by_payment_id(db, payment_id=payment_id)
+                
+                if not donation:
+                    # Попробуем найти по order_id (если payment_id не найден)
+                    all_donations = crud.donation.get_multi(db)
+                    for d in all_donations:
+                        if d.payment_id and order_id in str(d.payment_id):
+                            donation = d
+                            break
+                
+                if donation:
+                    print(f"📋 Найден донат ID: {donation.id}, текущий статус: {donation.status}")
+                    
+                    # Обновляем статус доната в зависимости от статуса платежа
+                    if payment_status in ["CONFIRMED", "AUTHORIZED"] and donation.status != DonationStatus.COMPLETED:
+                        print(f"✅ Обновляем донат на COMPLETED")
+                        donation = crud.donation.update(
+                            db, 
+                            db_obj=donation, 
+                            obj_in={"status": DonationStatus.COMPLETED}
+                        )
+                        
+                        # Обновляем статистику стримера
+                        streamer = crud.streamer.get(db, id=donation.streamer_id)
+                        if streamer:
+                            new_total = streamer.current_donations + donation.amount
+                            crud.streamer.update(
+                                db, 
+                                db_obj=streamer, 
+                                obj_in={"current_donations": new_total}
+                            )
+                            
+                            # Отправляем уведомление
+                            await notify_new_donation({
+                                "donor_name": donation.donor_name if not donation.is_anonymous else None,
+                                "amount": donation.amount,
+                                "message": donation.message or "",
+                                "is_anonymous": donation.is_anonymous
+                            }, streamer.id, db)
+                            
+                            print(f"🎉 Донат успешно обработан!")
+                    
+                    elif payment_status in ["CANCELLED", "REVERSED", "REFUNDED"] and donation.status != DonationStatus.FAILED:
+                        print(f"❌ Обновляем донат на FAILED")
+                        donation = crud.donation.update(
+                            db, 
+                            db_obj=donation, 
+                            obj_in={"status": DonationStatus.FAILED}
+                        )
+                
+                return {
+                    "success": True,
+                    "order_id": order_id,
+                    "payment_id": payment_id,
+                    "status": payment_status,
+                    "donation_found": donation is not None,
+                    "donation_id": donation.id if donation else None,
+                    "donation_status": donation.status if donation else None
+                }
+            else:
+                error_msg = f"GetState failed: {result}"
+                print(f"❌ {error_msg}")
+                return {
+                    "success": False,
+                    "error": error_msg,
+                    "order_id": order_id
+                }
+                
+    except Exception as e:
+        print(f"❌ Ошибка при проверке статуса: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+
     # Проверяем токен уведомления (если требуется)
     notification_token = payload.get("Token")
     if notification_token:
