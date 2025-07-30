@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     TINKOFF_TERMINAL_KEY: Optional[str] = os.getenv("TINKOFF_TERMINAL_KEY")
     TINKOFF_SECRET_KEY: Optional[str] = os.getenv("TINKOFF_SECRET_KEY")
     
-    TBANK_TERMINAL: Optional[str] = os.getenv("TBANK_TERMINAL", "1753782171950DEMO")
+    TBANK_TERMINAL: Optional[str] = os.getenv("TBANK_TERMINAL", "1753782172001")
     TBANK_PASSWORD: Optional[str] = os.getenv("TBANK_PASSWORD", "Hs%8cNP6W&hv%3!^")
     TBANK_SECRET_KEY: Optional[str] = os.getenv("TBANK_SECRET_KEY", "Hs%8cNP6W&hv%3!^")
     TBANK_MERCHANT_ID: Optional[str] = os.getenv("TBANK_MERCHANT_ID", "200000001669463")

@@ -204,7 +204,7 @@ class PaymentService:
         
         print(f"T-Bank payment data: {payment_data}")
         
-        # Отправляем запрос к T-Bank API (боевая среда для DEMO терминала)
+        # Отправляем запрос к T-Bank API (боевая среда)
         url = "https://securepay.tinkoff.ru/v2/Init"
         
         try:
