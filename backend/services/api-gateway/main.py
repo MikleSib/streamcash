@@ -5,15 +5,24 @@ from contextlib import asynccontextmanager
 import asyncio
 import sys
 import os
+import importlib
 
 sys.path.append('/app/shared')
 sys.path.append('/app')
+sys.path.append('/app/services/api-gateway')
 
 from shared.rabbitmq import RabbitMQClient, EventPublisher
 from shared.events import EventType
 from app.core.config import settings
 from app.core.deps import get_current_active_user
-from services.api-gateway.routers import donations, payments, auth, websocket, streamers, users
+
+# Импортируем модули роутеров
+donations = importlib.import_module('routers.donations')
+payments = importlib.import_module('routers.payments')
+auth = importlib.import_module('routers.auth')
+websocket = importlib.import_module('routers.websocket')
+streamers = importlib.import_module('routers.streamers')
+users = importlib.import_module('routers.users')
 
 RABBITMQ_URL = os.getenv("RABBITMQ_URL", "amqp://guest:guest@rabbitmq:5672/")
 
