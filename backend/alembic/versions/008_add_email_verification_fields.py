@@ -1,7 +1,7 @@
 """add email verification fields
 
 Revision ID: 008
-Revises: 007_add_tbank_to_payment_method_enum
+Revises: 007
 Create Date: 2024-12-19 10:00:00.000000
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '008'
-down_revision = '007_add_tbank_to_payment_method_enum'
+down_revision = '007'
 branch_labels = None
 depends_on = None
 

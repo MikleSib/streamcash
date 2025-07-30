@@ -175,6 +175,7 @@ export default function VerifyEmailPage() {
                       onChange={(e) => handleCodeChange(index, e.target.value)}
                       onKeyDown={(e) => handleKeyDown(index, e)}
                       onPaste={handlePaste}
+                      autoComplete="off"
                       className="w-12 h-12 text-center text-xl font-bold bg-gray-700/60 backdrop-blur-sm border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300"
                       inputMode="numeric"
                       pattern="[0-9]*"
