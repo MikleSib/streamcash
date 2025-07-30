@@ -154,8 +154,8 @@ services:
       sh -c "
         echo '🚀 Запуск API Gateway...' &&
         alembic upgrade head &&
-        cd /app/services/api-gateway &&
-        python3 main.py
+        cd /app &&
+        python3 -m uvicorn services.api-gateway.main:app --host 0.0.0.0 --port 8000 --reload
       "
 
   # Микросервис управления донатами
