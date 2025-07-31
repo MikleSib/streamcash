@@ -19,4 +19,4 @@ Disallow: /documents/
 Disallow: /login/
 Disallow: /register/
 
-Sitemap: https://стримкэш.рф/sitemap.xml 
+Sitemap: https://xn--80aafg3aiou.xn--p1ai/sitemap.xml 
