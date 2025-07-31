@@ -60,35 +60,40 @@ async def create_tier(request: Request):
     return response.json()
 
 @router.put("/tier/{tier_id}")
-async def update_tier(tier_id: str, tier_data: dict):
+async def update_tier(tier_id: str, tier_data: dict, request: Request):
     """Обновить уровень алерта"""
-    response = await make_alerts_request("PUT", f"/api/v1/alerts/tier/{tier_id}", json=tier_data)
+    headers = dict(request.headers)
+    response = await make_alerts_request("PUT", f"/api/v1/alerts/tier/{tier_id}", json=tier_data, headers=headers)
     return response.json()
 
 @router.delete("/tier/{tier_id}")
-async def delete_tier(tier_id: str):
+async def delete_tier(tier_id: str, request: Request):
     """Удалить уровень алерта"""
-    response = await make_alerts_request("DELETE", f"/api/v1/alerts/tier/{tier_id}")
+    headers = dict(request.headers)
+    response = await make_alerts_request("DELETE", f"/api/v1/alerts/tier/{tier_id}", headers=headers)
     return response.json()
 
 @router.post("/upload/audio")
-async def upload_audio_file(file: UploadFile = File(...)):
+async def upload_audio_file(file: UploadFile = File(...), request: Request = None):
     """Загрузить аудио файл"""
+    headers = dict(request.headers) if request else {}
     files = {"file": (file.filename, file.file, file.content_type)}
-    response = await make_alerts_request("POST", "/api/v1/alerts/upload/audio", files=files)
+    response = await make_alerts_request("POST", "/api/v1/alerts/upload/audio", files=files, headers=headers)
     return response.json()
 
 @router.post("/upload/image")
-async def upload_image_file(file: UploadFile = File(...)):
+async def upload_image_file(file: UploadFile = File(...), request: Request = None):
     """Загрузить изображение"""
+    headers = dict(request.headers) if request else {}
     files = {"file": (file.filename, file.file, file.content_type)}
-    response = await make_alerts_request("POST", "/api/v1/alerts/upload/image", files=files)
+    response = await make_alerts_request("POST", "/api/v1/alerts/upload/image", files=files, headers=headers)
     return response.json()
 
 @router.delete("/upload/file")
-async def delete_uploaded_file(file_url: str = Query(...)):
+async def delete_uploaded_file(file_url: str = Query(...), request: Request = None):
     """Удалить загруженный файл"""
-    response = await make_alerts_request("DELETE", f"/api/v1/alerts/upload/file?file_url={file_url}")
+    headers = dict(request.headers) if request else {}
+    response = await make_alerts_request("DELETE", f"/api/v1/alerts/upload/file?file_url={file_url}", headers=headers)
     return response.json()
 
 @router.get("/upload/files")
@@ -102,14 +107,16 @@ async def get_user_files(request: Request):
 async def preview_trimmed_audio(
     file_url: str = Query(...),
     start_time: float = Query(0.0),
-    end_time: float = Query(None)
+    end_time: float = Query(None),
+    request: Request = None
 ):
     """Предварительное прослушивание аудио"""
+    headers = dict(request.headers) if request else {}
     params = {"file_url": file_url, "start_time": start_time}
     if end_time is not None:
         params["end_time"] = end_time
     
-    response = await make_alerts_request("POST", "/api/v1/alerts/preview-audio", params=params)
+    response = await make_alerts_request("POST", "/api/v1/alerts/preview-audio", params=params, headers=headers)
     return StreamingResponse(
         response.iter_bytes(),
         media_type=response.headers.get("content-type", "audio/mpeg"),
@@ -117,21 +124,24 @@ async def preview_trimmed_audio(
     )
 
 @router.post("/tier/{tier_id}/gif")
-async def add_gif_to_tier(tier_id: str, gif_url: str = Query(...)):
+async def add_gif_to_tier(tier_id: str, gif_url: str = Query(...), request: Request = None):
     """Добавить гифку к уровню"""
-    response = await make_alerts_request("POST", f"/api/v1/alerts/tier/{tier_id}/gif?gif_url={gif_url}")
+    headers = dict(request.headers) if request else {}
+    response = await make_alerts_request("POST", f"/api/v1/alerts/tier/{tier_id}/gif?gif_url={gif_url}", headers=headers)
     return response.json()
 
 @router.delete("/tier/{tier_id}/gif")
-async def remove_gif_from_tier(tier_id: str, gif_url: str = Query(...)):
+async def remove_gif_from_tier(tier_id: str, gif_url: str = Query(...), request: Request = None):
     """Удалить гифку из уровня"""
-    response = await make_alerts_request("DELETE", f"/api/v1/alerts/tier/{tier_id}/gif?gif_url={gif_url}")
+    headers = dict(request.headers) if request else {}
+    response = await make_alerts_request("DELETE", f"/api/v1/alerts/tier/{tier_id}/gif?gif_url={gif_url}", headers=headers)
     return response.json()
 
 @router.get("/tier/{tier_id}/gifs")
-async def get_tier_gifs(tier_id: str):
+async def get_tier_gifs(tier_id: str, request: Request = None):
     """Получить гифки уровня"""
-    response = await make_alerts_request("GET", f"/api/v1/alerts/tier/{tier_id}/gifs")
+    headers = dict(request.headers) if request else {}
+    response = await make_alerts_request("GET", f"/api/v1/alerts/tier/{tier_id}/gifs", headers=headers)
     return response.json()
 
 @router.get("/widget/{donation_url}", response_class=HTMLResponse)
