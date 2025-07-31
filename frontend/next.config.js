@@ -9,11 +9,8 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   },
-  // Отключаем режим отладки
-  devIndicators: {
-    buildActivity: false,
-    buildActivityPosition: 'bottom-right',
-  },
+  // Полностью отключаем индикаторы разработки
+  devIndicators: false,
   // Отключаем строгую проверку ESLint при сборке
   eslint: {
     ignoreDuringBuilds: true,
