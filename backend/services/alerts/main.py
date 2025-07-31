@@ -9,6 +9,7 @@ sys.path.append('/app')
 sys.path.append('/app/shared')
 
 from app.api.api_v1.endpoints.alerts import router as alerts_router
+from app.api.api_v1.endpoints.websocket import router as websocket_router
 from app.core.database import engine
 from app.models import user, donation, streamer, alert_settings
 
@@ -31,8 +32,9 @@ app.add_middleware(
 
 app.mount("/static", StaticFiles(directory="/app/static"), name="static")
 
-# Подключаем роутер алертов
+# Подключаем роутеры
 app.include_router(alerts_router, prefix="/api/v1/alerts", tags=["alerts"])
+app.include_router(websocket_router, prefix="/api/v1", tags=["websocket"])
 
 @app.get("/")
 async def root():

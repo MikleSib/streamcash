@@ -67,31 +67,59 @@ async def websocket_endpoint(websocket: WebSocket, streamer_id: int):
 
 @router.websocket("/widget/{streamer_id}")
 async def widget_websocket_endpoint(websocket: WebSocket, streamer_id: int):
-    """WebSocket для виджетов алертов - простое подключение без аутентификации"""
+    """WebSocket для виджетов алертов - прокси к Alerts Service"""
     logger.info(f"Widget WebSocket connection attempt for streamer_id: {streamer_id}")
     
     try:
-        # Принимаем WebSocket соединение без аутентификации
+        # Принимаем WebSocket соединение
         await websocket.accept()
         logger.info(f"Widget WebSocket accepted for streamer_id: {streamer_id}")
         
-        # Просто держим соединение открытым для получения уведомлений
-        # В реальности уведомления будут приходить через RabbitMQ или другой механизм
-        while True:
-            try:
-                # Ждем сообщения от клиента (ping/pong для поддержания соединения)
-                data = await websocket.receive_text()
-                logger.info(f"Received from widget client {streamer_id}: {data}")
-                
-                # Можем отправить pong ответ
-                await websocket.send_text('{"type": "pong"}')
-                
-            except WebSocketDisconnect:
-                logger.info(f"Widget client disconnected for streamer_id: {streamer_id}")
-                break
-            except Exception as e:
-                logger.error(f"Widget WebSocket error for streamer_id {streamer_id}: {e}")
-                break
+        # Подключаемся к Alerts Service
+        alerts_ws_url = f"{BACKEND_URL.replace('http', 'ws')}/api/v1/widget/{streamer_id}"
+        logger.info(f"Connecting to Alerts Service WebSocket: {alerts_ws_url}")
+        
+        import websockets
+        
+        async with websockets.connect(alerts_ws_url) as alerts_websocket:
+            logger.info(f"Connected to Alerts Service WebSocket for streamer_id: {streamer_id}")
+            
+            # Проксируем сообщения между клиентом и Alerts Service
+            while True:
+                try:
+                    # Используем asyncio.wait для ожидания сообщений с обеих сторон
+                    import asyncio
+                    
+                    client_task = asyncio.create_task(websocket.receive_text())
+                    alerts_task = asyncio.create_task(alerts_websocket.recv())
+                    
+                    done, pending = await asyncio.wait(
+                        [client_task, alerts_task], 
+                        return_when=asyncio.FIRST_COMPLETED
+                    )
+                    
+                    # Отменяем оставшееся задание
+                    for task in pending:
+                        task.cancel()
+                    
+                    for task in done:
+                        if task == client_task:
+                            # Сообщение от клиента
+                            message = task.result()
+                            logger.info(f"Received from widget client {streamer_id}: {message}")
+                            await alerts_websocket.send(message)
+                        elif task == alerts_task:
+                            # Сообщение от Alerts Service
+                            message = task.result()
+                            logger.info(f"Received from Alerts Service {streamer_id}: {message}")
+                            await websocket.send_text(message)
+                    
+                except WebSocketDisconnect:
+                    logger.info(f"Widget client disconnected for streamer_id: {streamer_id}")
+                    break
+                except Exception as e:
+                    logger.error(f"Widget WebSocket error for streamer_id {streamer_id}: {e}")
+                    break
                         
     except Exception as e:
         logger.error(f"Failed to establish Widget WebSocket connection for streamer_id {streamer_id}: {e}")
