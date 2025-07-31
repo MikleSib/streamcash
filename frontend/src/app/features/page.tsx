@@ -205,21 +205,18 @@ export default function FeaturesPage() {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-20 pb-32">
+      <section className="relative overflow-hidden pt-20 pb-16 sm:pb-24 lg:pb-32">
         {/* Animated Background */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-blue-500/5 to-purple-500/5"></div>
-          <div className="absolute top-20 left-10 w-72 h-72 bg-green-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute top-40 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute bottom-20 left-1/2 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+          <div className="absolute top-20 left-5 sm:left-10 w-48 sm:w-72 h-48 sm:h-72 bg-green-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-40 right-5 sm:right-10 w-60 sm:w-96 h-60 sm:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 w-56 sm:w-80 h-56 sm:h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
         </div>
         
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            
-           
-            
-            <h1 className="text-6xl md:text-8xl font-black text-white mb-8 leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black text-white mb-6 sm:mb-8 leading-tight">
               Зарабатывай
               <br />
               <span className="bg-gradient-to-r from-green-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
@@ -227,22 +224,22 @@ export default function FeaturesPage() {
               </span>
             </h1>
             
-            <p className="text-2xl text-gray-400 mb-16 max-w-4xl mx-auto font-medium">
+            <p className="text-lg sm:text-xl lg:text-2xl text-gray-400 mb-10 sm:mb-16 max-w-4xl mx-auto font-medium px-2">
               Все инструменты для успешного стриминга в одном месте
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center max-w-md sm:max-w-none mx-auto">
               <Button 
                 onClick={() => router.push('/register')}
-                className="group px-12 py-6 text-xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 rounded-2xl transform hover:scale-105 transition-all duration-300 shadow-2xl shadow-green-500/25"
+                className="group px-8 sm:px-10 lg:px-12 py-4 sm:py-5 lg:py-6 text-lg sm:text-xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 rounded-xl sm:rounded-2xl transform hover:scale-105 transition-all duration-300 shadow-2xl shadow-green-500/25"
               >
-                <Play className="w-6 h-6 mr-3 group-hover:animate-pulse" />
+                <Play className="w-5 sm:w-6 h-5 sm:h-6 mr-2 sm:mr-3 group-hover:animate-pulse" />
                 Попробовать бесплатно
               </Button>
               <Button 
                 variant="outline"
                 onClick={() => router.push('/pricing')}
-                className="px-10 py-6 text-xl font-semibold border-2 border-white/20 text-white hover:bg-white/10 rounded-2xl backdrop-blur-xl transform hover:scale-105 transition-all duration-300"
+                className="px-6 sm:px-8 lg:px-10 py-4 sm:py-5 lg:py-6 text-lg sm:text-xl font-semibold border-2 border-white/20 text-white hover:bg-white/10 rounded-xl sm:rounded-2xl backdrop-blur-xl transform hover:scale-105 transition-all duration-300"
               >
                 Тарифы
               </Button>
@@ -252,10 +249,10 @@ export default function FeaturesPage() {
       </section>
 
       {/* Features Showcase */}
-      <section className="py-32 relative">
+      <section className="py-16 sm:py-24 lg:py-32 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <h2 className="text-5xl md:text-6xl font-black text-white mb-8">
+          <div className="text-center mb-12 sm:mb-16 lg:mb-20">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 sm:mb-8">
               Что мы
               <span className="block bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
                 предлагаем?
@@ -264,30 +261,30 @@ export default function FeaturesPage() {
           </div>
 
           {/* Interactive Feature Cards */}
-          <div className="space-y-32">
+          <div className="space-y-16 sm:space-y-20 lg:space-y-32">
             {mainFeatures.map((feature, index) => (
-              <div key={index} className={`flex items-center gap-16 ${index % 2 === 1 ? 'flex-row-reverse' : ''}`}>
+              <div key={index} className={`flex flex-col ${index % 2 === 1 ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center gap-8 lg:gap-16`}>
                 
                 {/* Feature Content */}
-                <div className="flex-1 space-y-8">
-                  <div className="inline-flex items-center px-6 py-3 rounded-full bg-white/5 backdrop-blur-xl border border-white/10">
-                    <div className={`w-3 h-3 rounded-full mr-3 bg-gradient-to-r ${feature.gradient}`}></div>
-                    <span className="text-white font-semibold">Функция #{index + 1}</span>
+                <div className="flex-1 space-y-6 sm:space-y-8">
+                  <div className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-white/5 backdrop-blur-xl border border-white/10">
+                    <div className={`w-2 sm:w-3 h-2 sm:h-3 rounded-full mr-2 sm:mr-3 bg-gradient-to-r ${feature.gradient}`}></div>
+                    <span className="text-white font-semibold text-sm sm:text-base">Функция #{index + 1}</span>
                   </div>
                   
-                  <h3 className="text-4xl md:text-5xl font-black text-white leading-tight">
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight">
                     {feature.title}
                   </h3>
                   
-                  <p className="text-xl text-gray-300 leading-relaxed font-medium">
+                  <p className="text-base sm:text-lg lg:text-xl text-gray-300 leading-relaxed font-medium">
                     {feature.description}
                   </p>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     {feature.details.slice(0, 4).map((detail, detailIndex) => (
-                      <div key={detailIndex} className="flex items-start space-x-3 p-4 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10">
-                        <div className="flex-shrink-0 w-2 h-2 bg-green-400 rounded-full mt-3"></div>
-                        <span className="text-gray-300 font-medium">{detail}</span>
+                      <div key={detailIndex} className="flex items-start space-x-2 sm:space-x-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-white/5 backdrop-blur-xl border border-white/10">
+                        <div className="flex-shrink-0 w-1.5 sm:w-2 h-1.5 sm:h-2 bg-green-400 rounded-full mt-2 sm:mt-3"></div>
+                        <span className="text-gray-300 font-medium text-sm sm:text-base">{detail}</span>
                       </div>
                     ))}
                   </div>
@@ -295,8 +292,8 @@ export default function FeaturesPage() {
                   {feature.details.length > 4 && (
                     <div className="flex flex-wrap gap-2 pt-4">
                       {feature.details.slice(4).map((detail, detailIndex) => (
-                        <div key={detailIndex} className="px-4 py-2 rounded-full bg-white/5 backdrop-blur-xl border border-white/10">
-                          <span className="text-gray-300 text-sm font-medium">{detail}</span>
+                        <div key={detailIndex} className="px-3 sm:px-4 py-1 sm:py-2 rounded-full bg-white/5 backdrop-blur-xl border border-white/10">
+                          <span className="text-gray-300 text-xs sm:text-sm font-medium">{detail}</span>
                         </div>
                       ))}
                     </div>
@@ -304,17 +301,17 @@ export default function FeaturesPage() {
                 </div>
                 
                 {/* Feature Visual */}
-                <div className="flex-1 flex justify-center">
-                  <div className={`relative w-96 h-96 rounded-3xl bg-gradient-to-br ${feature.gradient} p-1 shadow-2xl`}>
-                    <div className="w-full h-full rounded-3xl bg-black/80 backdrop-blur-xl flex items-center justify-center">
+                <div className="flex-1 flex justify-center w-full">
+                  <div className={`relative w-64 sm:w-80 lg:w-96 h-64 sm:h-80 lg:h-96 rounded-2xl sm:rounded-3xl bg-gradient-to-br ${feature.gradient} p-1 shadow-2xl`}>
+                    <div className="w-full h-full rounded-2xl sm:rounded-3xl bg-black/80 backdrop-blur-xl flex items-center justify-center">
                       <div className="text-center">
-                        <div className={`w-24 h-24 mx-auto mb-6 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center shadow-2xl`}>
+                        <div className={`w-16 sm:w-20 lg:w-24 h-16 sm:h-20 lg:h-24 mx-auto mb-4 sm:mb-6 rounded-xl sm:rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center shadow-2xl`}>
                           <div className="text-white">
-                            {React.cloneElement(feature.icon, { className: "w-12 h-12" })}
+                            {React.cloneElement(feature.icon, { className: "w-8 sm:w-10 lg:w-12 h-8 sm:h-10 lg:h-12" })}
                           </div>
                         </div>
-                        <h4 className="text-2xl font-bold text-white mb-2">{feature.title}</h4>
-                        <div className="w-24 h-1 bg-gradient-to-r from-green-400 to-blue-400 mx-auto rounded-full"></div>
+                        <h4 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-2">{feature.title}</h4>
+                        <div className="w-16 sm:w-20 lg:w-24 h-1 bg-gradient-to-r from-green-400 to-blue-400 mx-auto rounded-full"></div>
                       </div>
                     </div>
                   </div>
@@ -327,46 +324,46 @@ export default function FeaturesPage() {
       </section>
 
       {/* Additional Features Grid */}
-      <section className="py-32 relative">
+      <section className="py-16 sm:py-24 lg:py-32 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent"></div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <h2 className="text-5xl md:text-6xl font-black text-white mb-8">
+          <div className="text-center mb-12 sm:mb-16 lg:mb-20">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 sm:mb-8">
               И это еще
               <span className="block bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                 не всё
               </span>
             </h2>
-            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-gray-400 max-w-3xl mx-auto px-2">
               Десятки дополнительных функций для максимальной эффективности
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {additionalFeatures.map((feature, index) => (
               <div key={index} className="group relative">
-                <div className="h-full p-8 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:transform hover:scale-105 hover:bg-white/10">
+                <div className="h-full p-6 sm:p-8 rounded-xl sm:rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:transform hover:scale-105 hover:bg-white/10">
                   
                   {/* Glow effect on hover */}
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-green-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl"></div>
+                  <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-r from-green-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl"></div>
                   
                   <div className="relative">
-                    <div className="mb-6">
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                        {React.cloneElement(feature.icon, { className: "w-8 h-8" })}
+                    <div className="mb-4 sm:mb-6">
+                      <div className="w-12 sm:w-16 h-12 sm:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300">
+                        {React.cloneElement(feature.icon, { className: "w-6 sm:w-8 h-6 sm:h-8" })}
                       </div>
-                      <h3 className="text-xl font-bold text-white group-hover:text-green-400 transition-colors duration-300">
+                      <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-green-400 transition-colors duration-300">
                         {feature.title}
                       </h3>
                     </div>
                     
-                    <p className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300 leading-relaxed">
+                    <p className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300 leading-relaxed text-sm sm:text-base">
                       {feature.description}
                     </p>
                     
                     {/* Bottom accent line */}
-                    <div className="mt-6 h-1 w-0 bg-gradient-to-r from-green-400 to-blue-400 group-hover:w-full transition-all duration-500 rounded-full"></div>
+                    <div className="mt-4 sm:mt-6 h-1 w-0 bg-gradient-to-r from-green-400 to-blue-400 group-hover:w-full transition-all duration-500 rounded-full"></div>
                   </div>
                 </div>
               </div>
@@ -376,24 +373,24 @@ export default function FeaturesPage() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-32 relative overflow-hidden">
+      <section className="py-16 sm:py-24 lg:py-32 relative overflow-hidden">
         {/* Background Effects */}
         <div className="absolute inset-0 bg-gradient-to-t from-green-500/10 via-blue-500/5 to-purple-500/10"></div>
-        <div className="absolute top-20 left-20 w-96 h-96 bg-green-500/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-10 sm:top-20 left-10 sm:left-20 w-48 sm:w-96 h-48 sm:h-96 bg-green-500/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-10 sm:bottom-20 right-10 sm:right-20 w-48 sm:w-96 h-48 sm:h-96 bg-blue-500/20 rounded-full blur-3xl"></div>
         
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="mb-12">
-            <div className="inline-flex items-center px-8 py-4 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 mb-8">
-              <div className="flex space-x-2 mr-4">
+          <div className="mb-8 sm:mb-12">
+            <div className="inline-flex items-center px-4 sm:px-6 lg:px-8 py-3 sm:py-4 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 mb-6 sm:mb-8">
+              <div className="flex space-x-2 mr-3 sm:mr-4">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                 <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-75"></div>
                 <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse delay-150"></div>
               </div>
-              <span className="text-white font-bold text-lg">Готов начать?</span>
+              <span className="text-white font-bold text-sm sm:text-base lg:text-lg">Готов начать?</span>
             </div>
             
-            <h2 className="text-6xl md:text-7xl font-black text-white mb-8 leading-tight">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-6 sm:mb-8 leading-tight">
               Твой успех
               <br />
               <span className="bg-gradient-to-r from-green-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
@@ -401,84 +398,84 @@ export default function FeaturesPage() {
               </span>
             </h2>
             
-            <p className="text-2xl text-gray-300 mb-12 max-w-4xl mx-auto font-medium leading-relaxed">
+            <p className="text-lg sm:text-xl lg:text-2xl text-gray-300 mb-8 sm:mb-12 max-w-4xl mx-auto font-medium leading-relaxed px-2">
               Присоединяйся к профессиональным стримерам и начни зарабатывать больше уже сегодня
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-8 justify-center mb-12">
+          <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 justify-center mb-8 sm:mb-12 px-4">
             <Button 
               onClick={() => router.push('/register')}
-              className="group relative px-16 py-8 text-2xl font-black bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 rounded-3xl transform hover:scale-105 transition-all duration-300 shadow-2xl shadow-green-500/30"
+              className="group relative px-8 sm:px-12 lg:px-16 py-4 sm:py-6 lg:py-8 text-lg sm:text-xl lg:text-2xl font-black bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 rounded-2xl sm:rounded-3xl transform hover:scale-105 transition-all duration-300 shadow-2xl shadow-green-500/30"
             >
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-green-400 to-emerald-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-green-400 to-emerald-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
               <div className="relative flex items-center">
-                <Rocket className="w-8 h-8 mr-4 group-hover:animate-bounce" />
+                <Rocket className="w-6 sm:w-8 h-6 sm:h-8 mr-3 sm:mr-4 group-hover:animate-bounce" />
                 Начать бесплатно
               </div>
             </Button>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-4xl mx-auto">
             <div className="text-center">
-              <div className="text-4xl font-black text-green-400 mb-2">1%</div>
-              <div className="text-gray-400 font-semibold">Минимальная комиссия</div>
+              <div className="text-3xl sm:text-4xl font-black text-green-400 mb-2">1%</div>
+              <div className="text-gray-400 font-semibold text-sm sm:text-base">Минимальная комиссия</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-black text-blue-400 mb-2">0₽</div>
-              <div className="text-gray-400 font-semibold">За регистрацию</div>
+              <div className="text-3xl sm:text-4xl font-black text-blue-400 mb-2">0₽</div>
+              <div className="text-gray-400 font-semibold text-sm sm:text-base">За регистрацию</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-black text-purple-400 mb-2">∞</div>
-              <div className="text-gray-400 font-semibold">Возможностей</div>
+              <div className="text-3xl sm:text-4xl font-black text-purple-400 mb-2">∞</div>
+              <div className="text-gray-400 font-semibold text-sm sm:text-base">Возможностей</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 py-16 bg-black/50 backdrop-blur-xl">
+      <footer className="border-t border-white/10 py-8 sm:py-12 lg:py-16 bg-black/50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-            <div className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-12">
+            <div className="space-y-4 sm:space-y-6 sm:col-span-2 md:col-span-1">
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-400 rounded-2xl flex items-center justify-center mr-4">
-                  <DollarSign className="w-6 h-6 text-white" />
+                <div className="w-10 sm:w-12 h-10 sm:h-12 bg-gradient-to-br from-green-400 to-blue-400 rounded-xl sm:rounded-2xl flex items-center justify-center mr-3 sm:mr-4">
+                  <DollarSign className="w-5 sm:w-6 h-5 sm:h-6 text-white" />
                 </div>
-                <span className="text-2xl font-black text-white">СтримКэш</span>
+                <span className="text-xl sm:text-2xl font-black text-white">СтримКэш</span>
               </div>
-              <p className="text-gray-400 font-medium leading-relaxed">
+              <p className="text-gray-400 font-medium leading-relaxed text-sm sm:text-base">
                 Профессиональная платформа для донатов. Зарабатывай больше с минимальными комиссиями.
               </p>
             </div>
             
             <div>
-              <h4 className="text-white font-bold mb-6 text-lg">Продукт</h4>
-              <ul className="space-y-4">
-                <li><a href="/features" className="text-gray-400 hover:text-green-400 transition-colors font-medium">Возможности</a></li>
-                <li><a href="/pricing" className="text-gray-400 hover:text-green-400 transition-colors font-medium">Тарифы</a></li>
+              <h4 className="text-white font-bold mb-4 sm:mb-6 text-base sm:text-lg">Продукт</h4>
+              <ul className="space-y-2 sm:space-y-4">
+                <li><a href="/features" className="text-gray-400 hover:text-green-400 transition-colors font-medium text-sm sm:text-base">Возможности</a></li>
+                <li><a href="/pricing" className="text-gray-400 hover:text-green-400 transition-colors font-medium text-sm sm:text-base">Тарифы</a></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="text-white font-bold mb-6 text-lg">Поддержка</h4>
-              <ul className="space-y-4">
-                <li><a href="/documents" className="text-gray-400 hover:text-blue-400 transition-colors font-medium">Юридическая информация</a></li>
-                <li><a href="/help" className="text-gray-400 hover:text-blue-400 transition-colors font-medium">Помощь</a></li>
-                <li><a href="/status" className="text-gray-400 hover:text-blue-400 transition-colors font-medium">Статус</a></li>
+              <h4 className="text-white font-bold mb-4 sm:mb-6 text-base sm:text-lg">Поддержка</h4>
+              <ul className="space-y-2 sm:space-y-4">
+                <li><a href="/documents" className="text-gray-400 hover:text-blue-400 transition-colors font-medium text-sm sm:text-base">Юридическая информация</a></li>
+                <li><a href="/help" className="text-gray-400 hover:text-blue-400 transition-colors font-medium text-sm sm:text-base">Помощь</a></li>
+                <li><a href="/status" className="text-gray-400 hover:text-blue-400 transition-colors font-medium text-sm sm:text-base">Статус</a></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="text-white font-bold mb-6 text-lg">Компания</h4>
-              <ul className="space-y-4">
-                <li><a href="/about" className="text-gray-400 hover:text-purple-400 transition-colors font-medium">О нас</a></li>
+              <h4 className="text-white font-bold mb-4 sm:mb-6 text-base sm:text-lg">Компания</h4>
+              <ul className="space-y-2 sm:space-y-4">
+                <li><a href="/about" className="text-gray-400 hover:text-purple-400 transition-colors font-medium text-sm sm:text-base">О нас</a></li>
               </ul>
             </div>
           </div>
           
-          <div className="border-t border-white/10 mt-16 pt-8 text-center">
-            <p className="text-gray-400 font-medium">&copy; 2025 СтримКэш. Все права защищены.</p>
+          <div className="border-t border-white/10 mt-8 sm:mt-12 lg:mt-16 pt-6 sm:pt-8 text-center">
+            <p className="text-gray-400 font-medium text-xs sm:text-sm">&copy; 2025 СтримКэш. Все права защищены.</p>
           </div>
         </div>
       </footer>
