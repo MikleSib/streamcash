@@ -1,3 +1,10 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Помощь',
+  description: 'Получите помощь по использованию платформы СтримКэш',
+};
+
 'use client';
 
 import { useRouter } from 'next/navigation';

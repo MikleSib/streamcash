@@ -65,6 +65,7 @@ export const metadata: Metadata = {
   verification: {
     yandex: 'f5c0468707bf2cb1',
   },
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
@@ -74,8 +75,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ru">
-      <head>
-        <link rel="manifest" href="/manifest.json" />
+      <body className={inter.className}>
         <Script
           id="yandex-metrika"
           strategy="afterInteractive"
@@ -97,8 +97,6 @@ export default function RootLayout({
             <img src="https://mc.yandex.ru/watch/103508060" style={{position:'absolute', left:'-9999px'}} alt="" />
           </div>
         </noscript>
-      </head>
-      <body className={inter.className}>
         <Providers>
           {children}
           <ClientSupportWidget />
