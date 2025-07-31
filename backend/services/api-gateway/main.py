@@ -23,6 +23,7 @@ auth = importlib.import_module('routers.auth')
 websocket = importlib.import_module('routers.websocket')
 streamers = importlib.import_module('routers.streamers')
 users = importlib.import_module('routers.users')
+alerts = importlib.import_module('routers.alerts')
 
 RABBITMQ_URL = os.getenv("RABBITMQ_URL", "amqp://guest:guest@rabbitmq:5672/")
 
@@ -77,6 +78,7 @@ auth.setup_dependencies(api_gateway)
 websocket.setup_dependencies(api_gateway)
 streamers.setup_dependencies(api_gateway)
 users.setup_dependencies(api_gateway)
+alerts.setup_dependencies(api_gateway)
 
 # Подключаем роутеры
 app.include_router(donations.router, prefix="/api/v1/donations", tags=["donations"])
@@ -85,6 +87,7 @@ app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(websocket.router, prefix="/api/v1/ws", tags=["websocket"])
 app.include_router(streamers.router, prefix="/api/v1/streamers", tags=["streamers"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
+app.include_router(alerts.router, prefix="/api/v1/alerts", tags=["alerts"])
 
 @app.get("/")
 async def root():
