@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Header } from '@/components/layout/Header';
@@ -23,229 +24,350 @@ import {
   DollarSign,
   Clock,
   Lock,
-  Palette
+  Palette,
+  ExternalLink,
+  Bell,
+  Target,
+  Trophy,
+  Music,
+  Eye,
+  CreditCard,
+  Headphones,
+  MessageSquare,
+  Star,
+  Flame,
+  Calendar,
+  PieChart,
+  Volume2,
+  FileText,
+  Webhook,
+  Gamepad2,
+  Coffee,
+  Coins,
+  Rocket
 } from 'lucide-react';
 
 export default function FeaturesPage() {
   const router = useRouter();
 
-  const features = [
+  const mainFeatures = [
     {
-      icon: <Monitor className="w-8 h-8 text-purple-400" />,
-      title: "OBS интеграция",
-      description: "Готовые виджеты для OBS с настраиваемым дизайном и анимациями",
+      icon: <ExternalLink className="w-10 h-10 text-purple-400" />,
+      title: "Страница стримера",
+      description: "Персональная страница для приема донатов и заказов на музыку",
       details: [
-        "Готовые шаблоны виджетов",
-        "Настраиваемые анимации",
-        "Поддержка всех версий OBS",
-        "Простая установка через URL"
-      ]
+        "Уникальная ссылка для донатов (streamcash.ru/ваш_ник)",
+        "Прием заказов на музыку с указанием цены",
+        "Возможность добавить описание и правила",
+        "Настраиваемый дизайн и фон страницы",
+        "Отображение цели сбора средств",
+        "Последние донаты и топ донатеров"
+      ],
+      gradient: "from-purple-500 to-pink-500"
     },
     {
-      icon: <Zap className="w-8 h-8 text-yellow-400" />,
-      title: "Мгновенные алерты",
-      description: "Алерты появляются на стриме сразу после доната",
+      icon: <Bell className="w-10 h-10 text-yellow-400" />,
+      title: "Уведомления о донатах",
+      description: "Виджеты алертов для отображения донатов, подписок и других событий",
       details: [
-        "Задержка менее 3 секунд",
-        "Настраиваемые звуки",
-        "Кастомные анимации",
-        "Поддержка изображений"
-      ]
+        "Алерты о новых донатах с именем и суммой",
+        "Уведомления о новых фолловерах и подписчиках",
+        "Алерты о битсах и рейдах",
+        "Настраиваемые звуки для каждого типа события",
+        "Анимации появления и исчезновения",
+        "Поддержка GIF и изображений в алертах"
+      ],
+      gradient: "from-yellow-500 to-orange-500"
     },
     {
-      icon: <Smartphone className="w-8 h-8 text-green-400" />,
-      title: "Мобильные донаты",
-      description: "Страницы для донатов с любых устройств",
+      icon: <Settings className="w-10 h-10 text-blue-400" />,
+      title: "Личный кабинет стримера",
+      description: "Полноценная панель управления для настройки всех функций",
       details: [
-        "Адаптивный дизайн",
-        "Быстрая загрузка",
-        "Удобная оплата",
-        "Поддержка всех браузеров"
-      ]
+        "Настройка виджетов и их внешнего вида",
+        "Статистика доходов в реальном времени",
+        "История всех донатов с фильтрацией",
+        "Вывод средств на банковскую карту",
+        "Управление заказами на музыку",
+        "Настройки уведомлений и звуков"
+      ],
+      gradient: "from-blue-500 to-cyan-500"
     },
     {
-      icon: <Shield className="w-8 h-8 text-blue-400" />,
-      title: "Безопасные платежи",
-      description: "Интеграция с YooKassa, Сбербанк и другими платежными системами",
+      icon: <Trophy className="w-10 h-10 text-green-400" />,
+      title: "ТОП донатеров",
+      description: "Виджет для отображения самых щедрых поддерживающих на стриме",
       details: [
-        "SSL шифрование",
-        "PCI DSS соответствие",
-        "Множественные способы оплаты",
-        "Автоматические возвраты"
-      ]
+        "Топ донатеров за день, неделю, месяц или год",
+        "Рейтинг по общей сумме донатов",
+        "Отображение лучших донатов по размеру",
+        "Настраиваемое количество позиций в топе",
+        "Автоматическое обновление рейтинга",
+        "Красивое оформление с аватарками"
+      ],
+      gradient: "from-green-500 to-emerald-500"
     },
     {
-      icon: <TrendingUp className="w-8 h-8 text-pink-400" />,
-      title: "Аналитика",
-      description: "Подробная статистика донатов и активности ваших зрителей",
+      icon: <Target className="w-10 h-10 text-red-400" />,
+      title: "Полоска цели на стриме",
+      description: "Виджет для сбора средств на конкретную цель с отображением прогресса",
       details: [
-        "Графики в реальном времени",
-        "История донатов",
-        "Топ донатеров",
-        "Экспорт данных"
-      ]
+        "Установка цели сбора с описанием",
+        "Прогресс-бар с процентами выполнения",
+        "Отображение собранной суммы и цели",
+        "Автоматическое обновление прогресса",
+        "Настраиваемые цвета и стили",
+        "Уведомления при достижении цели"
+      ],
+      gradient: "from-red-500 to-pink-500"
     },
     {
-      icon: <Mic className="w-8 h-8 text-red-400" />,
-      title: "Озвучка донатов",
-      description: "Автоматическая озвучка сообщений донатеров через TTS",
+      icon: <Music className="w-10 h-10 text-indigo-400" />,
+      title: "Заказы музыки",
+      description: "Система заказов треков с возможностью установки цены",
       details: [
-        "Множественные голоса",
-        "Настраиваемая скорость",
-        "Фильтрация контента",
-        "Поддержка эмодзи"
-      ]
+        "Прием заказов на проигрывание музыки",
+        "Установка минимальной цены за заказ",
+        "Очередь заказанных треков",
+        "Модерация заказов перед воспроизведением",
+        "Поиск треков через Spotify/YouTube",
+        "История всех заказанных композиций"
+      ],
+      gradient: "from-indigo-500 to-purple-500"
     }
   ];
 
   const additionalFeatures = [
     {
-      icon: <Users className="w-6 h-6 text-purple-400" />,
-      title: "Управление донатерами",
-      description: "Система лояльности и персональных сообщений"
+      icon: <Volume2 className="w-6 h-6 text-purple-400" />,
+      title: "TTS Озвучка",
+      description: "Автоматическая озвучка сообщений донатеров разными голосами"
     },
     {
-      icon: <Settings className="w-6 h-6 text-blue-400" />,
-      title: "Гибкие настройки",
-      description: "Полный контроль над внешним видом и поведением"
+      icon: <MessageSquare className="w-6 h-6 text-blue-400" />,
+      title: "Чат-бот интеграция",
+      description: "Уведомления о донатах в Twitch/YouTube чате"
     },
     {
-      icon: <BarChart3 className="w-6 h-6 text-green-400" />,
-      title: "Детальная статистика",
-      description: "Анализ эффективности и рост аудитории"
+      icon: <PieChart className="w-6 h-6 text-green-400" />,
+      title: "Детальная аналитика",
+      description: "Графики доходов, топ часы для донатов, средний чек"
     },
     {
-      icon: <Globe className="w-6 h-6 text-yellow-400" />,
-      title: "Мультиязычность",
-      description: "Поддержка русского и английского языков"
+      icon: <Webhook className="w-6 h-6 text-yellow-400" />,
+      title: "API и Webhook",
+      description: "Интеграция с внешними сервисами и ботами"
     },
     {
-      icon: <Clock className="w-6 h-6 text-pink-400" />,
-      title: "Работает 24/7",
-      description: "Стабильная работа без перебоев"
-    },
-    {
-      icon: <Lock className="w-6 h-6 text-red-400" />,
+      icon: <Shield className="w-6 h-6 text-red-400" />,
       title: "Защита от спама",
-      description: "Автоматическая фильтрация нежелательных донатов"
+      description: "Фильтрация нежелательного контента и блокировка"
+    },
+    {
+      icon: <Gamepad2 className="w-6 h-6 text-indigo-400" />,
+      title: "Игровые интеграции",
+      description: "Мини-игры для донатеров: рулетка, слоты, предсказания"
+    },
+    {
+      icon: <Coffee className="w-6 h-6 text-orange-400" />,
+      title: "Поддержка контента",
+      description: "Виджет 'Купить кофе' и разовые поддержки"
+    },
+    {
+      icon: <Calendar className="w-6 h-6 text-pink-400" />,
+      title: "Планировщик стримов",
+      description: "Расписание стримов и уведомления подписчикам"
+    },
+    {
+      icon: <Coins className="w-6 h-6 text-cyan-400" />,
+      title: "Виртуальная валюта",
+      description: "Система очков и наград для активных донатеров"
+    },
+    {
+      icon: <Eye className="w-6 h-6 text-emerald-400" />,
+      title: "Счетчик зрителей",
+      description: "Виджет отображения текущего количества зрителей"
+    },
+    {
+      icon: <Star className="w-6 h-6 text-violet-400" />,
+      title: "Система рейтингов",
+      description: "Рейтинг стримеров по активности донатов"
+    },
+    {
+      icon: <FileText className="w-6 h-6 text-teal-400" />,
+      title: "Экспорт данных",
+      description: "Выгрузка статистики в Excel/CSV для отчетности"
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
+    <div className="min-h-screen bg-black">
       <Header />
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-20 pb-16">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden pt-20 pb-32">
+        {/* Animated Background */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-blue-500/5 to-purple-500/5"></div>
+          <div className="absolute top-20 left-10 w-72 h-72 bg-green-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-40 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute bottom-20 left-1/2 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        </div>
+        
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <div className="inline-flex items-center px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 mb-8">
-              <Sparkles className="w-4 h-4 text-purple-400 mr-2" />
-              <span className="text-purple-300 text-sm font-medium">
-                Все возможности платформы
-              </span>
-            </div>
             
-            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent mb-6">
-              Возможности <span className="text-purple-400">СтримКэш</span>
+           
+            
+            <h1 className="text-6xl md:text-8xl font-black text-white mb-8 leading-tight">
+              Зарабатывай
+              <br />
+              <span className="bg-gradient-to-r from-green-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+                как профи
+              </span>
             </h1>
             
-            <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
-              Профессиональные инструменты для создания незабываемого опыта 
-              для ваших зрителей и максимизации доходов от стримов
+            <p className="text-2xl text-gray-400 mb-16 max-w-4xl mx-auto font-medium">
+              Все инструменты для успешного стриминга в одном месте
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Button 
                 onClick={() => router.push('/register')}
-                className="px-8 py-4 text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transform hover:scale-105 transition-all duration-200 shadow-lg shadow-purple-500/25"
+                className="group px-12 py-6 text-xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 rounded-2xl transform hover:scale-105 transition-all duration-300 shadow-2xl shadow-green-500/25"
               >
-                <Play className="w-5 h-5 mr-2" />
-                Начать бесплатно
+                <Play className="w-6 h-6 mr-3 group-hover:animate-pulse" />
+                Попробовать бесплатно
               </Button>
               <Button 
                 variant="outline"
                 onClick={() => router.push('/pricing')}
-                className="px-8 py-4 text-lg border-gray-600 text-gray-300 hover:bg-gray-800 transform hover:scale-105 transition-all duration-200"
+                className="px-10 py-6 text-xl font-semibold border-2 border-white/20 text-white hover:bg-white/10 rounded-2xl backdrop-blur-xl transform hover:scale-105 transition-all duration-300"
               >
-                <DollarSign className="w-5 h-5 mr-2" />
-                Посмотреть тарифы
+                Тарифы
               </Button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Main Features Grid */}
-      <section className="py-20">
+      {/* Features Showcase */}
+      <section className="py-32 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Основные <span className="text-purple-400">возможности</span>
+          <div className="text-center mb-20">
+            <h2 className="text-5xl md:text-6xl font-black text-white mb-8">
+              Что мы
+              <span className="block bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
+                предлагаем?
+              </span>
             </h2>
-            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-              Все что нужно для профессионального стриминга и монетизации
-            </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {features.map((feature, index) => (
-              <div key={index} className="group">
-                <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-8 border border-gray-700/50 hover:border-purple-500/50 transition-all duration-300 hover:transform hover:scale-105">
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0">
-                      {feature.icon}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-purple-300 transition-colors">
-                        {feature.title}
-                      </h3>
-                      <p className="text-gray-400 group-hover:text-gray-300 transition-colors mb-4">
-                        {feature.description}
-                      </p>
-                      <ul className="space-y-2">
-                        {feature.details.map((detail, detailIndex) => (
-                          <li key={detailIndex} className="flex items-center text-gray-300">
-                            <Check className="w-4 h-4 text-green-400 mr-3 flex-shrink-0" />
-                            <span className="text-sm">{detail}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+          {/* Interactive Feature Cards */}
+          <div className="space-y-32">
+            {mainFeatures.map((feature, index) => (
+              <div key={index} className={`flex items-center gap-16 ${index % 2 === 1 ? 'flex-row-reverse' : ''}`}>
+                
+                {/* Feature Content */}
+                <div className="flex-1 space-y-8">
+                  <div className="inline-flex items-center px-6 py-3 rounded-full bg-white/5 backdrop-blur-xl border border-white/10">
+                    <div className={`w-3 h-3 rounded-full mr-3 bg-gradient-to-r ${feature.gradient}`}></div>
+                    <span className="text-white font-semibold">Функция #{index + 1}</span>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Additional Features */}
-      <section className="py-20 bg-gradient-to-r from-gray-900/50 to-purple-900/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Дополнительные <span className="text-purple-400">функции</span>
-            </h2>
-            <p className="text-xl text-gray-400">
-              Множество полезных инструментов для улучшения вашего стрима
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {additionalFeatures.map((feature, index) => (
-              <div key={index} className="group">
-                <div className="bg-gray-800/30 backdrop-blur-sm rounded-lg p-6 border border-gray-700/30 hover:border-purple-500/30 transition-all duration-300">
-                  <div className="flex items-center space-x-3 mb-3">
-                    {feature.icon}
-                    <h3 className="text-lg font-semibold text-white group-hover:text-purple-300 transition-colors">
-                      {feature.title}
-                    </h3>
-                  </div>
-                  <p className="text-gray-400 group-hover:text-gray-300 transition-colors text-sm">
+                  
+                  <h3 className="text-4xl md:text-5xl font-black text-white leading-tight">
+                    {feature.title}
+                  </h3>
+                  
+                  <p className="text-xl text-gray-300 leading-relaxed font-medium">
                     {feature.description}
                   </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {feature.details.slice(0, 4).map((detail, detailIndex) => (
+                      <div key={detailIndex} className="flex items-start space-x-3 p-4 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10">
+                        <div className="flex-shrink-0 w-2 h-2 bg-green-400 rounded-full mt-3"></div>
+                        <span className="text-gray-300 font-medium">{detail}</span>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {feature.details.length > 4 && (
+                    <div className="flex flex-wrap gap-2 pt-4">
+                      {feature.details.slice(4).map((detail, detailIndex) => (
+                        <div key={detailIndex} className="px-4 py-2 rounded-full bg-white/5 backdrop-blur-xl border border-white/10">
+                          <span className="text-gray-300 text-sm font-medium">{detail}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
+                {/* Feature Visual */}
+                <div className="flex-1 flex justify-center">
+                  <div className={`relative w-96 h-96 rounded-3xl bg-gradient-to-br ${feature.gradient} p-1 shadow-2xl`}>
+                    <div className="w-full h-full rounded-3xl bg-black/80 backdrop-blur-xl flex items-center justify-center">
+                      <div className="text-center">
+                        <div className={`w-24 h-24 mx-auto mb-6 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center shadow-2xl`}>
+                          <div className="text-white">
+                            {React.cloneElement(feature.icon, { className: "w-12 h-12" })}
+                          </div>
+                        </div>
+                        <h4 className="text-2xl font-bold text-white mb-2">{feature.title}</h4>
+                        <div className="w-24 h-1 bg-gradient-to-r from-green-400 to-blue-400 mx-auto rounded-full"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Additional Features Grid */}
+      <section className="py-32 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent"></div>
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl md:text-6xl font-black text-white mb-8">
+              И это еще
+              <span className="block bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                не всё
+              </span>
+            </h2>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+              Десятки дополнительных функций для максимальной эффективности
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {additionalFeatures.map((feature, index) => (
+              <div key={index} className="group relative">
+                <div className="h-full p-8 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:transform hover:scale-105 hover:bg-white/10">
+                  
+                  {/* Glow effect on hover */}
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-green-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl"></div>
+                  
+                  <div className="relative">
+                    <div className="mb-6">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                        {React.cloneElement(feature.icon, { className: "w-8 h-8" })}
+                      </div>
+                      <h3 className="text-xl font-bold text-white group-hover:text-green-400 transition-colors duration-300">
+                        {feature.title}
+                      </h3>
+                    </div>
+                    
+                    <p className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300 leading-relaxed">
+                      {feature.description}
+                    </p>
+                    
+                    {/* Bottom accent line */}
+                    <div className="mt-6 h-1 w-0 bg-gradient-to-r from-green-400 to-blue-400 group-hover:w-full transition-all duration-500 rounded-full"></div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -253,79 +375,110 @@ export default function FeaturesPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl p-12 border border-purple-500/30">
-            <Heart className="w-16 h-16 text-pink-400 mx-auto mb-6" />
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Готовы использовать все <span className="text-purple-400">возможности</span>?
+      {/* Final CTA */}
+      <section className="py-32 relative overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-gradient-to-t from-green-500/10 via-blue-500/5 to-purple-500/10"></div>
+        <div className="absolute top-20 left-20 w-96 h-96 bg-green-500/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"></div>
+        
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="mb-12">
+            <div className="inline-flex items-center px-8 py-4 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 mb-8">
+              <div className="flex space-x-2 mr-4">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-75"></div>
+                <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse delay-150"></div>
+              </div>
+              <span className="text-white font-bold text-lg">Готов начать?</span>
+            </div>
+            
+            <h2 className="text-6xl md:text-7xl font-black text-white mb-8 leading-tight">
+              Твой успех
+              <br />
+              <span className="bg-gradient-to-r from-green-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+                начинается здесь
+              </span>
             </h2>
-            <p className="text-xl text-gray-300 mb-8">
-              Присоединяйтесь к тысячам стримеров, которые уже зарабатывают больше
+            
+            <p className="text-2xl text-gray-300 mb-12 max-w-4xl mx-auto font-medium leading-relaxed">
+              Присоединяйся к профессиональным стримерам и начни зарабатывать больше уже сегодня
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                onClick={() => router.push('/register')}
-                className="px-8 py-4 text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transform hover:scale-105 transition-all duration-200"
-              >
-                <Gift className="w-5 h-5 mr-2" />
-                Создать аккаунт
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={() => router.push('/pricing')}
-                className="px-8 py-4 text-lg border-gray-600 text-gray-300 hover:bg-gray-800"
-              >
-                <DollarSign className="w-5 h-5 mr-2" />
-                Посмотреть тарифы
-              </Button>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-8 justify-center mb-12">
+            <Button 
+              onClick={() => router.push('/register')}
+              className="group relative px-16 py-8 text-2xl font-black bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 rounded-3xl transform hover:scale-105 transition-all duration-300 shadow-2xl shadow-green-500/30"
+            >
+              <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-green-400 to-emerald-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+              <div className="relative flex items-center">
+                <Rocket className="w-8 h-8 mr-4 group-hover:animate-bounce" />
+                Начать бесплатно
+              </div>
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="text-center">
+              <div className="text-4xl font-black text-green-400 mb-2">1%</div>
+              <div className="text-gray-400 font-semibold">Минимальная комиссия</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-black text-blue-400 mb-2">0₽</div>
+              <div className="text-gray-400 font-semibold">За регистрацию</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-black text-purple-400 mb-2">∞</div>
+              <div className="text-gray-400 font-semibold">Возможностей</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-800 py-12 bg-black/30">
+      <footer className="border-t border-white/10 py-16 bg-black/50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center mb-4">
-                <DollarSign className="w-8 h-8 text-purple-400 mr-2" />
-                <span className="text-xl font-bold text-white">СтримКэш</span>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div className="space-y-6">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-400 rounded-2xl flex items-center justify-center mr-4">
+                  <DollarSign className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-2xl font-black text-white">СтримКэш</span>
               </div>
-              <p className="text-gray-400">
-                Лучшая платформа для донатов в России
+              <p className="text-gray-400 font-medium leading-relaxed">
+                Профессиональная платформа для донатов. Зарабатывай больше с минимальными комиссиями.
               </p>
             </div>
             
             <div>
-              <h4 className="text-white font-semibold mb-4">Продукт</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="/features" className="hover:text-purple-400 transition-colors">Возможности</a></li>
-                <li><a href="/pricing" className="hover:text-purple-400 transition-colors">Тарифы</a></li>
+              <h4 className="text-white font-bold mb-6 text-lg">Продукт</h4>
+              <ul className="space-y-4">
+                <li><a href="/features" className="text-gray-400 hover:text-green-400 transition-colors font-medium">Возможности</a></li>
+                <li><a href="/pricing" className="text-gray-400 hover:text-green-400 transition-colors font-medium">Тарифы</a></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="text-white font-semibold mb-4">Поддержка</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="/documents" className="hover:text-purple-400 transition-colors">Документация</a></li>
-                <li><a href="/help" className="hover:text-purple-400 transition-colors">Помощь</a></li>
-                <li><a href="/status" className="hover:text-purple-400 transition-colors">Статус</a></li>
+              <h4 className="text-white font-bold mb-6 text-lg">Поддержка</h4>
+              <ul className="space-y-4">
+                <li><a href="/documents" className="text-gray-400 hover:text-blue-400 transition-colors font-medium">Документация</a></li>
+                <li><a href="/help" className="text-gray-400 hover:text-blue-400 transition-colors font-medium">Помощь</a></li>
+                <li><a href="/status" className="text-gray-400 hover:text-blue-400 transition-colors font-medium">Статус</a></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="text-white font-semibold mb-4">Компания</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="/about" className="hover:text-purple-400 transition-colors">О нас</a></li>
+              <h4 className="text-white font-bold mb-6 text-lg">Компания</h4>
+              <ul className="space-y-4">
+                <li><a href="/about" className="text-gray-400 hover:text-purple-400 transition-colors font-medium">О нас</a></li>
               </ul>
             </div>
           </div>
           
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 СтримКэш. Все права защищены.</p>
+          <div className="border-t border-white/10 mt-16 pt-8 text-center">
+            <p className="text-gray-400 font-medium">&copy; 2025 СтримКэш. Все права защищены.</p>
           </div>
         </div>
       </footer>

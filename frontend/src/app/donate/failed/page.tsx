@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 
-export default function FailedPage() {
+function FailedPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [errorInfo, setErrorInfo] = useState<any>(null);
@@ -77,5 +77,20 @@ export default function FailedPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function FailedPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Загрузка...</p>
+        </div>
+      </div>
+    }>
+      <FailedPageContent />
+    </Suspense>
   );
 } 

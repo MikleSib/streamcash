@@ -2,7 +2,33 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import TbankPayment from '@/components/TbankPayment';
+// import TbankPayment from '@/components/TbankPayment';
+
+// Временная заглушка для TbankPayment
+const TbankPayment = ({ amount, orderId, donorName, description, onSuccess, onError, onClose }: any) => (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-2xl p-8 max-w-md w-full">
+      <h3 className="text-xl font-bold mb-4">T-Bank Payment (Тест)</h3>
+      <div className="space-y-2 mb-6">
+        <p>Сумма: {amount} ₽</p>
+        <p>Заказ: {orderId}</p>
+        <p>Донатер: {donorName}</p>
+        <p>Описание: {description}</p>
+      </div>
+      <div className="flex gap-4">
+        <Button onClick={onSuccess} className="flex-1 bg-green-600 hover:bg-green-700">
+          Успех
+        </Button>
+        <Button onClick={() => onError('Тестовая ошибка')} className="flex-1 bg-red-600 hover:bg-red-700">
+          Ошибка
+        </Button>
+        <Button onClick={onClose} variant="outline" className="flex-1">
+          Закрыть
+        </Button>
+      </div>
+    </div>
+  </div>
+);
 
 export default function TbankTestPage() {
   const [showPayment, setShowPayment] = useState(false);
