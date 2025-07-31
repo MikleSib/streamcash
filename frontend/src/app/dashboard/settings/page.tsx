@@ -465,7 +465,7 @@ export default function AlertSettingsPage() {
     return null;
   }
 
-  const currentTier = settings.tiers[activeTab];
+  const currentTier = settings.tiers && settings.tiers.length > 0 ? settings.tiers[activeTab] : null;
 
   return (
     <DashboardLayout>
@@ -547,12 +547,12 @@ export default function AlertSettingsPage() {
               </div>
               
               <div className="space-y-4">
-                {settings.tiers.map((tier, index) => (
+                {settings.tiers && settings.tiers.map((tier, index) => (
                   <TierCard key={tier.id} tier={tier} index={index} />
                 ))}
               </div>
               
-              {settings.tiers.length === 0 && (
+              {(!settings.tiers || settings.tiers.length === 0) && (
                 <div className="text-center py-12">
                   <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Plus className="w-10 h-10 text-gray-400" />

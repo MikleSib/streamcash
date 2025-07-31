@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
 import httpx
 import os
@@ -12,6 +12,12 @@ async def make_alerts_request(method: str, path: str, **kwargs):
     """Делает запрос к сервису алертов"""
     async with httpx.AsyncClient() as client:
         url = f"{ALERTS_SERVICE_URL}{path}"
+        
+        # Добавляем заголовки аутентификации если они есть в запросе
+        headers = kwargs.get('headers', {})
+        if 'authorization' in headers:
+            kwargs['headers'] = headers
+        
         try:
             response = await client.request(method, url, **kwargs)
             return response
@@ -19,33 +25,38 @@ async def make_alerts_request(method: str, path: str, **kwargs):
             raise HTTPException(status_code=500, detail=f"Alerts service connection error: {str(e)}")
 
 @router.get("/")
-async def get_alert_settings():
+async def get_alert_settings(request: Request):
     """Получить настройки алертов"""
-    response = await make_alerts_request("GET", "/api/v1/alerts/")
+    headers = dict(request.headers)
+    response = await make_alerts_request("GET", "/api/v1/alerts/", headers=headers)
     return response.json()
 
 @router.put("/")
-async def update_alert_settings(settings_data: dict):
+async def update_alert_settings(settings_data: dict, request: Request):
     """Обновить настройки алертов"""
-    response = await make_alerts_request("PUT", "/api/v1/alerts/", json=settings_data)
+    headers = dict(request.headers)
+    response = await make_alerts_request("PUT", "/api/v1/alerts/", json=settings_data, headers=headers)
     return response.json()
 
 @router.post("/reset")
-async def reset_alert_settings():
+async def reset_alert_settings(request: Request):
     """Сбросить настройки алертов"""
-    response = await make_alerts_request("POST", "/api/v1/alerts/reset")
+    headers = dict(request.headers)
+    response = await make_alerts_request("POST", "/api/v1/alerts/reset", headers=headers)
     return response.json()
 
 @router.post("/test/{amount}")
-async def test_alert(amount: float):
+async def test_alert(amount: float, request: Request):
     """Тестировать алерт"""
-    response = await make_alerts_request("POST", f"/api/v1/alerts/test/{amount}")
+    headers = dict(request.headers)
+    response = await make_alerts_request("POST", f"/api/v1/alerts/test/{amount}", headers=headers)
     return response.json()
 
 @router.post("/tier")
-async def create_tier():
+async def create_tier(request: Request):
     """Создать новый уровень алерта"""
-    response = await make_alerts_request("POST", "/api/v1/alerts/tier")
+    headers = dict(request.headers)
+    response = await make_alerts_request("POST", "/api/v1/alerts/tier", headers=headers)
     return response.json()
 
 @router.put("/tier/{tier_id}")
@@ -81,9 +92,10 @@ async def delete_uploaded_file(file_url: str = Query(...)):
     return response.json()
 
 @router.get("/upload/files")
-async def get_user_files():
+async def get_user_files(request: Request):
     """Получить список файлов пользователя"""
-    response = await make_alerts_request("GET", "/api/v1/alerts/upload/files")
+    headers = dict(request.headers)
+    response = await make_alerts_request("GET", "/api/v1/alerts/upload/files", headers=headers)
     return response.json()
 
 @router.post("/preview-audio")
