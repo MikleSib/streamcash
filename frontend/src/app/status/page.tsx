@@ -1,11 +1,11 @@
+'use client';
+
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Статус',
   description: 'Статус работы сервисов СтримКэш',
 };
-
-'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';

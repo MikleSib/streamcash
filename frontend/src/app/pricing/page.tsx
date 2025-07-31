@@ -1,11 +1,11 @@
+'use client';
+
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Тарифы',
   description: 'Выберите подходящий тариф для вашего стрима на СтримКэш',
 };
-
-'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';

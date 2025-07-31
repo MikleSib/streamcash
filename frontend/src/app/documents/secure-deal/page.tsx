@@ -1,11 +1,11 @@
+'use client';
+
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Безопасная сделка',
   description: 'Информация о безопасных сделках на СтримКэш',
 };
-
-'use client';
 
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
