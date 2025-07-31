@@ -25,4 +25,23 @@ async def websocket_endpoint(websocket: WebSocket, streamer_id: int):
         manager.disconnect(websocket, streamer_id)
     except Exception as e:
         print(f"WebSocket error for streamer_id {streamer_id}: {e}")
+        manager.disconnect(websocket, streamer_id)
+
+@router.websocket("/widget/{streamer_id}")
+async def widget_websocket_endpoint(websocket: WebSocket, streamer_id: int):
+    """WebSocket для виджетов алертов - без аутентификации"""
+    print(f"Widget WebSocket connection attempt for streamer_id: {streamer_id}")
+    
+    try:
+        await manager.connect(websocket, streamer_id)
+        print(f"Widget WebSocket connected successfully for streamer_id: {streamer_id}")
+        
+        while True:
+            data = await websocket.receive_text()
+            print(f"Received Widget WebSocket data from streamer {streamer_id}: {data}")
+    except WebSocketDisconnect:
+        print(f"Widget WebSocket disconnected for streamer_id: {streamer_id}")
+        manager.disconnect(websocket, streamer_id)
+    except Exception as e:
+        print(f"Widget WebSocket error for streamer_id {streamer_id}: {e}")
         manager.disconnect(websocket, streamer_id) 
