@@ -1,12 +1,5 @@
 'use client';
 
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'О нас',
-  description: 'Узнайте больше о платформе СтримКэш',
-};
-
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Header } from '@/components/layout/Header';
