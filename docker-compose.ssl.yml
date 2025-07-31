@@ -138,6 +138,7 @@ services:
       - EMAIL_HOST_USER=no-reply@xn--h1aefoeg0czb.xn--p1ai
       - EMAIL_HOST_PASSWORD=UfjuQqDoCk
       - EMAIL_USE_TLS=true
+      - ALERTS_SERVICE_URL=http://alerts-service:8000
     depends_on:
       db:
         condition: service_healthy
@@ -145,6 +146,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      alerts-service:
+        condition: service_started
     volumes:
       - ./backend:/app
       - ./backend/static:/app/static
@@ -273,6 +276,38 @@ services:
         echo '🔍 Запуск Payment Checker Service...' &&
         while ! nc -z rabbitmq 5672; do sleep 2; done &&
         python3 /app/services/payment-checker/main.py
+      "
+
+  # Микросервис управления алертами
+  alerts-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: streamcash_alerts_service
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://postgres:streamcash_dev_2024@db:5432/streamcash_dev
+      - RABBITMQ_URL=amqp://streamcash:streamcash_dev_2024@rabbitmq:5672/
+      - SECRET_KEY=streamcash-dev-secret-key-super-long-and-secure-2024
+      - FRONTEND_URL=https://стримкэш.рф
+      - API_URL=https://стримкэш.рф
+      - UPLOAD_DIR=static/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - ./backend/static:/app/static
+    networks:
+      - streamcash_network
+    command: >
+      sh -c "
+        echo '🔔 Запуск Alerts Service...' &&
+        alembic upgrade head &&
+        cd /app &&
+        python3 -m uvicorn services.alerts.main:app --host 0.0.0.0 --port 8000 --reload
       "
 
   # Frontend
