@@ -290,6 +290,254 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Terms & Conditions */}
+      <section className="py-32 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-500/5 to-transparent"></div>
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl md:text-6xl font-black text-white mb-8">
+              Условия использования
+              <span className="block bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                платформы
+              </span>
+            </h2>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+              Прозрачные условия и выгодные тарифы для всех стримеров
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            {/* Стартовый тариф */}
+            <div className="group relative h-full">
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              
+              <div className="relative bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 hover:border-yellow-400/30 transition-all duration-500 hover:transform hover:scale-105 h-full flex flex-col">
+                <div className="text-center mb-8">
+                  <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-yellow-500/30">
+                    <Target className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-black text-white mb-2">Старт</h3>
+                  <p className="text-gray-400">Для новых стримеров</p>
+                </div>
+
+                <div className="text-center mb-8">
+                  <div className="text-5xl font-black text-yellow-400 mb-2">5%</div>
+                  <p className="text-gray-300 font-semibold">комиссия с доната</p>
+                </div>
+
+                <div className="space-y-3 mb-8 flex-1">
+                  <div className="flex items-center text-gray-300">
+                    <Check className="w-4 h-4 text-green-400 mr-3 flex-shrink-0" />
+                    <span className="text-sm">Неограниченные донаты</span>
+                  </div>
+                  <div className="flex items-center text-gray-300">
+                    <Check className="w-4 h-4 text-green-400 mr-3 flex-shrink-0" />
+                    <span className="text-sm">Алерты для OBS</span>
+                  </div>
+                  <div className="flex items-center text-gray-300">
+                    <Check className="w-4 h-4 text-green-400 mr-3 flex-shrink-0" />
+                    <span className="text-sm">Настройка внешнего вида</span>
+                  </div>
+                  <div className="flex items-center text-gray-300">
+                    <Check className="w-4 h-4 text-green-400 mr-3 flex-shrink-0" />
+                    <span className="text-sm">Мобильная страница донатов</span>
+                  </div>
+                  <div className="flex items-center text-gray-300">
+                    <Check className="w-4 h-4 text-green-400 mr-3 flex-shrink-0" />
+                    <span className="text-sm">Базовая аналитика</span>
+                  </div>
+                  <div className="flex items-center text-gray-300">
+                    <Check className="w-4 h-4 text-green-400 mr-3 flex-shrink-0" />
+                    <span className="text-sm">Поддержка по email</span>
+                  </div>
+                </div>
+
+                <div className="mt-auto">
+                  <div className="bg-yellow-500/10 rounded-2xl p-4 border border-yellow-500/20 mb-6">
+                    <p className="text-yellow-300 text-sm font-semibold text-center">
+                      Действует с первого доната
+                    </p>
+                  </div>
+
+                  <button
+                  onClick={() => router.push('/register')}
+                    className="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
+                  >
+                    Начать бесплатно
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Продвинутый тариф */}
+            <div className="group relative h-full">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              
+              <div className="relative bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 hover:border-blue-400/30 transition-all duration-500 hover:transform hover:scale-105 h-full flex flex-col">
+                <div className="absolute top-4 right-4">
+                  <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                    ПОПУЛЯРНЫЙ
+                  </div>
+                </div>
+
+                <div className="text-center mb-8">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-blue-500/30">
+                    <Trophy className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-black text-white mb-2">Про</h3>
+                  <p className="text-gray-400">Для активных стримеров</p>
+                </div>
+
+                <div className="text-center mb-8">
+                  <div className="text-5xl font-black text-blue-400 mb-2">3%</div>
+                  <p className="text-gray-300 font-semibold">комиссия с доната</p>
+                </div>
+
+                <div className="space-y-3 mb-8 flex-1">
+                  <div className="flex items-center text-gray-300">
+                    <Check className="w-4 h-4 text-green-400 mr-3 flex-shrink-0" />
+                    <span className="text-sm">Все функции тарифа "Старт"</span>
+                  </div>
+                  <div className="flex items-center text-gray-300">
+                    <Check className="w-4 h-4 text-green-400 mr-3 flex-shrink-0" />
+                    <span className="text-sm">Расширенная аналитика</span>
+                  </div>
+                  <div className="flex items-center text-gray-300">
+                    <Check className="w-4 h-4 text-green-400 mr-3 flex-shrink-0" />
+                    <span className="text-sm">Кастомные звуки алертов</span>
+                  </div>
+                  <div className="flex items-center text-gray-300">
+                    <Check className="w-4 h-4 text-green-400 mr-3 flex-shrink-0" />
+                    <span className="text-sm">API для интеграций</span>
+                  </div>
+                  <div className="flex items-center text-gray-300">
+                    <Check className="w-4 h-4 text-green-400 mr-3 flex-shrink-0" />
+                    <span className="text-sm">Приоритетная поддержка</span>
+                  </div>
+                  <div className="flex items-center text-gray-300">
+                    <Check className="w-4 h-4 text-green-400 mr-3 flex-shrink-0" />
+                    <span className="text-sm">Убрать брендинг</span>
+                  </div>
+                </div>
+
+                <div className="mt-auto">
+                  <div className="bg-blue-500/10 rounded-2xl p-4 border border-blue-500/20 mb-6">
+                    <p className="text-blue-300 text-sm font-semibold text-center">
+                      При обороте 50к+ ₽/месяц<br/>
+                      или подписка "Профи" 299₽/месяц
+                    </p>
+                  </div>
+
+                  <button
+                  onClick={() => router.push('/pricing')}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
+                  >
+                    Подробнее о тарифах
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Премиум тариф */}
+            <div className="group relative h-full">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              
+              <div className="relative bg-white/5 backdrop-blur-xl rounded-3xl p-8 border-2 border-purple-400/40 hover:border-purple-400/60 transition-all duration-500 hover:transform hover:scale-105 h-full flex flex-col">
+                <div className="absolute top-4 right-4">
+                  <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                    ВИП
+                  </div>
+                </div>
+
+                <div className="text-center mb-8">
+                  <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-purple-500/30">
+                    <Crown className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-black text-white mb-2">Студия</h3>
+                  <p className="text-gray-400">Для топ-стримеров</p>
+                </div>
+
+                <div className="text-center mb-8">
+                  <div className="text-5xl font-black text-purple-400 mb-2">1%</div>
+                  <p className="text-gray-300 font-semibold">комиссия с доната</p>
+                </div>
+
+                <div className="space-y-3 mb-8 flex-1">
+                  <div className="flex items-center text-gray-300">
+                    <Check className="w-4 h-4 text-green-400 mr-3 flex-shrink-0" />
+                    <span className="text-sm">Все функции тарифа "Про"</span>
+                  </div>
+                  <div className="flex items-center text-gray-300">
+                    <Check className="w-4 h-4 text-green-400 mr-3 flex-shrink-0" />
+                    <span className="text-sm">Множественные аккаунты</span>
+                  </div>
+                  <div className="flex items-center text-gray-300">
+                    <Check className="w-4 h-4 text-green-400 mr-3 flex-shrink-0" />
+                    <span className="text-sm">Персональный менеджер</span>
+                  </div>
+                  <div className="flex items-center text-gray-300">
+                    <Check className="w-4 h-4 text-green-400 mr-3 flex-shrink-0" />
+                    <span className="text-sm">Белый лейбл</span>
+                  </div>
+                </div>
+
+                <div className="mt-auto">
+                  <div className="bg-purple-500/10 rounded-2xl p-4 border border-purple-500/20 mb-6">
+                    <p className="text-purple-300 text-sm font-semibold text-center">
+                      При обороте 200к+ ₽/месяц<br/>
+                      или подписка "Студия" 999₽/месяц
+                    </p>
+                  </div>
+
+                  <button
+                  onClick={() => router.push('/pricing')}
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200"
+                  >
+                    Оформить подписку
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Дополнительная информация */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10">
+              <div className="flex items-center mb-6">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-400 rounded-xl flex items-center justify-center mr-4">
+                  <Calculator className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-2xl font-black text-white">Как рассчитывается оборот?</h3>
+              </div>
+              <div className="space-y-4 text-gray-300">
+                <p>• Учитывается сумма всех донатов за календарный месяц</p>
+                <p>• Переход на новый тариф происходит автоматически</p>
+                <p>• При снижении оборота тариф остается прежним до конца месяца</p>
+                <p>• Подписка дает фиксированную комиссию независимо от оборота</p>
+                <p>• Все суммы указаны без учета комиссии платежных систем</p>
+              </div>
+            </div>
+
+            <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10">
+              <div className="flex items-center mb-6">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-400 rounded-xl flex items-center justify-center mr-4">
+                  <AlertCircle className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-2xl font-black text-white">Важная информация</h3>
+              </div>
+              <div className="space-y-4 text-gray-300">
+                <p>• Минимальная сумма доната: 1 рубль</p>
+                <p>• Выплаты производятся ежедневно</p>
+                <p>• Комиссия платежных систем: 2.8-3.5%</p>
+                <p>• Подписки можно оформить в личном кабинете</p>
+                <p>• Техподдержка работает круглосуточно</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Grid */}
       <section className="py-32 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
