@@ -13,10 +13,23 @@ async def make_alerts_request(method: str, path: str, **kwargs):
     async with httpx.AsyncClient() as client:
         url = f"{ALERTS_SERVICE_URL}{path}"
         
-        # Добавляем заголовки аутентификации если они есть в запросе
+        # Извлекаем заголовки из kwargs
         headers = kwargs.get('headers', {})
-        if 'authorization' in headers:
-            kwargs['headers'] = headers
+        
+        # Фильтруем заголовки - оставляем только нужные для аутентификации
+        filtered_headers = {}
+        if headers:
+            # Добавляем только заголовки аутентификации
+            for key, value in headers.items():
+                key_lower = key.lower()
+                if key_lower in ['authorization', 'x-api-key', 'x-auth-token']:
+                    filtered_headers[key] = value
+        
+        # Обновляем kwargs с отфильтрованными заголовками
+        if filtered_headers:
+            kwargs['headers'] = filtered_headers
+        elif 'headers' in kwargs:
+            del kwargs['headers']
         
         try:
             response = await client.request(method, url, **kwargs)
