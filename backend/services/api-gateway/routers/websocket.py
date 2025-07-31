@@ -67,46 +67,31 @@ async def websocket_endpoint(websocket: WebSocket, streamer_id: int):
 
 @router.websocket("/widget/{streamer_id}")
 async def widget_websocket_endpoint(websocket: WebSocket, streamer_id: int):
-    """WebSocket для виджетов алертов - прокси к основному бэкенду без аутентификации"""
+    """WebSocket для виджетов алертов - простое подключение без аутентификации"""
     logger.info(f"Widget WebSocket connection attempt for streamer_id: {streamer_id}")
     
     try:
-        # Принимаем WebSocket соединение
+        # Принимаем WebSocket соединение без аутентификации
         await websocket.accept()
         logger.info(f"Widget WebSocket accepted for streamer_id: {streamer_id}")
         
-        # Подключаемся к основному бэкенду
-        backend_ws_url = f"{BACKEND_URL.replace('http', 'ws')}/api/v1/widget/{streamer_id}"
-        logger.info(f"Connecting to backend Widget WebSocket: {backend_ws_url}")
-        
-        async with httpx.AsyncClient() as client:
-            # Создаем WebSocket соединение с бэкендом
-            async with client.websocket_connect(backend_ws_url) as backend_websocket:
-                logger.info(f"Connected to backend Widget WebSocket for streamer_id: {streamer_id}")
+        # Просто держим соединение открытым для получения уведомлений
+        # В реальности уведомления будут приходить через RabbitMQ или другой механизм
+        while True:
+            try:
+                # Ждем сообщения от клиента (ping/pong для поддержания соединения)
+                data = await websocket.receive_text()
+                logger.info(f"Received from widget client {streamer_id}: {data}")
                 
-                # Проксируем сообщения между клиентом и бэкендом
-                while True:
-                    try:
-                        # Получаем сообщение от клиента
-                        client_message = await websocket.receive_text()
-                        logger.info(f"Received from widget client: {client_message}")
-                        
-                        # Отправляем в бэкенд
-                        await backend_websocket.send_text(client_message)
-                        
-                        # Получаем ответ от бэкенда
-                        backend_message = await backend_websocket.receive_text()
-                        logger.info(f"Received from backend widget: {backend_message}")
-                        
-                        # Отправляем клиенту
-                        await websocket.send_text(backend_message)
-                        
-                    except WebSocketDisconnect:
-                        logger.info(f"Widget client disconnected for streamer_id: {streamer_id}")
-                        break
-                    except Exception as e:
-                        logger.error(f"Widget WebSocket error for streamer_id {streamer_id}: {e}")
-                        break
+                # Можем отправить pong ответ
+                await websocket.send_text('{"type": "pong"}')
+                
+            except WebSocketDisconnect:
+                logger.info(f"Widget client disconnected for streamer_id: {streamer_id}")
+                break
+            except Exception as e:
+                logger.error(f"Widget WebSocket error for streamer_id {streamer_id}: {e}")
+                break
                         
     except Exception as e:
         logger.error(f"Failed to establish Widget WebSocket connection for streamer_id {streamer_id}: {e}")

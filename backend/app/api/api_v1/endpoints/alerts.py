@@ -767,7 +767,7 @@ def get_alert_widget(
             const animationContainer = document.getElementById('animationContainer');
             const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const wsHost = window.location.hostname === 'xn--h1aefoeg0czb.xn--p1ai' ? 'стримкэш.рф' : window.location.hostname;
-            const wsUrl = `${{wsProtocol}}//${{wsHost}}/api/v1/widget/{streamer.id}`;
+            const wsUrl = `${{wsProtocol}}//${{wsHost}}/api/v1/ws/widget/{streamer.id}`;
             console.log('WebSocket URL:', wsUrl);
             
             let socket;
