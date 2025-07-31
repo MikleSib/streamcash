@@ -29,23 +29,11 @@
   </url>
   
   <url>
-    <loc>https://xn--80aafg3aiou.xn--p1ai/streamers</loc>
+    <loc>https://xn--h1aefoeg0czb.xn--p1ai/streamers</loc>
     <lastmod>2024-12-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   
-  <url>
-    <loc>https://xn--80aafg3aiou.xn--p1ai/help</loc>
-    <lastmod>2024-12-19</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://xn--80aafg3aiou.xn--p1ai/status</loc>
-    <lastmod>2024-12-19</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.4</priority>
-  </url>
+
 </urlset> 
