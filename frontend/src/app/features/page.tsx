@@ -56,7 +56,7 @@ export default function FeaturesPage() {
       title: "Страница стримера",
       description: "Персональная страница для приема донатов и заказов на музыку",
       details: [
-        "Уникальная ссылка для донатов (streamcash.ru/ваш_ник)",
+        "Уникальная ссылка для донатов (стримкэш.рф/ваш_ник)",
         "Прием заказов на музыку с указанием цены",
         "Возможность добавить описание и правила",
         "Настраиваемый дизайн и фон страницы",
@@ -463,7 +463,7 @@ export default function FeaturesPage() {
             <div>
               <h4 className="text-white font-bold mb-6 text-lg">Поддержка</h4>
               <ul className="space-y-4">
-                <li><a href="/documents" className="text-gray-400 hover:text-blue-400 transition-colors font-medium">Документация</a></li>
+                <li><a href="/documents" className="text-gray-400 hover:text-blue-400 transition-colors font-medium">Юридическая информация</a></li>
                 <li><a href="/help" className="text-gray-400 hover:text-blue-400 transition-colors font-medium">Помощь</a></li>
                 <li><a href="/status" className="text-gray-400 hover:text-blue-400 transition-colors font-medium">Статус</a></li>
               </ul>

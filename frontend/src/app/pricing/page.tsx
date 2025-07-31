@@ -62,7 +62,7 @@ export default function PricingPage() {
     },
     {
       name: "Профи",
-      price: { monthly: "299₽/мес", yearly: "2990₽/год" },
+      price: { monthly: "299₽", yearly: "2990₽/год" },
       commission: "3%",
       description: "Для профессиональных стримеров",
       features: [
@@ -86,7 +86,7 @@ export default function PricingPage() {
     },
     {
       name: "Студия",
-      price: { monthly: "999₽/мес", yearly: "9990₽/год" },
+      price: { monthly: "999₽", yearly: "9990₽/год" },
       commission: "1%",
       description: "Максимальная выгода для команд",
       features: [
@@ -140,7 +140,7 @@ export default function PricingPage() {
 
   const getSavings = (plan: any) => {
     if (plan.price.monthly === "Бесплатно") return null;
-    const monthly = parseInt(plan.price.monthly.replace('₽/мес', ''));
+    const monthly = parseInt(plan.price.monthly.replace('₽', ''));
     const yearly = parseInt(plan.price.yearly.replace('₽/год', ''));
     const savings = (monthly * 12 - yearly) / (monthly * 12) * 100;
     return Math.round(savings);
@@ -215,15 +215,8 @@ export default function PricingPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {plans.map((plan, index) => (
-              <div key={index} className={`group relative ${plan.bestValue ? 'lg:scale-110' : ''}`}>
-                {/* Glow Effect */}
-                <div className={`absolute inset-0 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
-                  plan.bestValue ? 'bg-gradient-to-br from-green-500/30 to-emerald-500/30' :
-                  plan.popular ? 'bg-gradient-to-br from-purple-500/30 to-pink-500/30' :
-                  'bg-gradient-to-br from-blue-500/20 to-cyan-500/20'
-                }`}></div>
-                
-                {/* Top Badge */}
+              <div key={index} className={`group relative transition-all duration-500 hover:transform hover:scale-105 ${plan.bestValue ? 'lg:scale-110' : ''}`}>
+                {/* Top Badge - прикреплен к группе */}
                 {plan.popular && (
                   <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 z-20">
                     <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-full text-sm font-bold flex items-center shadow-2xl">
@@ -242,7 +235,14 @@ export default function PricingPage() {
                   </div>
                 )}
                 
-                <div className={`relative bg-white/5 backdrop-blur-xl rounded-3xl p-10 border-2 transition-all duration-500 hover:transform hover:scale-105 overflow-hidden ${
+                {/* Glow Effect */}
+                <div className={`absolute inset-0 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
+                  plan.bestValue ? 'bg-gradient-to-br from-green-500/30 to-emerald-500/30' :
+                  plan.popular ? 'bg-gradient-to-br from-purple-500/30 to-pink-500/30' :
+                  'bg-gradient-to-br from-blue-500/20 to-cyan-500/20'
+                }`}></div>
+                
+                <div className={`relative bg-white/5 backdrop-blur-xl rounded-3xl p-10 border-2 transition-all duration-300 overflow-hidden ${
                   plan.bestValue ? 'border-green-400/40 shadow-2xl shadow-green-500/20' :
                   plan.popular ? 'border-purple-400/40 shadow-2xl shadow-purple-500/20' :
                   'border-white/10 hover:border-white/20 shadow-xl'
@@ -281,7 +281,7 @@ export default function PricingPage() {
                       
                       {/* Price */}
                       <div className="mb-6">
-                        <div className={`text-6xl font-black mb-4 ${
+                        <div className={`${getCurrentPrice(plan) === 'Бесплатно' ? 'text-4xl' : 'text-6xl'} font-black mb-4 ${
                           plan.bestValue ? 'text-green-400' : plan.popular ? 'text-purple-400' : 'text-blue-400'
                         }`}>
                           {getCurrentPrice(plan)}
@@ -636,7 +636,7 @@ export default function PricingPage() {
             <div>
               <h4 className="text-white font-semibold mb-4">Поддержка</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="/documents" className="hover:text-purple-400 transition-colors">Документация</a></li>
+                <li><a href="/documents" className="hover:text-purple-400 transition-colors">Юридическая информация</a></li>
                 <li><a href="/help" className="hover:text-purple-400 transition-colors">Помощь</a></li>
                 <li><a href="/status" className="hover:text-purple-400 transition-colors">Статус</a></li>
               </ul>

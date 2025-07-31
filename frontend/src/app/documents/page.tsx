@@ -68,7 +68,7 @@ export default function DocumentsPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-              Документация
+              Юридическая информация
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               Все юридические документы и правила использования платформы СтримКэш
@@ -182,7 +182,7 @@ export default function DocumentsPage() {
             <div>
               <h4 className="text-white font-semibold mb-4">Поддержка</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="/documents" className="hover:text-purple-400 transition-colors">Документация</a></li>
+                <li><a href="/documents" className="hover:text-purple-400 transition-colors">Юридическая информация</a></li>
                 <li><a href="/help" className="hover:text-purple-400 transition-colors">Помощь</a></li>
                 <li><a href="/status" className="hover:text-purple-400 transition-colors">Статус</a></li>
               </ul>

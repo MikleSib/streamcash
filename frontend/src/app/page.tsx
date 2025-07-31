@@ -28,6 +28,7 @@ import {
   Banknote,
   Trophy,
   Rocket,
+  Award,
   Target
 } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
@@ -113,29 +114,24 @@ export default function HomePage() {
               </span>
             </h1>
             
-            {/* Крупный блок с комиссией */}
-            <div className="mb-12">
-              <div className="inline-block bg-white/5 backdrop-blur-xl border-2 border-green-400/30 rounded-3xl px-12 py-8 mb-8 shadow-2xl shadow-green-400/20">
-                <p className="text-5xl md:text-6xl font-black text-center text-white">
-                  🚀 Комиссия всего <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent border-b-4 border-green-400/50">1%*</span>
-                </p>
-              </div>
-              
-          
-            </div>
+            <p className="text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed font-medium">
+              Самая <span className="text-green-400 font-bold">выгодная платформа</span> для донатов в России
+              <br />
+              <span className="text-lg text-gray-400">Комиссия от 1% • Настройка за 5 минут • Поддержка 24/7</span>
+            </p>
             
             <div className="flex flex-wrap justify-center gap-6 mb-16">
-              <div className="flex items-center bg-white/5 backdrop-blur-xl px-6 py-4 rounded-2xl border border-white/10 shadow-lg">
-                <Check className="w-5 h-5 text-green-400 mr-3" />
-                <span className="text-white font-semibold">Настройка за 5 минут</span>
+              <div className="flex items-center bg-white/5 backdrop-blur-xl px-6 py-4 rounded-2xl border border-white/10 shadow-lg hover:shadow-green-500/20 hover:border-green-400/30 transition-all duration-300">
+                <TrendingUp className="w-5 h-5 text-green-400 mr-3" />
+                <span className="text-white font-semibold">Самые низкие комиссии</span>
               </div>
-              <div className="flex items-center bg-white/5 backdrop-blur-xl px-6 py-4 rounded-2xl border border-white/10 shadow-lg">
+              <div className="flex items-center bg-white/5 backdrop-blur-xl px-6 py-4 rounded-2xl border border-white/10 shadow-lg hover:shadow-blue-500/20 hover:border-blue-400/30 transition-all duration-300">
                 <Shield className="w-5 h-5 text-blue-400 mr-3" />
                 <span className="text-white font-semibold">Безопасные платежи</span>
               </div>
-              <div className="flex items-center bg-white/5 backdrop-blur-xl px-6 py-4 rounded-2xl border border-white/10 shadow-lg">
-                <Heart className="w-5 h-5 text-purple-400 mr-3" />
-                <span className="text-white font-semibold">Поддержка 24/7</span>
+              <div className="flex items-center bg-white/5 backdrop-blur-xl px-6 py-4 rounded-2xl border border-white/10 shadow-lg hover:shadow-purple-500/20 hover:border-purple-400/30 transition-all duration-300">
+                <Zap className="w-5 h-5 text-purple-400 mr-3" />
+                <span className="text-white font-semibold">Мгновенные алерты</span>
               </div>
             </div>
             
@@ -157,8 +153,21 @@ export default function HomePage() {
               </Button>
             </div>
             
-           
-
+            {/* Subtle Trust Indicators */}
+            <div className="flex flex-wrap justify-center items-center gap-8 text-gray-400 text-sm">
+              <div className="flex items-center">
+                <Users className="w-4 h-4 mr-2" />
+                <span>5000+ довольных стримеров</span>
+              </div>
+              <div className="flex items-center">
+                <DollarSign className="w-4 h-4 mr-2" />
+                <span>100М+ рублей выплачено</span>
+              </div>
+              <div className="flex items-center">
+                <Award className="w-4 h-4 mr-2" />
+                <span>Лидер рынка с 2021 года</span>
+              </div>
+            </div>
 
           </div>
         </div>
@@ -442,7 +451,7 @@ export default function HomePage() {
                 <span className="text-2xl font-black text-white">СтримКэш</span>
               </div>
               <p className="text-gray-400 font-medium leading-relaxed">
-                #1 платформа для донатов в России. Зарабатывай больше с минимальными комиссиями.
+                Зарабатывай больше с минимальными комиссиями.
               </p>
             </div>
             
