@@ -14,8 +14,7 @@ import {
   Settings, 
   BarChart3,
   Gift,
-  Zap,
-  Shield
+  Zap
 } from 'lucide-react';
 
 export function Header() {
@@ -33,7 +32,6 @@ export function Header() {
   const navigation = [
     { name: 'Стримеры', href: '/streamers', icon: User },
     { name: 'Возможности', href: '/features', icon: Zap },
-    { name: 'Безопасная сделка', href: '/documents/secure-deal', icon: Shield },
     { name: 'Тарифы', href: '/pricing', icon: BarChart3 },
   ];
 
