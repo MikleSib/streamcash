@@ -112,7 +112,7 @@ export default function HomePage() {
             </h1>
             
             <p className="text-lg sm:text-xl lg:text-2xl text-gray-300 mb-8 sm:mb-12 max-w-4xl mx-auto leading-relaxed font-medium px-2">
-              Самая <span className="text-green-400 font-bold">выгодная платформа</span> для донатов в России
+              <span className="text-green-400 font-bold">Выгодная платформа</span> для донатов в России
               <br className="hidden sm:block" />
               <span className="text-base sm:text-lg text-gray-400 block sm:inline mt-2 sm:mt-0">Комиссия от 1% • Поддержка 24/7</span>
             </p>
@@ -698,7 +698,7 @@ export default function HomePage() {
             <div>
               <h4 className="text-white font-bold mb-4 sm:mb-6 text-base sm:text-lg">Поддержка</h4>
               <ul className="space-y-2 sm:space-y-4">
-                <li><a href="/documents" className="text-gray-400 hover:text-blue-400 transition-colors font-medium text-sm sm:text-base">Юридическая информация</a></li>
+                <li><a href="/documents/user-agreement" className="text-gray-400 hover:text-blue-400 transition-colors font-medium text-sm sm:text-base">Пользовательское соглашение</a></li>
                 <li><a href="/help" className="text-gray-400 hover:text-blue-400 transition-colors font-medium text-sm sm:text-base">Помощь</a></li>
                 <li><a href="/status" className="text-gray-400 hover:text-blue-400 transition-colors font-medium text-sm sm:text-base">Статус</a></li>
               </ul>
@@ -709,6 +709,30 @@ export default function HomePage() {
               <ul className="space-y-2 sm:space-y-4">
                 <li><a href="/about" className="text-gray-400 hover:text-purple-400 transition-colors font-medium text-sm sm:text-base">О нас</a></li>
               </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-white/10 mt-8 sm:mt-12 pt-8 sm:pt-12">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12">
+              <div>
+                <h5 className="text-white font-bold mb-4 sm:mb-6 text-base sm:text-lg">Реквизиты счета</h5>
+                <div className="text-xs sm:text-sm text-gray-400 space-y-2 sm:space-y-3 leading-relaxed">
+                  <p><strong className="text-gray-300 font-semibold">Название организации:</strong></p>
+                  <p className="break-words">ИНДИВИДУАЛЬНЫЙ ПРЕДПРИНИМАТЕЛЬ ТРОФИМОВ МИХАИЛ ВЯЧЕСЛАВОВИЧ</p>
+                  <p><strong className="text-gray-300 font-semibold">Юридический адрес:</strong></p>
+                  <p className="break-words">630048, РОССИЯ, НОВОСИБИРСКАЯ ОБЛ, Г НОВОСИБИРСК, УЛ ВЕРТКОВСКАЯ, Д 5/3, КВ 97</p>
+                  <p><strong className="text-gray-300 font-semibold">ИНН:</strong> 540438160180</p>
+                  <p><strong className="text-gray-300 font-semibold">ОГРН/ОГРНИП:</strong> 321547600158582</p>
+                </div>
+              </div>
+              <div>
+                <h5 className="text-white font-bold mb-4 sm:mb-6 text-base sm:text-lg">Контакты</h5>
+                <div className="text-xs sm:text-sm text-gray-400 space-y-2 sm:space-y-3 leading-relaxed">
+                  <p><strong className="text-gray-300 font-semibold">Email:</strong> <a href="mailto:support@floory-app.ru" className="hover:text-blue-400 transition-colors break-words">support@floory-app.ru</a></p>
+                  <p><strong className="text-gray-300 font-semibold">Telegram:</strong> <a href="https://t.me/streamcash_support" className="hover:text-blue-400 transition-colors">@streamcash_support</a></p>
+                  <p><strong className="text-gray-300 font-semibold">Сайт:</strong> <a href="https://стримкэш.рф" className="hover:text-blue-400 transition-colors break-words">стримкэш.рф</a></p>
+                </div>
+              </div>
             </div>
           </div>
           

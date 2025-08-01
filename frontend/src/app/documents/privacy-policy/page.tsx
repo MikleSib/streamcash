@@ -189,7 +189,7 @@ export default function PrivacyPolicyPage() {
                 <span className="text-xl font-bold text-white">СтримКэш</span>
               </div>
               <p className="text-gray-400">
-                Лучшая платформа для донатов в России
+                 
               </p>
             </div>
 

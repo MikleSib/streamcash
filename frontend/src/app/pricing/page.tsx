@@ -619,7 +619,7 @@ export default function PricingPage() {
                 <span className="text-lg sm:text-xl font-bold text-white">СтримКэш</span>
               </div>
               <p className="text-gray-400 text-sm sm:text-base">
-                Лучшая платформа для донатов в России
+                 
               </p>
             </div>
             

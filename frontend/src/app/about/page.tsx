@@ -117,7 +117,7 @@ export default function AboutPage() {
             </h1>
             
             <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
-              Мы создаем лучшую платформу для донатов в России, помогая стримерам 
+              Мы создаем платформу для донатов в России, помогая стримерам 
               монетизировать свой контент и развивать сообщество
             </p>
           </div>
@@ -376,7 +376,7 @@ export default function AboutPage() {
                 <span className="text-xl font-bold text-white">СтримКэш</span>
               </div>
               <p className="text-gray-400">
-                Лучшая платформа для донатов в России
+                 
               </p>
             </div>
             

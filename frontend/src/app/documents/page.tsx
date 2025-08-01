@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
-import { FileText, Shield, Users, CreditCard, Lock, DollarSign, ShieldCheck } from 'lucide-react';
+import { FileText, Shield, Users, CreditCard, Lock, DollarSign } from 'lucide-react';
 
 export default function DocumentsPage() {
   const router = useRouter();
@@ -10,9 +10,9 @@ export default function DocumentsPage() {
   const documents = [
     {
       title: "Пользовательское соглашение",
-      description: "Основные условия использования платформы СтримКэш",
+      description: "Условия использования сервиса СтримКэш для приема донатов",
       icon: <FileText className="w-6 h-6 text-blue-400" />,
-      lastUpdated: "15.01.2025",
+      lastUpdated: "16.01.2025",
       status: "Актуально",
       href: "/documents/user-agreement"
     },
@@ -48,14 +48,7 @@ export default function DocumentsPage() {
       status: "Актуально",
       href: "/documents/security-policy"
     },
-    {
-      title: "Правила сервиса «Безопасная сделка»",
-      description: "Условия предоставления услуги безопасных транзакций",
-      icon: <ShieldCheck className="w-6 h-6 text-blue-400" />,
-      lastUpdated: "15.01.2025",
-      status: "Актуально",
-      href: "/documents/secure-deal"
-    }
+
   ];
 
   return (
@@ -168,7 +161,7 @@ export default function DocumentsPage() {
                 <span className="text-lg sm:text-xl font-bold text-white">СтримКэш</span>
               </div>
               <p className="text-sm sm:text-base text-gray-400">
-                Лучшая платформа для донатов в России
+                 
               </p>
             </div>
 
