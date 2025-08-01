@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { FileText, Shield, Users, CreditCard, Lock, DollarSign } from 'lucide-react';
 
 export default function DocumentsPage() {
@@ -151,74 +152,7 @@ export default function DocumentsPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-800 py-8 sm:py-12 bg-black/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
-            <div className="sm:col-span-2 md:col-span-1">
-              <div className="flex items-center mb-4">
-                <DollarSign className="w-6 sm:w-8 h-6 sm:h-8 text-purple-400 mr-2" />
-                <span className="text-lg sm:text-xl font-bold text-white">СтримКэш</span>
-              </div>
-              <p className="text-sm sm:text-base text-gray-400">
-                 
-              </p>
-            </div>
-
-            <div>
-              <h4 className="text-white font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Продукт</h4>
-              <ul className="space-y-1 sm:space-y-2 text-gray-400 text-sm sm:text-base">
-                <li><a href="/features" className="hover:text-purple-400 transition-colors">Возможности</a></li>
-                <li><a href="/pricing" className="hover:text-purple-400 transition-colors">Тарифы</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-white font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Поддержка</h4>
-              <ul className="space-y-1 sm:space-y-2 text-gray-400 text-sm sm:text-base">
-                <li><a href="/documents" className="hover:text-purple-400 transition-colors">Юридическая информация</a></li>
-                <li><a href="/help" className="hover:text-purple-400 transition-colors">Помощь</a></li>
-                <li><a href="/status" className="hover:text-purple-400 transition-colors">Статус</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-white font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Компания</h4>
-              <ul className="space-y-1 sm:space-y-2 text-gray-400 text-sm sm:text-base">
-                <li><a href="/about" className="hover:text-purple-400 transition-colors">О нас</a></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-800 mt-6 sm:mt-8 pt-6 sm:pt-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-              <div>
-                <h5 className="text-white font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Реквизиты счета</h5>
-                <div className="text-xs sm:text-sm text-gray-400 space-y-1 sm:space-y-2">
-                  <p><strong className="text-gray-300">Название организации:</strong></p>
-                  <p className="break-words">ИНДИВИДУАЛЬНЫЙ ПРЕДПРИНИМАТЕЛЬ ТРОФИМОВ МИХАИЛ ВЯЧЕСЛАВОВИЧ</p>
-                  <p><strong className="text-gray-300">Юридический адрес:</strong></p>
-                  <p className="break-words">630048, РОССИЯ, НОВОСИБИРСКАЯ ОБЛ, Г НОВОСИБИРСК, УЛ ВЕРТКОВСКАЯ, Д 5/3, КВ 97</p>
-                  <p><strong className="text-gray-300">ИНН:</strong> 540438160180</p>
-                  <p><strong className="text-gray-300">ОГРН/ОГРНИП:</strong> 321547600158582</p>
-                </div>
-              </div>
-              <div>
-                <h5 className="text-white font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Контакты</h5>
-                <div className="text-xs sm:text-sm text-gray-400 space-y-1 sm:space-y-2">
-                  <p><strong className="text-gray-300">Email:</strong> <a href="mailto:support@floory-app.ru" className="hover:text-purple-400 transition-colors break-words">support@floory-app.ru</a></p>
-                  <p><strong className="text-gray-300">Telegram:</strong> <a href="https://t.me/streamcash_support" className="hover:text-purple-400 transition-colors">@streamcash_support</a></p>
-                  <p><strong className="text-gray-300">Сайт:</strong> <a href="https://стримкэш.рф" className="hover:text-purple-400 transition-colors break-words">стримкэш.рф</a></p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-800 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-gray-400">
-            <p className="text-xs sm:text-sm">&copy; 2025 СтримКэш. Все права защищены.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 } 

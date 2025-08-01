@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { 
   CheckCircle, 
   AlertCircle, 
@@ -338,50 +339,7 @@ export default function StatusPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-800 py-12 bg-black/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center mb-4">
-                <DollarSign className="w-8 h-8 text-purple-400 mr-2" />
-                <span className="text-xl font-bold text-white">СтримКэш</span>
-              </div>
-              <p className="text-gray-400">
-                 
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="text-white font-semibold mb-4">Продукт</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="/features" className="hover:text-purple-400 transition-colors">Возможности</a></li>
-                <li><a href="/pricing" className="hover:text-purple-400 transition-colors">Тарифы</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-white font-semibold mb-4">Поддержка</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="/documents" className="hover:text-purple-400 transition-colors">Документация</a></li>
-                <li><a href="/help" className="hover:text-purple-400 transition-colors">Помощь</a></li>
-                <li><a href="/status" className="hover:text-purple-400 transition-colors">Статус</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-white font-semibold mb-4">Компания</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="/about" className="hover:text-purple-400 transition-colors">О нас</a></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 СтримКэш. Все права защищены.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 } 

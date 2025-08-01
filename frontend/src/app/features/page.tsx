@@ -4,6 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { 
   Monitor, 
   Zap, 
@@ -433,52 +434,7 @@ export default function FeaturesPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-white/10 py-8 sm:py-12 lg:py-16 bg-black/50 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-12">
-            <div className="space-y-4 sm:space-y-6 sm:col-span-2 md:col-span-1">
-              <div className="flex items-center">
-                <div className="w-10 sm:w-12 h-10 sm:h-12 bg-gradient-to-br from-green-400 to-blue-400 rounded-xl sm:rounded-2xl flex items-center justify-center mr-3 sm:mr-4">
-                  <DollarSign className="w-5 sm:w-6 h-5 sm:h-6 text-white" />
-                </div>
-                <span className="text-xl sm:text-2xl font-black text-white">СтримКэш</span>
-              </div>
-              <p className="text-gray-400 font-medium leading-relaxed text-sm sm:text-base">
-                Профессиональная платформа для донатов. Зарабатывай больше с минимальными комиссиями.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="text-white font-bold mb-4 sm:mb-6 text-base sm:text-lg">Продукт</h4>
-              <ul className="space-y-2 sm:space-y-4">
-                <li><a href="/features" className="text-gray-400 hover:text-green-400 transition-colors font-medium text-sm sm:text-base">Возможности</a></li>
-                <li><a href="/pricing" className="text-gray-400 hover:text-green-400 transition-colors font-medium text-sm sm:text-base">Тарифы</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-white font-bold mb-4 sm:mb-6 text-base sm:text-lg">Поддержка</h4>
-              <ul className="space-y-2 sm:space-y-4">
-                <li><a href="/documents" className="text-gray-400 hover:text-blue-400 transition-colors font-medium text-sm sm:text-base">Юридическая информация</a></li>
-                <li><a href="/help" className="text-gray-400 hover:text-blue-400 transition-colors font-medium text-sm sm:text-base">Помощь</a></li>
-                <li><a href="/status" className="text-gray-400 hover:text-blue-400 transition-colors font-medium text-sm sm:text-base">Статус</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-white font-bold mb-4 sm:mb-6 text-base sm:text-lg">Компания</h4>
-              <ul className="space-y-2 sm:space-y-4">
-                <li><a href="/about" className="text-gray-400 hover:text-purple-400 transition-colors font-medium text-sm sm:text-base">О нас</a></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-white/10 mt-8 sm:mt-12 lg:mt-16 pt-6 sm:pt-8 text-center">
-            <p className="text-gray-400 font-medium text-xs sm:text-sm">&copy; 2025 СтримКэш. Все права защищены.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 } 

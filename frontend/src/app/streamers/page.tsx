@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
 import { 
   Search, 
@@ -354,6 +355,8 @@ export default function StreamersPage() {
           </div>
         </div>
       </div>
+      
+      <Footer />
     </div>
   );
 } 
